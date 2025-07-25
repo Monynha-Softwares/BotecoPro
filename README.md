@@ -5,7 +5,7 @@ This repository holds all code for the **BotecoPro** ecosystem in a single place
 ```
 BotecoPro-Monorepo/
 ├── apps/
-│   └── boteco_flutter/         # Mobile app (Flutter)
+│   └── botecopro_flutter/         # Mobile app (Flutter)
 ├── backend/
 │   ├── database/
 │   │   └── supabase/           # SQL schemas, seeds and OpenAPI
