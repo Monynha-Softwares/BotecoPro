@@ -1,39 +1,26 @@
 -- ============================================
--- RLS Policies for Schema: client
+-- client/rls.sql
 -- ============================================
 
--- Ativar RLS
 alter table client.client enable row level security;
 alter table client.table_seating enable row level security;
 
--- =====================
--- client
--- =====================
-
--- Leitura: todos
 create policy "public read access to clients"
 on client.client
 for select
 using (true);
 
--- Escrita: apenas gerente
 create policy "only manager can manage clients"
 on client.client
 for all
 using (auth.jwt() ->> 'role' = 'manager')
 with check (auth.jwt() ->> 'role' = 'manager');
 
--- =====================
--- table_seating
--- =====================
-
--- Leitura: todos
 create policy "public read access to tables"
 on client.table_seating
 for select
 using (true);
 
--- Escrita: apenas gerente
 create policy "only manager can manage tables"
 on client.table_seating
 for all

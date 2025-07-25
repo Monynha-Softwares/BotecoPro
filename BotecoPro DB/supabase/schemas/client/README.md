@@ -1,63 +1,40 @@
-# BotecoPro Database
+# 🪑 Schema: `client`
 
-This repo defines the Supabase database for the BotecoPro app using schema-based structure.
+O schema `client` representa as entidades relacionadas à **gestão de clientes e mesas** do BotecoPro.
 
----
-
-## 🧭 Passo a Passo: Supabase CLI + GitHub Actions
+É utilizado tanto para registrar dados cadastrais de clientes quanto para controlar a disponibilidade das mesas no ambiente físico do bar ou restaurante.
 
 ---
 
-### ✅ 1. Inicialize o Supabase CLI no seu repositório
+## 📐 Estrutura
 
-No terminal, na raiz do repositório (ex: `botecopro-db-repo/`):
+### Tabelas
 
-```bash
-supabase init
-```
+* `client`: cadastro de clientes (nome, endereço, tipo de cliente)
+* `table_seating`: controle das mesas físicas do local (número, lugares, status de disponibilidade)
 
-Isso criará a pasta `.supabase/` e o arquivo `config.toml`.
+### Funções
 
-> 🔐 Para projetos com schemas múltiplos, pode ser necessário ajustar manualmente o `config.toml`.
-
----
-
-### ⚙️ 2. Configure o `config.toml` com schemas personalizados
-
-```toml
-[db]
-shadow_schema = "_shadow"
-schemas = [
-  "public",
-  "core",
-  "order",
-  "invoice",
-  "client",
-  "staff",
-  "inventory",
-  "auth"
-]
-```
+Este schema não possui funções diretas (RPC), mas é utilizado como referência em outros domínios como `order`.
 
 ---
 
-### 🚀 3. Deploy manual local (para testar)
+## 🔐 RLS Policies
 
-```bash
-supabase db push
-```
-
-Isso aplicará toda a estrutura e functions ao seu projeto Supabase conectado.
+* Leitura: liberada para todos
+* Escrita e alteração: restrita a usuários com papel `manager`
 
 ---
 
-### 🔐 4. Configure o token da Supabase no GitHub
+## 📊 Uso no app
 
-1. Acesse [https://app.supabase.com/account/tokens](https://app.supabase.com/account/tokens)
-2. Gere um novo token **com permissão `database.admin`**
-3. Vá no seu repositório GitHub:
-
-   * **Settings > Secrets > Actions**
-   * Adicione: `SUPABASE_ACCESS_TOKEN`
+* Permite exibir lista de mesas disponíveis para seleção
+* Associar pedidos a clientes cadastrados ou anônimos
 
 ---
+
+## 🔮 Melhorias futuras
+
+* Múltiplas zonas/ambientes (salão, varanda, externo)
+* Controle de ocupação em tempo real
+* Histórico de clientes e preferências
