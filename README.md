@@ -1,27 +1,27 @@
 # BotecoPro Monorepo
 
-Este repositório concentra todo o código do ecossistema **BotecoPro** em um único lugar.
+This repository holds all code for the **BotecoPro** ecosystem in a single place.
 
 ```
 BotecoPro-Monorepo/
 ├── apps/
-│   └── boteco_flutter/         # Aplicativo móvel (Flutter)
+│   └── boteco_flutter/         # Mobile app (Flutter)
 ├── backend/
 │   ├── database/
-│   │   └── supabase/           # Schemas SQL, seeds e OpenAPI
-│   ├── edge-functions/         # Funções do Supabase
-│   ├── services/               # Scripts auxiliares
-│   └── .github/workflows/      # Workflows de CI/CD
+│   │   └── supabase/           # SQL schemas, seeds and OpenAPI
+│   ├── edge-functions/         # Supabase Functions
+│   ├── services/               # Helper scripts and workers
+│   └── .github/workflows/      # CI/CD workflows
 ├── docs/
-│   └── AGENTS.md               # Guia para agentes Codex
-├── scripts/                    # Automação e utilitários
+│   └── AGENTS.md               # Codex agents guide
+├── scripts/                    # Automation utilities
 ├── .env.example
-└── README.md (este arquivo)
+└── README.md (this file)
 ```
 
-## Como começar
+## Getting started
 
-1. Copie `.env.example` para `.env` e ajuste as variáveis.
-2. Execute `./scripts/dev_start.sh` para iniciar o ambiente local.
+1. Copy `.env.example` to `.env` and adjust the variables.
+2. Run `./scripts/dev_start.sh` to boot the local environment.
 
-Contribuições são bem-vindas!
+Contributions are welcome!

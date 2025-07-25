@@ -1,19 +1,18 @@
 # AGENTS Guide
 
-Este arquivo orienta agentes Codex no monorepositório **BotecoPro**.
+This file guides Codex agents inside the **BotecoPro** monorepo.
 
-## Estrutura
+## Structure
 
-- **apps/boteco_flutter**: aplicativo móvel escrito em Flutter.
-- **backend**: serviços de backend e banco de dados.
-  - **database/supabase**: schemas SQL e configurações.
-  - **edge-functions**: Functions do Supabase.
-  - **services**: scripts auxiliares.
-- **scripts**: utilitários de desenvolvimento.
+- **apps/boteco_flutter**: Flutter mobile application.
+- **backend**: backend services and database.
+  - **database/supabase**: SQL schemas and configuration.
+  - **edge-functions**: Supabase functions.
+  - **services**: helper scripts.
+- **scripts**: development utilities.
 
-## Como começar
+## Getting started
 
-1. Instale dependências necessárias (Node, Supabase CLI, etc).
-2. Execute os scripts em `scripts/` para iniciar o ambiente.
-3. Mantenha a organização de diretórios ao adicionar novos componentes.
-
+1. Install the required dependencies (Node, Supabase CLI, etc.).
+2. Run the scripts under `scripts/` to start the environment.
+3. Keep the directory organization when adding new components.

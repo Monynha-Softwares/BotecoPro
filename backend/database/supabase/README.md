@@ -1,47 +1,47 @@
-## 🍽️ **1. Cadastro e Gerência de Receitas**
+## 🍽️ **1. Recipe Management**
 
-### Regras:
+### Rules
 
-* Uma **receita** pode ser de tipo `dish`, `cocktail`, `combo`, etc.
-* Cada receita deve ter pelo menos um ingrediente.
-* O **preço de venda sugerido** pode ser calculado com base:
+* A **recipe** can be of type `dish`, `cocktail`, `combo`, etc.
+* Every recipe must have at least one ingredient.
+* The **suggested sale price** can be calculated as:
 
   ```plaintext
-  preço de custo total dos ingredientes + margem de lucro padrão + extras
+  total cost of ingredients + default profit margin + extras
   ```
-* **Adições** devem alterar o preço final do pedido.
+* **Additions** must change the final order price.
 
-### Para API:
+### API
 
-* Endpoint: `GET /recipes/{id}` → retornar estrutura da receita com ingredientes e adições.
-* Endpoint: `POST /recipes/calculate-price` → retorna preço sugerido baseado na quantidade e adições.
-
----
-
-## 🍷 **2. Bebidas Alcoólicas e Combinações**
-
-### Regras:
-
-* Cocktails podem ter múltiplas **bases alternativas** (ex: rum, gin).
-* Preço pode variar conforme a base selecionada.
-* Cada base deve ser definida como uma **adição** à receita base (`Recipe_Addition`).
-
-### Para API:
-
-* Mostrar lista de “bases” ao cliente ao selecionar a bebida.
-* Preço final do cocktail muda automaticamente se uma base mais cara for selecionada.
+* Endpoint: `GET /recipes/{id}` → return the recipe structure with ingredients and additions.
+* Endpoint: `POST /recipes/calculate-price` → return suggested price based on quantity and additions.
 
 ---
 
-## 📦 **3. Estoque e Insumos**
+## 🍷 **2. Alcoholic Drinks and Combos**
 
-### Regras:
+### Rules
 
-* Cada pedido **consome** ingredientes proporcionalmente à quantidade vendida.
-* O estoque de `Ingredient` deve ser atualizado automaticamente após o fechamento do pedido.
-* Notificações devem ser emitidas para ingredientes abaixo do nível mínimo (`stock_minimum`).
+* Cocktails can have multiple **alternative bases** (e.g. rum, gin).
+* Price may vary according to the selected base.
+* Each base should be defined as an **addition** to the base recipe (`Recipe_Addition`).
 
-### Para API / backend:
+### API
+
+* Show a list of "bases" when the client selects the drink.
+* The final cocktail price changes automatically if a more expensive base is chosen.
+
+---
+
+## 📦 **3. Stock and Ingredients**
+
+### Rules
+
+* Each order **consumes** ingredients proportionally to the sold quantity.
+* The `Ingredient` stock must be updated automatically after closing the order.
+* Notifications must be issued for ingredients below the minimum level (`stock_minimum`).
+
+### API / backend
 
 * Procedure: `sp_AtualizarEstoquePorPedido(@order_id)`
 * View: `vw_IngredientesAbaixoEstoqueMinimo`
@@ -49,47 +49,47 @@
 
 ---
 
-## 🧾 **4. Pedidos e Faturamento**
+## 🧾 **4. Orders and Billing**
 
-### Regras:
+### Rules
 
-* Um pedido pode conter múltiplos itens, cada um com adições opcionais.
-* O valor final da fatura = soma dos itens + soma das adições + impostos
-* Impostos podem ser diferentes para comida e bebida.
+* An order may contain multiple items, each with optional additions.
+* The final invoice value = sum of items + sum of additions + taxes.
+* Taxes may differ for food and drinks.
 
-### Para API:
+### API
 
-* `POST /orders` → criar pedido
-* `GET /orders/{id}` → ver detalhes do pedido
-* `POST /invoice/generate` → calcular e gerar fatura
-* `GET /invoice/{id}` → ver total com breakdown (subtotais, impostos, extras)
-
----
-
-## 👨‍🍳 **5. Funcionários e Controle de Trabalho**
-
-### Regras:
-
-* Cada funcionário tem um valor/hora e está vinculado a um plano de carreira.
-* As horas são lançadas mensalmente, com extras contabilizadas.
-* Login e senha são controlados separadamente em `Employee_Login`.
-
-### Para API:
-
-* `POST /login` → autenticação
-* `POST /workhours` → lançamento de horas
-* `GET /payroll/{month}/{year}` → cálculo estimado de remuneração
+* `POST /orders` → create order
+* `GET /orders/{id}` → view order details
+* `POST /invoice/generate` → calculate and generate invoice
+* `GET /invoice/{id}` → view total with breakdown (subtotals, taxes, extras)
 
 ---
 
-## 📲 **6. Comanda e Atendimento**
+## 👨‍🍳 **5. Employees and Work Control**
 
-> A ser discutido mais adiante, mas proposta inicial:
+### Rules
 
-* Uma **comanda** representa uma sessão ativa da mesa (pode conter múltiplos pedidos).
-* Permite pedidos em etapas sem fechar a conta.
-* Ao final, todos os pedidos da comanda são consolidados na fatura.
+* Each employee has an hourly rate and is linked to a career plan.
+* Hours are logged monthly, with extras accounted for.
+* Login and password are managed separately in `Employee_Login`.
+
+### API
+
+* `POST /login` → authentication
+* `POST /workhours` → log hours
+* `GET /payroll/{month}/{year}` → estimated remuneration calculation
 
 ---
 
-Deseja que eu escreva essas regras diretamente no banco como *comentários estruturais* ou devemos seguir criando *procedimentos armazenados* e endpoints que as implementem na prática?
+## 📲 **6. Tabs and Service**
+
+> To be discussed later, but initial idea:
+
+* A **tab** represents an active table session (it can contain multiple orders).
+* Allows orders in stages without closing the bill.
+* At the end, all tab orders are consolidated into the invoice.
+
+---
+
+Should these rules be written directly in the database as *structural comments* or should we keep creating *stored procedures* and endpoints that implement them?
