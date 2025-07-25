@@ -1,63 +1,38 @@
-# BotecoPro Database
+# 👥 Schema: `staff`
 
-This repo defines the Supabase database for the BotecoPro app using schema-based structure.
-
----
-
-## 🧭 Passo a Passo: Supabase CLI + GitHub Actions
+O schema `staff` representa o módulo de **gestão de funcionários** do BotecoPro. Ele contém os dados básicos dos colaboradores que interagem com o sistema, como garçons, gerentes, cozinheiros, etc.
 
 ---
 
-### ✅ 1. Inicialize o Supabase CLI no seu repositório
+## 📐 Estrutura
 
-No terminal, na raiz do repositório (ex: `botecopro-db-repo/`):
+### Tabela
 
-```bash
-supabase init
-```
+* `employee`: cadastro dos funcionários, incluindo nome, cargo e valor/hora
 
-Isso criará a pasta `.supabase/` e o arquivo `config.toml`.
+> A coluna `role` permite aplicar lógicas de acesso via RLS e Supabase Auth.
 
-> 🔐 Para projetos com schemas múltiplos, pode ser necessário ajustar manualmente o `config.toml`.
+### Funções
 
----
-
-### ⚙️ 2. Configure o `config.toml` com schemas personalizados
-
-```toml
-[db]
-shadow_schema = "_shadow"
-schemas = [
-  "public",
-  "core",
-  "order",
-  "invoice",
-  "client",
-  "staff",
-  "inventory",
-  "auth"
-]
-```
+Não possui RPCs diretas, mas é referenciado em pedidos (`order_main.employee_id`) e pode ser usado para cálculo de folha no futuro.
 
 ---
 
-### 🚀 3. Deploy manual local (para testar)
+## 🔐 RLS
 
-```bash
-supabase db push
-```
-
-Isso aplicará toda a estrutura e functions ao seu projeto Supabase conectado.
+Não foram ativadas políticas neste schema, pois espera-se que apenas usuários com permissão administrativa tenham acesso à tabela via painel interno ou scripts internos.
 
 ---
 
-### 🔐 4. Configure o token da Supabase no GitHub
+## 📊 Uso no app
 
-1. Acesse [https://app.supabase.com/account/tokens](https://app.supabase.com/account/tokens)
-2. Gere um novo token **com permissão `database.admin`**
-3. Vá no seu repositório GitHub:
-
-   * **Settings > Secrets > Actions**
-   * Adicione: `SUPABASE_ACCESS_TOKEN`
+* Seleção do funcionário logado ao registrar pedidos
+* Controle de acesso via JWT (`role`)
 
 ---
+
+## 🔮 Melhorias futuras
+
+* Tabela `work_hour` para registrar carga horária mensal
+* Integração com folha de pagamento
+* Login separado por função e segurança reforçada

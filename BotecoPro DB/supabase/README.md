@@ -1,63 +1,90 @@
-# BotecoPro Database
+# 🍻 BotecoPro Database (Supabase)
 
-This repo defines the Supabase database for the BotecoPro app using schema-based structure.
+Repositório oficial contendo **toda a infraestrutura de banco de dados** do projeto **BotecoPro**, organizada por *schemas* no Supabase.
 
----
-
-## 🧭 Passo a Passo: Supabase CLI + GitHub Actions
+> **Objetivo:** Facilitar versionamento, revisão de código SQL e automação de deploy (CI/CD) usando Supabase CLI e GitHub Actions.
 
 ---
 
-### ✅ 1. Inicialize o Supabase CLI no seu repositório
+## 📂 Estrutura de Pastas
 
-No terminal, na raiz do repositório (ex: `botecopro-db-repo/`):
+```
+supabase/
+├── schemas/             # Um diretório por domínio de negócio
+│   ├── core/            # Catálogo de receitas / ingredientes
+│   │   ├── tables.sql
+│   │   ├── functions.sql
+│   │   ├── rls.sql
+│   │   └── README.md
+│   ├── order/           # Pedidos e comandas
+│   ├── invoice/         # Faturas
+│   ├── client/          # Clientes e mesas
+│   ├── inventory/       # Fornecedores
+│   └── staff/           # Funcionários
+│
+├── openapi/             # Contrato OpenAPI usado para gerar SDKs (Flutter, Web…)
+│   └── openapi.yaml
+└── README.md            # Este arquivo
+```
+
+Cada *schema* contém **quatro** arquivos‑chave:
+
+| Arquivo         | Função                                                       |
+| --------------- | ------------------------------------------------------------ |
+| `tables.sql`    | Criação de tabelas e FKs                                     |
+| `functions.sql` | Funções PL/pgSQL expostas como RPC (quando aplicável)        |
+| `rls.sql`       | Políticas **Row‑Level Security** e permissões                |
+| `README.md`     | Documentação do domínio (objetivo, fluxo, melhorias futuras) |
+
+---
+
+## 🛠️ Como Usar
+
+### 1. Clonar & Inicializar Supabase CLI
 
 ```bash
+git clone https://github.com/monynha/botecopro-db.git
+cd botecopro-db
 supabase init
 ```
 
-Isso criará a pasta `.supabase/` e o arquivo `config.toml`.
-
-> 🔐 Para projetos com schemas múltiplos, pode ser necessário ajustar manualmente o `config.toml`.
-
----
-
-### ⚙️ 2. Configure o `config.toml` com schemas personalizados
+### 2. Configurar `config.toml`
 
 ```toml
 [db]
-shadow_schema = "_shadow"
-schemas = [
-  "public",
-  "core",
-  "order",
-  "invoice",
-  "client",
-  "staff",
-  "inventory",
-  "auth"
-]
+schemas = ["public", "core", "order", "invoice", "client", "inventory", "staff", "auth"]
 ```
 
----
-
-### 🚀 3. Deploy manual local (para testar)
+### 3. Deploy local ou remoto
 
 ```bash
-supabase db push
+supabase db push          # aplica tudo na instância alvo
 ```
 
-Isso aplicará toda a estrutura e functions ao seu projeto Supabase conectado.
+### 4. Seed opcional
+
+Coloque scripts em `seed/` e execute conforme necessário.
 
 ---
 
-### 🔐 4. Configure o token da Supabase no GitHub
+## 🚀 CI/CD com GitHub Actions
 
-1. Acesse [https://app.supabase.com/account/tokens](https://app.supabase.com/account/tokens)
-2. Gere um novo token **com permissão `database.admin`**
-3. Vá no seu repositório GitHub:
+Um workflow de exemplo (`.github/workflows/deploy-db.yml`) aplica migrações sempre que arquivos em `schemas/`, `views/` ou `seed/` forem alterados.
 
-   * **Settings > Secrets > Actions**
-   * Adicione: `SUPABASE_ACCESS_TOKEN`
+```yaml
+uses: supabase/setup-cli@v1
+run: supabase db push
+```
+
+Adicione o token `SUPABASE_ACCESS_TOKEN` em *Settings → Secrets → Actions*.
 
 ---
+
+## 🗺️ Roadmap (Banco)
+
+* [ ] Adicionar módulo de **Work Hours** no schema `staff`
+* [ ] Função `core.calculate_recipe_cost()`
+* [ ] Triggers de auditoria global
+* [ ] Tests automatizados com `pgTAP`
+
+Contribuições são bem‑vindas! Abra um *issue* ou *pull request* ✨
