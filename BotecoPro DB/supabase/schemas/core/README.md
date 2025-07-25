@@ -1,63 +1,43 @@
-# BotecoPro Database
+# 🧠 Schema: `core`
 
-This repo defines the Supabase database for the BotecoPro app using schema-based structure.
-
----
-
-## 🧭 Passo a Passo: Supabase CLI + GitHub Actions
+O schema `core` representa o **catálogo de produtos** do BotecoPro, incluindo receitas (comidas, drinks, combos), ingredientes e categorias. É a base para o cálculo de custos e estruturação dos pedidos.
 
 ---
 
-### ✅ 1. Inicialize o Supabase CLI no seu repositório
+## 📐 Estrutura
 
-No terminal, na raiz do repositório (ex: `botecopro-db-repo/`):
+### Tabelas
 
-```bash
-supabase init
-```
+* `category`: classifica receitas por tipo (ex: comida, bebida)
+* `recipe`: pratos e bebidas que podem ser vendidos
+* `ingredient`: insumos usados nas receitas (com controle de estoque)
+* `recipe_ingredient`: composição de cada receita
+* `recipe_addition`: opcionais/adicionais para uma receita
+* `addition_ingredient`: insumos consumidos por um adicional
 
-Isso criará a pasta `.supabase/` e o arquivo `config.toml`.
+### Funções
 
-> 🔐 Para projetos com schemas múltiplos, pode ser necessário ajustar manualmente o `config.toml`.
-
----
-
-### ⚙️ 2. Configure o `config.toml` com schemas personalizados
-
-```toml
-[db]
-shadow_schema = "_shadow"
-schemas = [
-  "public",
-  "core",
-  "order",
-  "invoice",
-  "client",
-  "staff",
-  "inventory",
-  "auth"
-]
-```
+Nenhuma função RPC ativa neste schema ainda.
 
 ---
 
-### 🚀 3. Deploy manual local (para testar)
+## 🔐 RLS Policies
 
-```bash
-supabase db push
-```
-
-Isso aplicará toda a estrutura e functions ao seu projeto Supabase conectado.
+* Leitura pública para todas as tabelas
+* Escrita e modificação restritas a `manager`
 
 ---
 
-### 🔐 4. Configure o token da Supabase no GitHub
+## 📊 Fluxo de uso
 
-1. Acesse [https://app.supabase.com/account/tokens](https://app.supabase.com/account/tokens)
-2. Gere um novo token **com permissão `database.admin`**
-3. Vá no seu repositório GitHub:
-
-   * **Settings > Secrets > Actions**
-   * Adicione: `SUPABASE_ACCESS_TOKEN`
+* App lê `recipe` e seus `additions`
+* Ao adicionar ao pedido, calcula-se o custo com base nos ingredientes e adicionais
+* Estoque é controlado automaticamente ao confirmar o pedido (via schema `order`)
 
 ---
+
+## 🔮 Melhorias futuras
+
+* Suporte a múltiplos tamanhos de porção
+* Função `core.calculate_recipe_cost()`
+* Flag para receitas inativas ou sazonais

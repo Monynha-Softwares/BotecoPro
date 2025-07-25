@@ -1,8 +1,7 @@
 -- ============================================
--- RLS Policies for Schema: core
+-- core/rls.sql
 -- ============================================
 
--- Ativar RLS nas tabelas principais
 alter table core.recipe enable row level security;
 alter table core.ingredient enable row level security;
 alter table core.category enable row level security;
@@ -10,26 +9,16 @@ alter table core.recipe_ingredient enable row level security;
 alter table core.recipe_addition enable row level security;
 alter table core.addition_ingredient enable row level security;
 
--- =====================
--- recipe
--- =====================
-
--- Leitura: liberada para todos
 create policy "public read access"
 on core.recipe
 for select
 using (true);
 
--- Escrita: apenas gerente
 create policy "only manager can insert or update recipes"
 on core.recipe
 for all
 using (auth.jwt() ->> 'role' = 'manager')
 with check (auth.jwt() ->> 'role' = 'manager');
-
--- =====================
--- ingredient
--- =====================
 
 create policy "public read access"
 on core.ingredient
@@ -42,10 +31,6 @@ for all
 using (auth.jwt() ->> 'role' = 'manager')
 with check (auth.jwt() ->> 'role' = 'manager');
 
--- =====================
--- category
--- =====================
-
 create policy "read categories"
 on core.category
 for select
@@ -56,10 +41,6 @@ on core.category
 for all
 using (auth.jwt() ->> 'role' = 'manager')
 with check (auth.jwt() ->> 'role' = 'manager');
-
--- =====================
--- Relacionais (recipe_ingredient, recipe_addition, addition_ingredient)
--- =====================
 
 create policy "view composition"
 on core.recipe_ingredient
