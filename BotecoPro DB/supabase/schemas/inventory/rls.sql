@@ -1,65 +1,16 @@
 -- ============================================
--- order/rls.sql
+-- inventory/rls.sql
 -- ============================================
 
-alter table "order".order_main enable row level security;
-alter table "order".order_item enable row level security;
-alter table "order".order_item_addition enable row level security;
+alter table inventory.supplier enable row level security;
 
-create policy "staff can view own orders"
-on "order".order_main
+create policy "public read access to suppliers"
+on inventory.supplier
 for select
-using (
-  auth.jwt() ->> 'role' = 'waiter' and employee_id = cast(auth.uid() as integer)
-);
+using (true);
 
-create policy "waiter can insert orders"
-on "order".order_main
-for insert
-with check (
-  auth.jwt() ->> 'role' = 'waiter' and employee_id = cast(auth.uid() as integer)
-);
-
-create policy "view items of own orders"
-on "order".order_item
-for select
-using (
-  exists (
-    select 1 from "order".order_main m
-    where m.order_id = order_item.order_id
-    and m.employee_id = cast(auth.uid() as integer)
-  )
-);
-
-create policy "insert items into own orders"
-on "order".order_item
-for insert
-with check (
-  exists (
-    select 1 from "order".order_main m
-    where m.order_id = order_item.order_id
-    and m.employee_id = cast(auth.uid() as integer)
-  )
-);
-
-create policy "view additions of own orders"
-on "order".order_item_addition
-for select
-using (
-  exists (
-    select 1 from "order".order_main m
-    where m.order_id = order_item_addition.order_id
-    and m.employee_id = cast(auth.uid() as integer)
-  )
-);
-
-create policy "insert additions into own orders"
-on "order".order_item_addition
-for insert
-with check (
-  exists (
-    select 1 from "order".order_main m
-    where m.order_id = order_item_addition.order_id
-    and m.employee_id = cast(auth.uid() as integer)
-  )
-);
+create policy "only manager can manage suppliers"
+on inventory.supplier
+for all
+using (auth.jwt() ->> 'role' = 'manager')
+with check (auth.jwt() ->> 'role' = 'manager');
