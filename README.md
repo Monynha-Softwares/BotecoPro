@@ -3,7 +3,7 @@
 This repository holds all code for the **BotecoPro** ecosystem in a single place.
 
 ```
-BotecoPro-Monorepo/
+Boteco-Pro-Monorepo/
 ├── apps/
 │   └── boteco_flutter/         # Mobile app (Flutter)
 ├── backend/
