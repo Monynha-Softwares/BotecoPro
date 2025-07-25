@@ -1,0 +1,8 @@
+name: boteco_pro_api
+description: Auto‑generated minimal client for Boteco Pro using Dio.
+version: 0.0.1
+environment:
+  sdk: '>=2.19.0 <4.0.0'
+dependencies:
+  dio: ^5.4.0
+  meta: any
