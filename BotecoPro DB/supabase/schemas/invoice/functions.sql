@@ -41,3 +41,15 @@ begin
   return invoice_id;
 end;
 $$;
+
+create or replace function invoice.get_invoice(invoice_id integer)
+returns table (invoice_id integer, order_id integer, invoice_date date, total_amount numeric, tax_amount numeric, food_tax_rate numeric, drink_tax_rate numeric)
+language plpgsql
+as $$
+begin
+  return query
+    select i.invoice_id, i.order_id, i.invoice_date, i.total_amount, i.tax_amount, i.food_tax_rate, i.drink_tax_rate
+    from invoice.invoice i
+    where i.invoice_id = invoice_id;
+end;
+$$;

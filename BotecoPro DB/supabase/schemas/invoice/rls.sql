@@ -1,15 +1,9 @@
 -- ============================================
--- RLS Policies for Schema: invoice
+-- invoice/rls.sql
 -- ============================================
 
--- Ativar RLS na tabela de faturas
 alter table invoice.invoice enable row level security;
 
--- =====================
--- invoice
--- =====================
-
--- Leitura: somente para gerente OU autor do pedido (match por order.employee_id)
 create policy "manager or order author can read invoices"
 on invoice.invoice
 for select
@@ -22,7 +16,6 @@ using (
   )
 );
 
--- Escrita: apenas gerente
 create policy "only manager can insert invoices"
 on invoice.invoice
 for insert
