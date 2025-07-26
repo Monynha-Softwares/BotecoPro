@@ -1,28 +1,20 @@
 #!/usr/bin/env bash
-set -euo pipefail
-
 if ! command -v supabase &>/dev/null; then
-  echo "📦 Instalando Supabase CLI via pacote .deb (Linux)..."
+  echo "📦 Baixando supabase_${SUPABASE_CLI_VERSION}_linux_amd64.deb…"
+  URL="https://github.com/supabase/cli/releases/download/v${SUPABASE_CLI_VERSION}/supabase_${SUPABASE_CLI_VERSION}_linux_amd64.deb"
+  curl -fsSL "$URL" -o supabase.deb
 
-  curl -sL https://github.com/supabase/cli/releases/latest/download/supabase_amd64.deb -o supabase.deb
-
-  # Verifica se o arquivo é realmente um .deb válido (não HTML)
-  if head -n 1 supabase.deb | grep -q '<'; then
-    echo "❌ Erro: supabase.deb não é um arquivo .deb válido (parece HTML)."
+  if ! dpkg-deb --info supabase.deb &>/dev/null; then
+    echo "❌ Arquivo supabase.deb corrompido (possivelmente HTML)."
     cat supabase.deb
     exit 1
   fi
 
-  # Instala com dpkg (não apt), pois o arquivo está local
   dpkg -i supabase.deb || apt-get install -fy
-
-  rm -f supabase.deb
+  rm supabase.deb
 fi
 
-# Autentica se variável estiver presente
 if [[ -n "${SUPABASE_ACCESS_TOKEN:-}" ]]; then
-  supabase logout || true
-  supabase login --access-token "$SUPABASE_ACCESS_TOKEN"
+  supabase login --no-browser --token "$SUPABASE_ACCESS_TOKEN"
+  echo "✅ Supabase autenticado"
 fi
-
-echo "✅ Supabase CLI instalado com sucesso."
