@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Verifica se o script está sendo executado como root
+if [[ $EUID -ne 0 ]]; then
+  echo "🚨 Este script deve ser executado como root. Use 'sudo' par
+a executar o script."
+  exit 1
+fi
+
+echo "🧠 [Codex] Instalando dependências do ambiente Monynha..."
+apt-get update && apt-get install -y file && apt-get install -y unzip
+
 echo "🧠 [Codex] Iniciando configuração do ambiente Monynha…"
 
 source ./scripts/check_env.sh
