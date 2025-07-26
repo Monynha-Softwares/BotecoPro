@@ -1,0 +1,48 @@
+name: boteco_pro
+description: "Seu Boteco nunca foi tão Pro!"
+publish_to: 'none'
+version: 1.0.0
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  audioplayers: ^6.0.0
+  http_interceptor: ^2.0.0
+  dio: ^5.3.3
+  image_picker: ^1.0.0
+  flutter_animate: ^4.2.0
+  flutter_launcher_icons: ^0.14.3
+  table_calendar: ^3.0.0
+  flutter_slidable: ^4.0.0
+  flutter_svg: ^2.0.0
+  intl: ^0.20.2
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.0
+  fl_chart: ^0.65.0
+  google_fonts: ^6.2.1
+  shared_preferences: ^2.5.3
+  path_provider: ^2.1.5
+  provider: ^6.1.5
+  http: '>=1.0.0'
+  uuid: '>=3.0.0'
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/sounds/erro.mp3
+    - assets/sounds/mesa_aberta.mp3
+    - assets/sounds/mesa_fechada.mp3
+    - assets/sounds/navegacao.mp3
+    - assets/sounds/notificacao.mp3
+    - assets/sounds/pedido_adicionado.mp3
+    - assets/sounds/pedido_entregue.mp3
+    - assets/sounds/produto_adicionado.mp3
+    - assets/sounds/sucesso.mp3
+    - assets/sounds/venda_fechada.mp3
