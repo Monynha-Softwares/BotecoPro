@@ -9,7 +9,7 @@ a executar o script."
 fi
 
 echo "🧠 [Codex] Instalando dependências do ambiente Monynha..."
-apt-get update && apt-get install -y file && apt-get install -y unzip
+apt-get update && apt-get install -y file && apt-get install -y unzip && apt-get install -y git && apt-get install -y curl
 
 echo "🧠 [Codex] Iniciando configuração do ambiente Monynha…"
 
