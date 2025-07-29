@@ -1,0 +1,2 @@
+CREATE OR REPLACE VIEW vw_pedidos AS
+SELECT * FROM pedidos;
