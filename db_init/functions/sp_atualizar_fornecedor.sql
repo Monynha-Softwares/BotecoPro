@@ -4,8 +4,7 @@ CREATE OR REPLACE FUNCTION sp_atualizar_fornecedor(
     p_telefone TEXT,
     p_email TEXT,
     p_contato TEXT,
-    p_detalhes TEXT,
-    p_user_id UUID
+    p_detalhes TEXT
 ) RETURNS VOID AS $$
 UPDATE fornecedores
 SET nome = p_nome,
@@ -13,5 +12,5 @@ SET nome = p_nome,
     email = p_email,
     contato = p_contato,
     detalhes = p_detalhes
-WHERE id_fornecedor = p_id_fornecedor AND user_id = p_user_id;
+WHERE id_fornecedor = p_id_fornecedor AND user_id = auth.uid();
 $$ LANGUAGE SQL;
