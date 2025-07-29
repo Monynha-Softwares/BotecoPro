@@ -39,7 +39,7 @@ class AuthProvider with ChangeNotifier {
       }
       notifyListeners();
     });
-    
+
     notifyListeners();
   }
 
@@ -63,12 +63,9 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _error = e is Exception ? _authService.getMessageFromErrorCode(e) : 'Ocorreu um erro. Tente novamente mais tarde.';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    } catch (e) {
-      _error = 'Ocorreu um erro. Tente novamente mais tarde.';
+      _error = e is Exception
+          ? _authService.getMessageFromErrorCode(e)
+          : 'Ocorreu um erro. Tente novamente mais tarde.';
       _isLoading = false;
       notifyListeners();
       return false;
@@ -76,13 +73,15 @@ class AuthProvider with ChangeNotifier {
   }
 
   // Sign up with email and password
-  Future<bool> signUpWithEmail(String email, String password, String displayName) async {
+  Future<bool> signUpWithEmail(
+      String email, String password, String displayName) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      final user = await _authService.signUpWithEmail(email, password, displayName);
+      final user =
+          await _authService.signUpWithEmail(email, password, displayName);
       if (user != null) {
         // Update user profile info in UserProvider
         _isLoading = false;
@@ -95,12 +94,9 @@ class AuthProvider with ChangeNotifier {
         return false;
       }
     } catch (e) {
-      _error = e is Exception ? _authService.getMessageFromErrorCode(e) : 'Ocorreu um erro. Tente novamente mais tarde.';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    } catch (e) {
-      _error = 'Ocorreu um erro. Tente novamente mais tarde.';
+      _error = e is Exception
+          ? _authService.getMessageFromErrorCode(e)
+          : 'Ocorreu um erro. Tente novamente mais tarde.';
       _isLoading = false;
       notifyListeners();
       return false;
@@ -164,12 +160,9 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _error = e is Exception ? _authService.getMessageFromErrorCode(e) : 'Ocorreu um erro. Tente novamente mais tarde.';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    } catch (e) {
-      _error = 'Ocorreu um erro ao resetar a senha. Tente novamente mais tarde.';
+      _error = e is Exception
+          ? _authService.getMessageFromErrorCode(e)
+          : 'Ocorreu um erro. Tente novamente mais tarde.';
       _isLoading = false;
       notifyListeners();
       return false;
@@ -177,7 +170,10 @@ class AuthProvider with ChangeNotifier {
   }
 
   // Update user profile in Firebase and sync with UserProvider
-  Future<bool> updateProfile({String? displayName, String? photoURL, required UserProvider userProvider}) async {
+  Future<bool> updateProfile(
+      {String? displayName,
+      String? photoURL,
+      required UserProvider userProvider}) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -187,7 +183,7 @@ class AuthProvider with ChangeNotifier {
         displayName: displayName,
         photoURL: photoURL,
       );
-      
+
       // Update user profile in UserProvider
       if (user != null && displayName != null) {
         // Only update the profile if the displayName was changed
@@ -196,7 +192,7 @@ class AuthProvider with ChangeNotifier {
           name: displayName,
         ));
       }
-      
+
       _isLoading = false;
       notifyListeners();
       return true;
