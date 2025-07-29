@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 : "${SUPABASE_URL:?SUPABASE_URL não definido}"
 : "${SUPABASE_ANON_KEY:?SUPABASE_ANON_KEY não definido}"
-: "${SUPABASE_PROJECT_ID:?SUPABASE_PROJECT_ID não definido}"
 : "${GITHUB_TOKEN:?GITHUB_TOKEN não definido}"
-SUPABASE_CLI_VERSION="${SUPABASE_CLI_VERSION:-2.31.8}"
-echo "🔍 Variáveis ok  | CLI v$SUPABASE_CLI_VERSION"
+: "${POSTGRES_USER:?POSTGRES_USER não definido}"
+: "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD não definido}"
+: "${POSTGRES_DB:?POSTGRES_DB não definido}"
+echo "🔍 Variáveis ok"
