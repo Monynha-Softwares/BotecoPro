@@ -39,3 +39,7 @@ flutter build web
 ## Pending Work
 - Provide valid Supabase credentials for CLI steps.
 - Address linter warnings and implement remaining tasks.
+### Build Web adjustments
+- Removed outdated `firebase_messaging` package from `pubspec.yaml` to avoid compile errors on Flutter Web.
+- Implemented missing `updateProduto` and `updateReceita` methods in `SupabaseDatabaseService` (`lib/services/supabase_database_service.dart`).
+- Verified web compilation using `flutter run -d web-server`.
