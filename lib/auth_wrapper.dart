@@ -7,7 +7,8 @@ class AuthWrapper extends StatelessWidget {
   final Widget child;
   final Future<void>? init;
 
-  const AuthWrapper({Key? key, required this.child, this.init}) : super(key: key);
+  const AuthWrapper({Key? key, required this.child, this.init})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -20,23 +21,26 @@ class AuthWrapper extends StatelessWidget {
           );
         }
 
-        final authProvider = Provider.of<AuthProvider>(context);
+        return ChangeNotifierProvider(
+          create: (_) => AuthProvider(),
+          child: Consumer<AuthProvider>(
+            builder: (context, authProvider, _) {
+              if (authProvider.status == AuthStatus.initial) {
+                return const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
+              }
 
-        if (authProvider.status == AuthStatus.initial) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
+              // If authenticated, show the main app content
+              if (authProvider.isAuthenticated) {
+                return child;
+              }
 
-        // If authenticated, show the main app content
-        if (authProvider.isAuthenticated) {
-          return child;
-        }
-
-        // If not authenticated, show login screen
-        return const LoginPage();
+              // If not authenticated, show login screen
+              return const LoginPage();
+            },
+          ),
+        );
       },
     );
   }
