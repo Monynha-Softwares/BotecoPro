@@ -260,22 +260,36 @@ class SupabaseDatabaseService {
     }
   }
 
-  Future<void> updateProduto(Produto produto) async {
-    if (_userId == null || produto.id_produto == null) return;
+  // PRODUTOS VENDA
+  Future<List<ProdutoVenda>> getProdutosVenda() async {
+    if (_userId == null) return [];
 
     try {
-      final data = produto.toJson();
-      data['user_id'] = _userId;
-      data.remove('id_produto');
+      final response = await _supabase
+          .from('produtos_venda')
+          .select()
+          .eq('user_id', _userId!)
+          .order('id_produto');
 
-      await _supabase
-          .from('produtos')
-          .update(data)
-          .eq('id_produto', produto.id_produto!)
-          .eq('user_id', _userId!);
+      return response.map<ProdutoVenda>((data) => ProdutoVenda.fromJson(data)).toList();
     } catch (e) {
-      debugPrint('Error updating produto: $e');
-      throw Exception('Erro ao atualizar produto');
+      debugPrint('Error getting produtos venda: $e');
+      return [];
+    }
+  }
+
+  Future<void> addProdutoVenda(ProdutoVenda produtoVenda) async {
+    if (_userId == null) return;
+
+    try {
+      final data = produtoVenda.toJson();
+      data['user_id'] = _userId;
+      data.remove('id_venda');
+
+      await _supabase.from('produtos_venda').insert(data);
+    } catch (e) {
+      debugPrint('Error adding produto venda: $e');
+      throw Exception('Erro ao adicionar produto venda');
     }
   }
 
@@ -440,6 +454,55 @@ class SupabaseDatabaseService {
     }
   }
 
+  // PEDIDO ITENS
+  Future<List<PedidoItem>> getPedidoItens() async {
+    if (_userId == null) return [];
+
+    try {
+      final response = await _supabase
+          .from('pedido_itens')
+          .select()
+          .eq('user_id', _userId!);
+
+      return response.map<PedidoItem>((data) => PedidoItem.fromJson(data)).toList();
+    } catch (e) {
+      debugPrint('Error getting pedido itens: $e');
+      return [];
+    }
+  }
+
+  Future<List<PedidoItem>> getPedidoItensByPedido(int idPedido) async {
+    if (_userId == null) return [];
+
+    try {
+      final response = await _supabase
+          .from('pedido_itens')
+          .select()
+          .eq('id_pedido', idPedido)
+          .eq('user_id', _userId!);
+
+      return response.map<PedidoItem>((data) => PedidoItem.fromJson(data)).toList();
+    } catch (e) {
+      debugPrint('Error getting pedido itens by pedido: $e');
+      return [];
+    }
+  }
+
+  Future<void> addPedidoItem(PedidoItem item) async {
+    if (_userId == null) return;
+
+    try {
+      final data = item.toJson();
+      data['user_id'] = _userId;
+      data.remove('id_pedido_item');
+
+      await _supabase.from('pedido_itens').insert(data);
+    } catch (e) {
+      debugPrint('Error adding pedido item: $e');
+      throw Exception('Erro ao adicionar item ao pedido');
+    }
+  }
+
   // ESTOQUE
   Future<List<Estoque>> getEstoque() async {
     if (_userId == null) return [];
@@ -530,22 +593,56 @@ class SupabaseDatabaseService {
     }
   }
 
-  Future<void> updateReceita(Receita receita) async {
-    if (_userId == null || receita.id_receita == null) return;
+  // RECEITA INGREDIENTES
+  Future<List<ReceitaIngrediente>> getReceitaIngredientes() async {
+    if (_userId == null) return [];
 
     try {
-      final data = receita.toJson();
-      data['user_id'] = _userId;
-      data.remove('id_receita');
-
-      await _supabase
-          .from('receitas')
-          .update(data)
-          .eq('id_receita', receita.id_receita!)
+      final response = await _supabase
+          .from('receita_ingredientes')
+          .select()
           .eq('user_id', _userId!);
+
+      return response
+          .map<ReceitaIngrediente>((data) => ReceitaIngrediente.fromJson(data))
+          .toList();
     } catch (e) {
-      debugPrint('Error updating receita: $e');
-      throw Exception('Erro ao atualizar receita');
+      debugPrint('Error getting receita ingredientes: $e');
+      return [];
+    }
+  }
+
+  Future<List<ReceitaIngrediente>> getReceitaIngredientesByReceita(int idReceita) async {
+    if (_userId == null) return [];
+
+    try {
+      final response = await _supabase
+          .from('receita_ingredientes')
+          .select()
+          .eq('id_receita', idReceita)
+          .eq('user_id', _userId!);
+
+      return response
+          .map<ReceitaIngrediente>((data) => ReceitaIngrediente.fromJson(data))
+          .toList();
+    } catch (e) {
+      debugPrint('Error getting receita ingredientes by receita: $e');
+      return [];
+    }
+  }
+
+  Future<void> addReceitaIngrediente(ReceitaIngrediente ingrediente) async {
+    if (_userId == null) return;
+
+    try {
+      final data = ingrediente.toJson();
+      data['user_id'] = _userId;
+      data.remove('id');
+
+      await _supabase.from('receita_ingredientes').insert(data);
+    } catch (e) {
+      debugPrint('Error adding receita ingrediente: $e');
+      throw Exception('Erro ao adicionar ingrediente da receita');
     }
   }
 

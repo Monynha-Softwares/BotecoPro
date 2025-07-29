@@ -65,7 +65,7 @@ class ServiceProvider with ChangeNotifier {
   }
 
   Future<List<ProdutoVenda>> getProdutosVenda() async {
-    return await _apiService.getProductSales();
+    return await _supabaseService.getProdutosVenda();
   }
 
   Future<void> addProduto(Produto produto) async {
@@ -73,8 +73,7 @@ class ServiceProvider with ChangeNotifier {
   }
 
   Future<void> addProdutoVenda(ProdutoVenda produtoVenda) async {
-    // For now, use Supabase service directly
-    debugPrint('addProdutoVenda called - implement when needed');
+    await _supabaseService.addProdutoVenda(produtoVenda);
   }
 
   Future<void> updateEstoqueProduto(
@@ -166,18 +165,15 @@ class ServiceProvider with ChangeNotifier {
   }
 
   Future<List<PedidoItem>> getPedidoItens() async {
-    // For now, return empty list - implement when needed
-    return [];
+    return await _supabaseService.getPedidoItens();
   }
 
   Future<List<PedidoItem>> getPedidoItensByPedido(int id_pedido) async {
-    // For now, return empty list - implement when needed
-    return [];
+    return await _supabaseService.getPedidoItensByPedido(id_pedido);
   }
 
   Future<void> addPedidoItem(PedidoItem item) async {
-    // For now, do nothing - implement when needed
-    debugPrint('addPedidoItem called - implement when needed');
+    await _supabaseService.addPedidoItem(item);
   }
 
   // RECEITAS (Recipes)
@@ -190,20 +186,15 @@ class ServiceProvider with ChangeNotifier {
   }
 
   Future<List<ReceitaIngrediente>> getReceitaIngredientes() async {
-    // For now, return empty list - implement when needed
-    return [];
+    return await _supabaseService.getReceitaIngredientes();
   }
 
-  Future<List<ReceitaIngrediente>> getReceitaIngredientesByReceita(
-    int id_receita,
-  ) async {
-    // For now, return empty list - implement when needed
-    return [];
+  Future<List<ReceitaIngrediente>> getReceitaIngredientesByReceita(int id_receita) async {
+    return await _supabaseService.getReceitaIngredientesByReceita(id_receita);
   }
 
   Future<void> addReceitaIngrediente(ReceitaIngrediente ingrediente) async {
-    // For now, do nothing - implement when needed
-    debugPrint('addReceitaIngrediente called - implement when needed');
+    await _supabaseService.addReceitaIngrediente(ingrediente);
   }
 
   Future<void> updateRecipe(Recipe recipe) async {
