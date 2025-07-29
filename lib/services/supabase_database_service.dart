@@ -260,6 +260,25 @@ class SupabaseDatabaseService {
     }
   }
 
+  Future<void> updateProduto(Produto produto) async {
+    if (_userId == null || produto.id_produto == null) return;
+
+    try {
+      final data = produto.toJson();
+      data['user_id'] = _userId;
+      data.remove('id_produto');
+
+      await _supabase
+          .from('produtos')
+          .update(data)
+          .eq('id_produto', produto.id_produto!)
+          .eq('user_id', _userId!);
+    } catch (e) {
+      debugPrint('Error updating produto: $e');
+      throw Exception('Erro ao atualizar produto');
+    }
+  }
+
   // PRODUTOS VENDA
   Future<List<ProdutoVenda>> getProdutosVenda() async {
     if (_userId == null) return [];
@@ -595,6 +614,25 @@ class SupabaseDatabaseService {
     } catch (e) {
       debugPrint('Error adding receita: $e');
       throw Exception('Erro ao adicionar receita');
+    }
+  }
+
+  Future<void> updateReceita(Receita receita) async {
+    if (_userId == null || receita.id_receita == null) return;
+
+    try {
+      final data = receita.toJson();
+      data['user_id'] = _userId;
+      data.remove('id_receita');
+
+      await _supabase
+          .from('receitas')
+          .update(data)
+          .eq('id_receita', receita.id_receita!)
+          .eq('user_id', _userId!);
+    } catch (e) {
+      debugPrint('Error updating receita: $e');
+      throw Exception('Erro ao atualizar receita');
     }
   }
 
