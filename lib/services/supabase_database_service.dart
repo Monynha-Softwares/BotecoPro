@@ -268,12 +268,13 @@ class SupabaseDatabaseService {
       final response = await _supabase
           .from('produtos_venda')
           .select()
-          .eq('user_id', _userId!)
-          .order('id_produto');
+          .eq('user_id', _userId!);
 
-      return response.map<ProdutoVenda>((data) => ProdutoVenda.fromJson(data)).toList();
+      return response
+          .map<ProdutoVenda>((data) => ProdutoVenda.fromJson(data))
+          .toList();
     } catch (e) {
-      debugPrint('Error getting produtos venda: $e');
+      debugPrint('Error getting produtos_venda: $e');
       return [];
     }
   }
@@ -288,7 +289,7 @@ class SupabaseDatabaseService {
 
       await _supabase.from('produtos_venda').insert(data);
     } catch (e) {
-      debugPrint('Error adding produto venda: $e');
+      debugPrint('Error adding produto_venda: $e');
       throw Exception('Erro ao adicionar produto venda');
     }
   }
@@ -464,9 +465,11 @@ class SupabaseDatabaseService {
           .select()
           .eq('user_id', _userId!);
 
-      return response.map<PedidoItem>((data) => PedidoItem.fromJson(data)).toList();
+      return response
+          .map<PedidoItem>((data) => PedidoItem.fromJson(data))
+          .toList();
     } catch (e) {
-      debugPrint('Error getting pedido itens: $e');
+      debugPrint('Error getting pedido_itens: $e');
       return [];
     }
   }
@@ -481,9 +484,11 @@ class SupabaseDatabaseService {
           .eq('id_pedido', idPedido)
           .eq('user_id', _userId!);
 
-      return response.map<PedidoItem>((data) => PedidoItem.fromJson(data)).toList();
+      return response
+          .map<PedidoItem>((data) => PedidoItem.fromJson(data))
+          .toList();
     } catch (e) {
-      debugPrint('Error getting pedido itens by pedido: $e');
+      debugPrint('Error getting pedido_itens by pedido: $e');
       return [];
     }
   }
@@ -498,8 +503,8 @@ class SupabaseDatabaseService {
 
       await _supabase.from('pedido_itens').insert(data);
     } catch (e) {
-      debugPrint('Error adding pedido item: $e');
-      throw Exception('Erro ao adicionar item ao pedido');
+      debugPrint('Error adding pedido_item: $e');
+      throw Exception('Erro ao adicionar item do pedido');
     }
   }
 
@@ -607,7 +612,7 @@ class SupabaseDatabaseService {
           .map<ReceitaIngrediente>((data) => ReceitaIngrediente.fromJson(data))
           .toList();
     } catch (e) {
-      debugPrint('Error getting receita ingredientes: $e');
+      debugPrint('Error getting receita_ingredientes: $e');
       return [];
     }
   }
@@ -626,7 +631,7 @@ class SupabaseDatabaseService {
           .map<ReceitaIngrediente>((data) => ReceitaIngrediente.fromJson(data))
           .toList();
     } catch (e) {
-      debugPrint('Error getting receita ingredientes by receita: $e');
+      debugPrint('Error getting receita_ingredientes by receita: $e');
       return [];
     }
   }
@@ -641,8 +646,8 @@ class SupabaseDatabaseService {
 
       await _supabase.from('receita_ingredientes').insert(data);
     } catch (e) {
-      debugPrint('Error adding receita ingrediente: $e');
-      throw Exception('Erro ao adicionar ingrediente da receita');
+      debugPrint('Error adding receita_ingrediente: $e');
+      throw Exception('Erro ao adicionar ingrediente');
     }
   }
 
