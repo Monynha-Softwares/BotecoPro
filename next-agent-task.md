@@ -5,7 +5,13 @@
 ✅ Script executado com sucesso em `boteco_dev`.
 ✅ Flutter instalado para futuras execuções do app.
 
-🔜 Pendências:
-- [x] Adaptar serviços para apontar para esta instância e validar integração completa.
-- [x] Executar o aplicativo com um dispositivo compatível (Chrome ou desktop).
-- [ ] Criar políticas RLS, views e procedures conforme necessário.
+### Scripts adicionados
+- `db_init/functions/` com stored procedures usadas pelo app (cadastro de fornecedores, produtos, vendas etc.)
+- `db_init/views/` com views de leitura para fornecedores, categorias, produtos, vendas e pedidos
+- `db_init/tables/` agora armazena `schema.sql` e `legacy_tables.sql`
+
+### Próximos passos
+- Revisar as definições das funções para garantir regras de negócio completas
+- Revisar e implementar funções, tabelas em falta
+- Criar e executar scripts com dados seeds
+- Validar execução dos scripts em um container PostgreSQL local
