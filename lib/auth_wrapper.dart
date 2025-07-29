@@ -5,28 +5,39 @@ import 'pages/auth/login_page.dart';
 
 class AuthWrapper extends StatelessWidget {
   final Widget child;
+  final Future<void>? init;
 
-  const AuthWrapper({Key? key, required this.child}) : super(key: key);
+  const AuthWrapper({Key? key, required this.child, this.init}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
+    return FutureBuilder<void>(
+      future: init,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
 
-    // Show a loading spinner while determining auth state
-    if (authProvider.status == AuthStatus.initial) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
+        final authProvider = Provider.of<AuthProvider>(context);
 
-    // If authenticated, show the main app content
-    if (authProvider.isAuthenticated) {
-      return child;
-    }
+        if (authProvider.status == AuthStatus.initial) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
 
-    // If not authenticated, show login screen
-    return const LoginPage();
+        // If authenticated, show the main app content
+        if (authProvider.isAuthenticated) {
+          return child;
+        }
+
+        // If not authenticated, show login screen
+        return const LoginPage();
+      },
+    );
   }
 }
