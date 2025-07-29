@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'theme.dart';
 import 'pages/home_page.dart';
 import 'pages/tables_page.dart';
@@ -28,17 +29,18 @@ import 'auth_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load();
   await initializeDateFormatting('pt_BR', null);
-  
-  // Initialize Supabase
-  await supabase.Supabase.initialize(
-    url: 'https://xmzhheuhydsifvzusbpi.supabase.co',
-    anonKey: 'sb_publishable_N2S5jIgqRTqpQ3RaYrHyug_06dgZooJ',
-  );
-  
-  // Initialize database service
-  final databaseService = SupabaseDatabaseService();
-  await databaseService.initializeData();
+
+  final initFuture = () async {
+    await supabase.Supabase.initialize(
+      url: dotenv.env['SUPABASE_URL']!,
+      anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
+    );
+
+    final databaseService = SupabaseDatabaseService();
+    await databaseService.initializeData();
+  }();
   
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -54,25 +56,26 @@ void main() async {
         ChangeNotifierProvider(create: (context) => SoundProvider()),
         ChangeNotifierProvider(create: (context) => AuthProvider()),
       ],
-      child: const MyApp(),
+      child: MyApp(init: initFuture),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final Future<void> init;
+  const MyApp({super.key, required this.init});
 
     @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-    
+
     return MaterialApp(
       title: 'Boteco PRO',
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: themeProvider.themeMode,
       debugShowCheckedModeBanner: false,
-      home: const AuthWrapper(child: MainNavigationScreen()),
+      home: AuthWrapper(init: init, child: const MainNavigationScreen()),
     );
   }
 }

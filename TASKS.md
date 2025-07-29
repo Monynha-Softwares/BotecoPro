@@ -11,8 +11,8 @@ Este arquivo lista as principais tarefas para corrigir os problemas encontrados 
 
 ## 2. Ajustes na Aplicação Flutter
 
-- [ ] Adicionar dependências `supabase_flutter`, `google_sign_in`, `flutter_local_notifications` e `firebase_messaging` em `pubspec.yaml`.
-- [ ] Inicializar o Supabase em `main.dart` utilizando as variáveis de ambiente.
+- [x] Adicionar dependências `supabase_flutter`, `google_sign_in`, `flutter_local_notifications` e `firebase_messaging` em `pubspec.yaml`.
+- [x] Inicializar o Supabase em `main.dart` utilizando as variáveis de ambiente.
 - [ ] Implementar `supabase_auth_service.dart` com métodos de cadastro, login (email e Google), recuperação de senha e logout.
 - [ ] Atualizar `AuthProvider` para utilizar `supabase.auth.onAuthStateChange`.
 - [ ] Substituir `DatabaseService` por `SupabaseDatabaseService` em todo o app, removendo persistência via `SharedPreferences`.
