@@ -18,6 +18,8 @@ Este arquivo lista as principais tarefas para corrigir os problemas encontrados 
 - [x] Substituir `DatabaseService` por `SupabaseDatabaseService` em todo o app, removendo persistência via `SharedPreferences`.
 - [ ] Implementar streams de atualização em tempo real (`supabase.from(...).stream`) para pedidos e estoque.
 - [x] Ajustar telas de login e registro para tratar erros do Supabase.
+- [x] Implementar streams de atualização em tempo real (`supabase.from(...).stream`) para pedidos e estoque.
+- [ ] Ajustar telas de login e registro para tratar erros do Supabase.
 
 ## 3. Notificações e Edge Functions
 
