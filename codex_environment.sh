@@ -9,7 +9,9 @@ fi
 
 #────────────────── 1. Instala dependências essenciais
 apt-get update -qq
-apt-get install -y -qq file unzip git curl dpkg
+apt-get install -y -qq file unzip git curl dpkg \
+  openjdk-17-jdk clang cmake ninja-build pkg-config libgtk-3-dev \
+  chromium-browser android-sdk
 
 #────────────────── 2. Verifica variáveis de ambiente obrigatórias
 : "${SUPABASE_URL:?SUPABASE_URL não definido}"
@@ -43,7 +45,7 @@ fi
 
 #────────────────── 4.1 Login no Supabase CLI (via token)
 if [[ -n "${SUPABASE_ACCESS_TOKEN:-}" ]]; then
-SUPABASE_CLI_VERSION="${SUPABASE_CLI_VERSION:-2.39.4}"
+  supabase login --token "$SUPABASE_ACCESS_TOKEN" >/dev/null
   echo "✅ Supabase autenticado"
 fi
 
@@ -55,13 +57,38 @@ if ! command -v flutter &>/dev/null; then
   echo 'export PATH="$HOME/flutter/bin:$PATH"' >> ~/.bashrc
 fi
 
+# Configura Android SDK
+export ANDROID_HOME=/usr/lib/android-sdk
+export ANDROID_SDK_ROOT=/usr/lib/android-sdk
+echo 'export ANDROID_HOME=/usr/lib/android-sdk' >> ~/.bashrc
+echo 'export ANDROID_SDK_ROOT=/usr/lib/android-sdk' >> ~/.bashrc
+
+# Instala ferramentas de linha de comando se ausentes
+if [[ ! -x "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" ]]; then
+  mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
+  curl -fsSL https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -o cmd.zip
+  unzip -q cmd.zip -d "$ANDROID_SDK_ROOT/cmdline-tools/"
+  mv "$ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools" "$ANDROID_SDK_ROOT/cmdline-tools/latest"
+  rm cmd.zip
+fi
+
+yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null
+yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" "platform-tools" "platforms;android-34" >/dev/null
+
+export CHROME_EXECUTABLE=/usr/bin/chromium-browser
+echo 'export CHROME_EXECUTABLE=/usr/bin/chromium-browser' >> ~/.bashrc
+
 flutter doctor -v || true
 echo "✅ Flutter instalado"
 
 #────────────────── 6. Clona repositórios do projeto
 echo "🔄 Clonando repositórios BotecoPro…"
-git clone "https://${GITHUB_TOKEN}@github.com/marcelo-m7/BotecoPro-Backend.git" BotecoPro-Backend
-git clone "https://${GITHUB_TOKEN}@github.com/marcelo-m7/BotecoPro-Apps.git" BotecoPro-Apps
+if [[ ! -d BotecoPro-Backend ]]; then
+  git clone "https://${GITHUB_TOKEN}@github.com/marcelo-m7/BotecoPro-Backend.git" BotecoPro-Backend
+fi
+if [[ ! -d BotecoPro-Apps ]]; then
+  git clone "https://${GITHUB_TOKEN}@github.com/marcelo-m7/BotecoPro-Apps.git" BotecoPro-Apps
+fi
 echo "✅ Repositórios clonados"
 
 #────────────────── ✅ Fim
