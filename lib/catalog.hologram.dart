@@ -10,7 +10,6 @@ import "package:http_interceptor/http_interceptor.dart";
 import "package:dio/dio.dart";
 import "package:image_picker/image_picker.dart";
 import "package:flutter_animate/flutter_animate.dart";
-import "package:flutter_launcher_icons/flutter_launcher_icons.dart";
 import "package:table_calendar/table_calendar.dart";
 import "package:flutter_slidable/flutter_slidable.dart";
 import "package:flutter_svg/flutter_svg.dart";
