@@ -1,6 +1,8 @@
-# Boteco PRO - Sistema de Gestão para Bares
+# ✨ Boteco PRO - Sistema de Gestão para Bares
+[![Flutter 3](https://img.shields.io/badge/Flutter-3.x-blue?logo=flutter)](https://flutter.dev) [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-Sistema completo de gestão para bares e restaurantes com autenticação Supabase, banco de dados em tempo real e interface Flutter moderna.
+Boteco PRO is a **cross-platform management system for small Brazilian bars (“botecos”)**.
+It helps owners keep tables, orders, stock, recipes and in-house production under control – whether the app is installed on Android, iOS or opened as a PWA in the browser.
 
 ## 🚀 Funcionalidades
 
@@ -46,3 +48,21 @@ Sistema completo de gestão para bares e restaurantes com autenticação Supabas
 ---
 
 **Desenvolvido com ❤️ para a gestão de bares e restaurantes**
+
+---
+
+
+## 🤝 Contributing & License
+
+This is an academic project but pull-requests are welcome for educational purposes.
+Code released under the **MIT License** – see [LICENSE](LICENSE).
+
+---
+
+### 🙌 Acknowledgements
+
+* Open-source Flutter community for awesome packages
+
+---
+
+> *“Gestão simples, cerveja gelada e boteco lotado.”* – **Boteco PRO**
