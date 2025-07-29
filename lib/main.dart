@@ -33,7 +33,7 @@ void main() async {
   // Initialize Supabase
   await supabase.Supabase.initialize(
     url: 'https://xmzhheuhydsifvzusbpi.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtemhoZXVoeWRzaWZ2enVzYnBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3MjMyMDEsImV4cCI6MjA2OTI5OTIwMX0.sb_publishable_N2S5jIgqRTqpQ3RaYrHyug_06dgZooJ',
+    anonKey: 'sb_publishable_N2S5jIgqRTqpQ3RaYrHyug_06dgZooJ',
   );
   
   // Initialize database service
