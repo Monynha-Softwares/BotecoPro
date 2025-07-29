@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: boteco
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-boteco}
+      POSTGRES_DB: boteco_pro
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:

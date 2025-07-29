@@ -12,7 +12,7 @@ apt-get install -y -qq file unzip git curl dpkg
 echo "🧠 Iniciando configuração do ambiente Monynha..."
 source ./scripts/check_env.sh
 source ./scripts/setup_git.sh
-source ./scripts/install_supabase.sh
+source ./scripts/install_postgres.sh
 source ./scripts/install_flutter.sh
 source ./scripts/clone_repos.sh
 

@@ -18,7 +18,7 @@ It helps owners keep tables, orders, stock, recipes and in-house production unde
 ## 🛠️ Tecnologias
 
 - **Frontend:** Flutter (Dart)
-- **Backend:** Supabase (PostgreSQL + Real-time)
+- **Backend:** Postgres (Docker para desenvolvimento local)
 - **Autenticação:** Supabase Auth + Google Sign-In
 - **Estado:** Provider Pattern
 - **UI:** Material Design 3
@@ -36,6 +36,12 @@ It helps owners keep tables, orders, stock, recipes and in-house production unde
 1. Cadastre-se com email/senha ou Google
 2. O sistema criará dados de exemplo automaticamente
 3. Explore as funcionalidades do dashboard
+
+### Desenvolvimento Local
+1. Instale o Docker
+2. Copie `.env.example` para `.env` e ajuste as variáveis se necessário
+3. Execute `docker compose up -d` para iniciar o Postgres
+4. Rode o aplicativo normalmente apontando para o banco local
 
 ### Funcionalidades Principais
 - **Dashboard:** Visão geral das vendas e mesas
