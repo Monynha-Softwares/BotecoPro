@@ -1,17 +1,23 @@
-## Banco de Dados PostgreSQL – Progresso
+## 🔧 Tarefas identificadas automaticamente – Auditoria Codex
 
-✅ PostgreSQL instalado localmente via apt-get (porta 5432) e configurado.
-✅ Script `database/postgres/schema.sql` criado com estrutura de tabelas e seeds.
-✅ Script executado com sucesso em `boteco_dev`.
-✅ Flutter instalado para futuras execuções do app.
+### Bugs críticos
+- [ ] `ServiceProvider.updateProduct` chama `_supabaseService.updateProduto`, mas esse método não existe em `supabase_database_service.dart`.
+- [ ] `ServiceProvider.updateRecipe` depende de `_supabaseService.updateReceita`, também ausente no serviço Supabase.
+- [ ] Script `scripts/init_postgres.sh` referencia `database/postgres/schema.sql`, porém o schema está em `db_init/tables/schema.sql`.
+- [ ] `scripts/clone_repos.sh` clona repositórios sem checar se as pastas já existem, podendo sobrescrever dados locais.
 
-### Scripts adicionados
-- `db_init/functions/` com stored procedures usadas pelo app (cadastro de fornecedores, produtos, vendas etc.)
-- `db_init/views/` com views de leitura para fornecedores, categorias, produtos, vendas e pedidos
-- `db_init/tables/` agora armazena `schema.sql` e `legacy_tables.sql`
+### Inconsistências estruturais
+- [ ] Métodos de sincronização `_syncProdutosVenda`, `_syncProducoes`, `_syncProducaoIngredientes` e `_syncEstoque` em `service_provider.dart` estão vazios.
+- [ ] Várias operações de produção ainda utilizam `ApiService` ao invés de `SupabaseDatabaseService`, contrariando a migração para Supabase.
 
-### Próximos passos
-- Revisar as definições das funções para garantir regras de negócio completas
-- Revisar e implementar funções, tabelas em falta
-- Criar e executar scripts com dados seeds
-- Validar execução dos scripts em um container PostgreSQL local
+### Melhorias de código
+- [ ] Implementar atualização de `produto_venda` em `updateProduct` quando o schema do Supabase estiver finalizado.
+- [ ] Criar métodos `updateProduto` e `updateReceita` em `SupabaseDatabaseService` para permitir edição de produtos e receitas.
+- [ ] Ajustar `check_env.sh` para validar também `POSTGRES_HOST` e `POSTGRES_PORT`.
+
+### Scripts SQL com falhas
+- [ ] Revisar `db_init/tables/rls_policies.sql` para garantir que todas as tabelas referenciadas existem e que as políticas cobrem inserts e updates.
+
+### Requisitos pendentes do app
+- [ ] Finalizar a substituição do `ApiService` antigo por chamadas diretas ao Supabase em todas as telas.
+- [ ] Validar a criação de dados iniciais e seeds utilizando os scripts em `db_init/`.
