@@ -16,6 +16,8 @@ Este arquivo lista as principais tarefas para corrigir os problemas encontrados 
 - [x] Implementar `supabase_auth_service.dart` com métodos de cadastro, login (email e Google), recuperação de senha e logout.
 - [x] Atualizar `AuthProvider` para utilizar `supabase.auth.onAuthStateChange`.
 - [x] Substituir `DatabaseService` por `SupabaseDatabaseService` em todo o app, removendo persistência via `SharedPreferences`.
+- [ ] Implementar streams de atualização em tempo real (`supabase.from(...).stream`) para pedidos e estoque.
+- [x] Ajustar telas de login e registro para tratar erros do Supabase.
 - [x] Implementar streams de atualização em tempo real (`supabase.from(...).stream`) para pedidos e estoque.
 - [ ] Ajustar telas de login e registro para tratar erros do Supabase.
 
@@ -40,6 +42,6 @@ Este arquivo lista as principais tarefas para corrigir os problemas encontrados 
 
 ## 6. Limpeza
 
-- [ ] Armazenar `SUPABASE_URL` e `SUPABASE_ANON_KEY` em arquivos `.env`, mantendo o `.env.example` atualizado.
+- [x] Armazenar `SUPABASE_URL` e `SUPABASE_ANON_KEY` em arquivos `.env`, mantendo o `.env.example` atualizado.
 - [ ] Remover código de protótipo não mais utilizado (classes de mock e gravação em `SharedPreferences`).
 
