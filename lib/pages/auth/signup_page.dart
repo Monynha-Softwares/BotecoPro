@@ -1,0 +1,457 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:provider/provider.dart';
+import '../../providers/auth_provider.dart';
+import '../../theme.dart';
+
+
+class SignupPage extends StatefulWidget {
+  const SignupPage({Key? key}) : super(key: key);
+
+  @override
+  State<SignupPage> createState() => _SignupPageState();
+}
+
+class _SignupPageState extends State<SignupPage> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+  bool _acceptTerms = false;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  void _togglePasswordVisibility() {
+    setState(() {
+      _obscurePassword = !_obscurePassword;
+    });
+  }
+
+  void _toggleConfirmPasswordVisibility() {
+    setState(() {
+      _obscureConfirmPassword = !_obscureConfirmPassword;
+    });
+  }
+
+  Future<void> _signUp() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      if (!_acceptTerms) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Você precisa aceitar os termos de uso para continuar'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final success = await authProvider.signUpWithEmail(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+        _nameController.text.trim(),
+      );
+
+      if (success && mounted) {
+        // Registration was successful, navigate back to login
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Conta criada com sucesso! Você já pode fazer login.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _signUpWithGoogle() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final success = await authProvider.signInWithGoogle();
+    
+    if (success && mounted) {
+      Navigator.pop(context);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Criar conta'),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        foregroundColor: colorScheme.onSurface,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Logo and Header
+                Center(
+                  child: Image.network(
+                    "https://pixabay.com/get/g2502430dc39b87f02c6eecb4d224ebfd02bcdcace53ca39aa536e985f5dde79d16fb40d4b250dbf0d89c831bac64b6781a77b7004e5478461bd3792c19ae9acd_1280.png",
+                    height: 100,
+                    width: 100,
+                  ),
+                ).animate().fadeIn(duration: 600.ms).slideY(
+                  begin: 0.2, 
+                  end: 0,
+                  curve: Curves.easeOutQuad,
+                  duration: 800.ms
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Crie sua conta no Boteco PRO',
+                  style: textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: botecoWine,
+                  ),
+                  textAlign: TextAlign.center,
+                ).animate().fadeIn(delay: 300.ms, duration: 600.ms),
+                const SizedBox(height: 8),
+                Text(
+                  'Preencha os dados abaixo para começar',
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurface.withOpacity(0.7),
+                  ),
+                  textAlign: TextAlign.center,
+                ).animate().fadeIn(delay: 400.ms, duration: 600.ms),
+                const SizedBox(height: 32),
+                
+                // Signup Form
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Name field
+                      TextFormField(
+                        controller: _nameController,
+                        decoration: InputDecoration(
+                          labelText: 'Nome completo',
+                          hintText: 'Seu nome completo',
+                          prefixIcon: const Icon(Icons.person_outline, color: botecoWine),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Por favor, insira seu nome';
+                          }
+                          return null;
+                        },
+                      ).animate().fadeIn(delay: 500.ms, duration: 600.ms).slideX(
+                        begin: 0.2, 
+                        end: 0,
+                        curve: Curves.easeOutQuad,
+                        duration: 800.ms
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // Email field
+                      TextFormField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          labelText: 'E-mail',
+                          hintText: 'Seu melhor e-mail',
+                          prefixIcon: const Icon(Icons.email_outlined, color: botecoWine),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Por favor, insira seu e-mail';
+                          }
+                          if (!value.contains('@') || !value.contains('.')) {
+                            return 'Por favor, insira um e-mail válido';
+                          }
+                          return null;
+                        },
+                      ).animate().fadeIn(delay: 600.ms, duration: 600.ms).slideX(
+                        begin: 0.2, 
+                        end: 0,
+                        curve: Curves.easeOutQuad,
+                        duration: 800.ms
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // Password field
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        decoration: InputDecoration(
+                          labelText: 'Senha',
+                          hintText: 'Crie uma senha forte',
+                          prefixIcon: const Icon(Icons.lock_outline, color: botecoWine),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                              color: Colors.grey,
+                            ),
+                            onPressed: _togglePasswordVisibility,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Por favor, crie uma senha';
+                          }
+                          if (value.length < 6) {
+                            return 'A senha deve ter pelo menos 6 caracteres';
+                          }
+                          return null;
+                        },
+                      ).animate().fadeIn(delay: 700.ms, duration: 600.ms).slideX(
+                        begin: 0.2, 
+                        end: 0,
+                        curve: Curves.easeOutQuad,
+                        duration: 800.ms
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // Confirm Password field
+                      TextFormField(
+                        controller: _confirmPasswordController,
+                        obscureText: _obscureConfirmPassword,
+                        decoration: InputDecoration(
+                          labelText: 'Confirmar senha',
+                          hintText: 'Confirme sua senha',
+                          prefixIcon: const Icon(Icons.lock_outline, color: botecoWine),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscureConfirmPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                              color: Colors.grey,
+                            ),
+                            onPressed: _toggleConfirmPasswordVisibility,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Por favor, confirme sua senha';
+                          }
+                          if (value != _passwordController.text) {
+                            return 'As senhas não conferem';
+                          }
+                          return null;
+                        },
+                      ).animate().fadeIn(delay: 800.ms, duration: 600.ms).slideX(
+                        begin: 0.2, 
+                        end: 0,
+                        curve: Curves.easeOutQuad,
+                        duration: 800.ms
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // Terms and conditions
+                      Row(
+                        children: [
+                          Checkbox(
+                            value: _acceptTerms,
+                            onChanged: (value) {
+                              setState(() {
+                                _acceptTerms = value ?? false;
+                              });
+                            },
+                            activeColor: botecoWine,
+                          ),
+                          Expanded(
+                            child: RichText(
+                              text: TextSpan(
+                                text: 'Eu aceito os ',
+                                style: textTheme.bodyMedium?.copyWith(
+                                  color: colorScheme.onSurface,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text: 'Termos de Uso',
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      color: botecoWine,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: ' e ',
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      color: colorScheme.onSurface,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: 'Política de Privacidade',
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      color: botecoWine,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ).animate().fadeIn(delay: 900.ms, duration: 600.ms),
+                      
+                      const SizedBox(height: 24),
+                      
+                      // Sign Up Button
+                      ElevatedButton(
+                        onPressed: authProvider.isLoading ? null : _signUp,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: botecoWine,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 2,
+                        ),
+                        child: authProvider.isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                'Criar conta',
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                      ).animate().fadeIn(delay: 1000.ms, duration: 600.ms).scale(
+                        delay: 1000.ms,
+                        duration: 600.ms,
+                        begin: Offset(0.95, 0.95),
+                        end: Offset(1, 1),
+                        curve: Curves.easeOutQuad
+                      ),
+                      
+                      // Error message if any
+                      if (authProvider.error != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16.0),
+                          child: Text(
+                            authProvider.error!,
+                            style: TextStyle(color: Colors.red[700], fontSize: 14),
+                            textAlign: TextAlign.center,
+                          ),
+                        ).animate().shake(delay: 100.ms),
+                      
+                      const SizedBox(height: 24),
+                      
+                      // Divider
+                      Row(
+                        children: [
+                          Expanded(child: Divider(color: Colors.grey.shade400)),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Text(
+                              'Ou continue com',
+                              style: textTheme.bodyMedium?.copyWith(
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ),
+                          Expanded(child: Divider(color: Colors.grey.shade400)),
+                        ],
+                      ).animate().fadeIn(delay: 1100.ms, duration: 600.ms),
+                      
+                      const SizedBox(height: 24),
+                      
+                      // Google Sign Up Button
+                      OutlinedButton(
+                        onPressed: authProvider.isLoading ? null : _signUpWithGoogle,
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: Colors.grey.shade300),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.network(
+                              'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg',
+                              height: 20,
+                              width: 20,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'Continuar com Google',
+                              style: textTheme.bodyLarge?.copyWith(
+                                fontWeight: FontWeight.w500,
+                                color: colorScheme.onSurface,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ).animate().fadeIn(delay: 1200.ms, duration: 600.ms).slideY(
+                        begin: 0.2, 
+                        end: 0,
+                        curve: Curves.easeOutQuad,
+                        duration: 800.ms
+                      ),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 24),
+                
+                // Already have account
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Já tem uma conta?',
+                      style: textTheme.bodyMedium,
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        'Faça login',
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: botecoWine,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ).animate().fadeIn(delay: 1300.ms, duration: 600.ms),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
