@@ -4,7 +4,8 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import '../models/data_models.dart';
 
 class SupabaseDatabaseService {
-  static final SupabaseDatabaseService _instance = SupabaseDatabaseService._internal();
+  static final SupabaseDatabaseService _instance =
+      SupabaseDatabaseService._internal();
   factory SupabaseDatabaseService() => _instance;
   SupabaseDatabaseService._internal();
 
@@ -33,9 +34,21 @@ class SupabaseDatabaseService {
     try {
       // Create sample categories
       await _supabase.from('categorias').insert([
-        {'nome': 'Bebidas', 'descricao': 'Bebidas em geral', 'user_id': _userId},
-        {'nome': 'Comidas', 'descricao': 'Alimentos em geral', 'user_id': _userId},
-        {'nome': 'Outros', 'descricao': 'Produtos diversos', 'user_id': _userId},
+        {
+          'nome': 'Bebidas',
+          'descricao': 'Bebidas em geral',
+          'user_id': _userId,
+        },
+        {
+          'nome': 'Comidas',
+          'descricao': 'Alimentos em geral',
+          'user_id': _userId,
+        },
+        {
+          'nome': 'Outros',
+          'descricao': 'Produtos diversos',
+          'user_id': _userId,
+        },
       ]);
 
       // Create sample tables
@@ -55,10 +68,14 @@ class SupabaseDatabaseService {
           .from('categorias')
           .select('id_categoria, nome')
           .eq('user_id', _userId!);
-      
+
       if (categoriasResponse.isNotEmpty) {
-        final bebidas = categoriasResponse.firstWhere((c) => c['nome'] == 'Bebidas');
-        final comidas = categoriasResponse.firstWhere((c) => c['nome'] == 'Comidas');
+        final bebidas = categoriasResponse.firstWhere(
+          (c) => c['nome'] == 'Bebidas',
+        );
+        final comidas = categoriasResponse.firstWhere(
+          (c) => c['nome'] == 'Comidas',
+        );
 
         // Create sample products
         await _supabase.from('produtos').insert([
@@ -132,7 +149,9 @@ class SupabaseDatabaseService {
           .eq('user_id', _userId!)
           .order('nome');
 
-      return response.map<Fornecedor>((data) => Fornecedor.fromJson(data)).toList();
+      return response
+          .map<Fornecedor>((data) => Fornecedor.fromJson(data))
+          .toList();
     } catch (e) {
       debugPrint('Error getting fornecedores: $e');
       return [];
@@ -199,7 +218,9 @@ class SupabaseDatabaseService {
           .eq('user_id', _userId!)
           .order('nome');
 
-      return response.map<Categoria>((data) => Categoria.fromJson(data)).toList();
+      return response
+          .map<Categoria>((data) => Categoria.fromJson(data))
+          .toList();
     } catch (e) {
       debugPrint('Error getting categorias: $e');
       return [];
@@ -236,6 +257,25 @@ class SupabaseDatabaseService {
     } catch (e) {
       debugPrint('Error adding produto: $e');
       throw Exception('Erro ao adicionar produto');
+    }
+  }
+
+  Future<void> updateProduto(Produto produto) async {
+    if (_userId == null || produto.id_produto == null) return;
+
+    try {
+      final data = produto.toJson();
+      data['user_id'] = _userId;
+      data.remove('id_produto');
+
+      await _supabase
+          .from('produtos')
+          .update(data)
+          .eq('id_produto', produto.id_produto!)
+          .eq('user_id', _userId!);
+    } catch (e) {
+      debugPrint('Error updating produto: $e');
+      throw Exception('Erro ao atualizar produto');
     }
   }
 
@@ -417,7 +457,10 @@ class SupabaseDatabaseService {
     }
   }
 
-  Future<void> updateEstoqueProduto(int idProduto, double novaQuantidade) async {
+  Future<void> updateEstoqueProduto(
+    int idProduto,
+    double novaQuantidade,
+  ) async {
     if (_userId == null) return;
 
     try {
@@ -487,6 +530,25 @@ class SupabaseDatabaseService {
     }
   }
 
+  Future<void> updateReceita(Receita receita) async {
+    if (_userId == null || receita.id_receita == null) return;
+
+    try {
+      final data = receita.toJson();
+      data['user_id'] = _userId;
+      data.remove('id_receita');
+
+      await _supabase
+          .from('receitas')
+          .update(data)
+          .eq('id_receita', receita.id_receita!)
+          .eq('user_id', _userId!);
+    } catch (e) {
+      debugPrint('Error updating receita: $e');
+      throw Exception('Erro ao atualizar receita');
+    }
+  }
+
   // REAL-TIME STREAMS
   Stream<List<Pedido>> streamPedidos() {
     if (_userId == null) {
@@ -497,7 +559,9 @@ class SupabaseDatabaseService {
         .from('pedidos')
         .stream(primaryKey: ['id_pedido'])
         .eq('user_id', _userId!)
-        .map((data) => data.map<Pedido>((item) => Pedido.fromJson(item)).toList());
+        .map(
+          (data) => data.map<Pedido>((item) => Pedido.fromJson(item)).toList(),
+        );
   }
 
   Stream<List<Mesa>> streamMesas() {
@@ -521,7 +585,10 @@ class SupabaseDatabaseService {
         .from('estoque')
         .stream(primaryKey: ['id_estoque'])
         .eq('user_id', _userId!)
-        .map((data) => data.map<Estoque>((item) => Estoque.fromJson(item)).toList());
+        .map(
+          (data) =>
+              data.map<Estoque>((item) => Estoque.fromJson(item)).toList(),
+        );
   }
 
   // UTILITY METHODS
