@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -41,12 +39,12 @@ void main() async {
     final databaseService = SupabaseDatabaseService();
     await databaseService.initializeData();
   }();
-  
+
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  
+
   runApp(
     MultiProvider(
       providers: [
@@ -54,7 +52,6 @@ void main() async {
         ChangeNotifierProvider(create: (context) => UserProvider()),
         ChangeNotifierProvider(create: (context) => ServiceProvider()),
         ChangeNotifierProvider(create: (context) => SoundProvider()),
-        ChangeNotifierProvider(create: (context) => AuthProvider()),
       ],
       child: MyApp(init: initFuture),
     ),
@@ -65,7 +62,7 @@ class MyApp extends StatelessWidget {
   final Future<void> init;
   const MyApp({super.key, required this.init});
 
-    @override
+  @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
@@ -116,8 +113,11 @@ class _SplashScreenState extends State<SplashScreen> {
               size: 80,
               color: Theme.of(context).colorScheme.onPrimary,
             )
-            .animate(onPlay: (controller) => controller.repeat(reverse: true))
-            .scale(duration: const Duration(seconds: 1), curve: Curves.easeInOut),
+                .animate(
+                    onPlay: (controller) => controller.repeat(reverse: true))
+                .scale(
+                    duration: const Duration(seconds: 1),
+                    curve: Curves.easeInOut),
             const SizedBox(height: 24),
             Text(
               'Boteco PRO',
@@ -125,18 +125,21 @@ class _SplashScreenState extends State<SplashScreen> {
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).colorScheme.onPrimary,
                   ),
-            )
-            .animate()
-            .fadeIn(duration: const Duration(milliseconds: 800), curve: Curves.easeIn),
+            ).animate().fadeIn(
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.easeIn),
             const SizedBox(height: 8),
             Text(
               'Gestão completa para seu bar',
               style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onPrimary
+                        .withOpacity(0.8),
                   ),
-            )
-            .animate()
-            .fadeIn(delay: const Duration(milliseconds: 400), duration: const Duration(milliseconds: 800)),
+            ).animate().fadeIn(
+                delay: const Duration(milliseconds: 400),
+                duration: const Duration(milliseconds: 800)),
             const SizedBox(height: 48),
             SizedBox(
               width: 60,
@@ -146,7 +149,8 @@ class _SplashScreenState extends State<SplashScreen> {
                 children: [
                   // Animated circle
                   CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.onPrimary),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                        Theme.of(context).colorScheme.onPrimary),
                     strokeWidth: 3,
                   ),
                   // Custom design inside the circle
@@ -154,15 +158,18 @@ class _SplashScreenState extends State<SplashScreen> {
                     width: 30,
                     height: 30,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onPrimary
+                          .withOpacity(0.3),
                       shape: BoxShape.circle,
                     ),
                   ),
                 ],
               ),
             )
-            .animate(onPlay: (controller) => controller.repeat())
-            .rotate(duration: const Duration(seconds: 2)),            
+                .animate(onPlay: (controller) => controller.repeat())
+                .rotate(duration: const Duration(seconds: 2)),
           ],
         ),
       ),
