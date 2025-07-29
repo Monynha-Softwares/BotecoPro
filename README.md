@@ -40,10 +40,24 @@ It helps owners keep tables, orders, stock, recipes and in-house production unde
 ### Funcionalidades Principais
 - **Dashboard:** Visão geral das vendas e mesas
 - **Mesas:** Controle de ocupação em tempo real
-- **Produtos:** Cadastro e controle de estoque  
+- **Produtos:** Cadastro e controle de estoque
 - **Pedidos:** Sistema de comandas
 - **Fornecedores:** Gestão de fornecedores
 - **Receitas:** Cadastro de receitas próprias
+
+## 🧪 Testes
+
+Este repositório utiliza **Flutter Test** para validar os widgets e
+funcionalidades principais do aplicativo. Os testes podem ser executados localmente
+com o comando:
+
+```bash
+flutter test
+```
+
+Uma pipeline do **GitHub Actions** roda automaticamente em cada *push* e *pull request*,
+executando `flutter analyze` e `flutter test` para garantir a qualidade do código.
+Os relatórios de cobertura são disponibilizados como artefato da execução.
 
 ---
 
