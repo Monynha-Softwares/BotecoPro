@@ -1,13 +1,11 @@
-name: Flutter CI
+name: Deploy Web
 
 on:
   push:
-    branches: [ main, master, work ]
-  pull_request:
-    branches: [ main, master, work ]
+    branches: [ main ]
 
 jobs:
-  test:
+  build-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -20,12 +18,10 @@ jobs:
         run: docker compose up -d db
       - name: Init schema
         run: ./scripts/init_postgres.sh
-      - name: Analyze
-        run: flutter analyze
-      - name: Run tests
-        run: flutter test --coverage
-      - name: Upload coverage
-        uses: actions/upload-artifact@v3
+      - name: Build web
+        run: flutter build web --release
+      - name: Deploy to Pages
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          name: coverage
-          path: coverage/
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: build/web
