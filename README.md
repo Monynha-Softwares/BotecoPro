@@ -15,10 +15,10 @@ It helps owners keep tables, orders, stock, recipes and in-house production unde
 - ✅ **Relatórios** - Dashboard com vendas diárias
 - ✅ **Tempo real** - Atualizações automáticas via Supabase
 
-## 🛠️ Tecnologias
+-## 🛠️ Tecnologias
 
 - **Frontend:** Flutter (Dart)
-- **Backend:** Supabase (PostgreSQL + Real-time)
+- **Backend:** PostgreSQL (Docker) em desenvolvimento / Supabase em produção
 - **Autenticação:** Supabase Auth + Google Sign-In
 - **Estado:** Provider Pattern
 - **UI:** Material Design 3
@@ -44,6 +44,15 @@ It helps owners keep tables, orders, stock, recipes and in-house production unde
 - **Pedidos:** Sistema de comandas
 - **Fornecedores:** Gestão de fornecedores
 - **Receitas:** Cadastro de receitas próprias
+
+## 📦 Ambiente de Desenvolvimento
+
+1. Certifique-se de ter o **Docker** instalado.
+2. Inicie o banco local com:
+   ```bash
+   docker compose up -d
+   ```
+3. Execute o aplicativo normalmente com `flutter run`.
 
 ## 🧪 Testes
 

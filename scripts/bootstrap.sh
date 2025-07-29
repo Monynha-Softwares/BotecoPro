@@ -7,12 +7,12 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 apt-get update -qq
-apt-get install -y -qq file unzip git curl dpkg
+apt-get install -y -qq file unzip git curl dpkg docker.io docker-compose
 
 echo "🧠 Iniciando configuração do ambiente Monynha..."
 source ./scripts/check_env.sh
 source ./scripts/setup_git.sh
-source ./scripts/install_supabase.sh
+source ./scripts/setup_postgres.sh
 source ./scripts/install_flutter.sh
 source ./scripts/clone_repos.sh
 

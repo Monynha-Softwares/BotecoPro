@@ -9,44 +9,30 @@ fi
 
 #────────────────── 1. Instala dependências essenciais
 apt-get update -qq
-apt-get install -y -qq file unzip git curl dpkg \
+apt-get install -y -qq file unzip git curl dpkg docker.io docker-compose \
   openjdk-17-jdk clang cmake ninja-build pkg-config libgtk-3-dev \
   chromium-browser android-sdk
 
 #────────────────── 2. Verifica variáveis de ambiente obrigatórias
 : "${SUPABASE_URL:?SUPABASE_URL não definido}"
 : "${SUPABASE_ANON_KEY:?SUPABASE_ANON_KEY não definido}"
-: "${SUPABASE_PROJECT_ID:?SUPABASE_PROJECT_ID não definido}"
 : "${GITHUB_TOKEN:?GITHUB_TOKEN não definido}"
-SUPABASE_CLI_VERSION="${SUPABASE_CLI_VERSION:-2.31.8}"  # padrão ou sobrescrevível
+: "${POSTGRES_USER:?POSTGRES_USER não definido}"
+: "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD não definido}"
+: "${POSTGRES_DB:?POSTGRES_DB não definido}"
 
-echo "🔍 Variáveis ok  | CLI v$SUPABASE_CLI_VERSION"
+echo "🔍 Variáveis ok"
 
 #────────────────── 3. Configura Git global
 git config --global user.name  "Codex Monynha"
 git config --global user.email "codex@monynha.com"
 echo "✅ Git configurado"
 
-#────────────────── 4. Instala Supabase CLI (formato .deb)
-if ! command -v supabase &>/dev/null; then
-  echo "📦 Baixando supabase_${SUPABASE_CLI_VERSION}_linux_amd64.deb…"
-  URL="https://github.com/supabase/cli/releases/download/v${SUPABASE_CLI_VERSION}/supabase_${SUPABASE_CLI_VERSION}_linux_amd64.deb"
-  curl -fsSL "$URL" -o supabase.deb
-
-  if ! dpkg-deb --info supabase.deb &>/dev/null; then
-    echo "❌ Arquivo supabase.deb corrompido (possivelmente HTML)."
-    cat supabase.deb
-    exit 1
-  fi
-
-  dpkg -i supabase.deb || apt-get install -fy
-  rm supabase.deb
-fi
-
-#────────────────── 4.1 Login no Supabase CLI (via token)
-if [[ -n "${SUPABASE_ACCESS_TOKEN:-}" ]]; then
-  supabase login --token "$SUPABASE_ACCESS_TOKEN" >/dev/null
-  echo "✅ Supabase autenticado"
+#────────────────── 4. Sobe Postgres local (Docker)
+if command -v docker compose &>/dev/null; then
+  docker compose up -d db
+else
+  docker-compose up -d db
 fi
 
 #────────────────── 5. Instala Flutter SDK (se necessário)
