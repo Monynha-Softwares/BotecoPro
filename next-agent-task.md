@@ -6,6 +6,6 @@
 ✅ Flutter instalado para futuras execuções do app.
 
 🔜 Pendências:
-- Adaptar serviços para apontar para esta instância e validar integração completa.
-- Executar o aplicativo com um dispositivo compatível (Chrome ou desktop).
-- Criar políticas RLS, views e procedures conforme necessário.
+- [x] Adaptar serviços para apontar para esta instância e validar integração completa.
+- [x] Executar o aplicativo com um dispositivo compatível (Chrome ou desktop).
+- [ ] Criar políticas RLS, views e procedures conforme necessário.

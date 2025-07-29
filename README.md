@@ -52,7 +52,8 @@ It helps owners keep tables, orders, stock, recipes and in-house production unde
    ```bash
    docker compose up -d
    ```
-3. Execute o aplicativo normalmente com `flutter run`.
+3. Aplique o esquema inicial executando `./scripts/init_postgres.sh`.
+4. Execute o aplicativo normalmente com `flutter run`.
 
 ## 🧪 Testes
 
@@ -67,6 +68,8 @@ flutter test
 Uma pipeline do **GitHub Actions** roda automaticamente em cada *push* e *pull request*,
 executando `flutter analyze` e `flutter test` para garantir a qualidade do código.
 Os relatórios de cobertura são disponibilizados como artefato da execução.
+Um workflow separado realiza o *deploy* da versão web no GitHub Pages
+sempre que há alterações na branch `main`.
 
 ---
 
