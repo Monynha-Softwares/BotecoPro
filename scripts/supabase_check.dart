@@ -13,7 +13,7 @@ Future<void> main() async {
 
   try {
     final email = 'codex_${DateTime.now().millisecondsSinceEpoch}@example.com';
-    final password = 'pass1234';
+    const password = 'pass1234';
     final signUp = await client.auth.signUp(email: email, password: password);
     print('SignUp: ${signUp.user != null}');
   } catch (e) {

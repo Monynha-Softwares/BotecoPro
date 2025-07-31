@@ -18,7 +18,6 @@ import 'services/theme_provider.dart';
 import 'services/user_provider.dart';
 import 'services/sound_provider.dart';
 import 'services/supabase_database_service.dart';
-import 'auth_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,7 +59,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-    final home = MainNavigationScreen();
+    const home = MainNavigationScreen();
     return MaterialApp(
         title: 'Boteco PRO',
         theme: lightTheme,

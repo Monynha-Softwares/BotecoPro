@@ -788,7 +788,7 @@ class SupabaseDatabaseService {
 
     final controller = StreamController<List<Pedido>>();
 
-    Future<void> _fetch() async {
+    Future<void> fetch() async {
       final data = await getPedidos();
       if (!controller.isClosed) controller.add(data);
     }
@@ -803,12 +803,12 @@ class SupabaseDatabaseService {
         column: 'user_id',
         value: _userId!,
       ),
-      callback: (_) => _fetch(),
+      callback: (_) => fetch(),
     );
     channel.subscribe();
 
     controller
-      ..onListen = _fetch
+      ..onListen = fetch
       ..onCancel = () async {
         await _supabase.removeChannel(channel);
       };
@@ -850,7 +850,7 @@ class SupabaseDatabaseService {
 
     final controller = StreamController<List<Venda>>();
 
-    Future<void> _fetch() async {
+    Future<void> fetch() async {
       final data = await getVendas();
       if (!controller.isClosed) controller.add(data);
     }
@@ -865,12 +865,12 @@ class SupabaseDatabaseService {
         column: 'user_id',
         value: _userId!,
       ),
-      callback: (_) => _fetch(),
+      callback: (_) => fetch(),
     );
     channel.subscribe();
 
     controller
-      ..onListen = _fetch
+      ..onListen = fetch
       ..onCancel = () async {
         await _supabase.removeChannel(channel);
       };

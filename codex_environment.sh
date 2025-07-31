@@ -9,9 +9,7 @@ fi
 
 #────────────────── 1. Instala dependências essenciais
 apt-get update -qq
-apt-get install -y -qq file unzip git curl dpkg docker.io docker-compose \
-  openjdk-17-jdk clang cmake ninja-build pkg-config libgtk-3-dev \
-  chromium-browser android-sdk
+apt-get install -y -qq file unzip git curl docker.io docker-compose pkg-config libgtk-3-dev chromium-browser android-sdk
 
 #────────────────── 2. Verifica variáveis de ambiente obrigatórias
 : "${SUPABASE_URL:?SUPABASE_URL não definido}"
