@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'supabase_database_service.dart';
-// import 'api_service.dart'; // DEVE USAR EXCLUSIVAMENTE A API DO SUPABASE!
+// import 'api_service.dart'; // Deletado: comunicação agora apenas via Supabase
 import '../models/data_models.dart';
 import '../adapters/model_adapters.dart';
 
@@ -12,7 +12,7 @@ const uuid = Uuid();
 /// Mantém compatibilidade com ApiService para migração gradual.
 class ServiceProvider with ChangeNotifier {
   final SupabaseDatabaseService _supabaseService = SupabaseDatabaseService();
-  final ApiService _apiService = ApiService();
+  // final ApiService _apiService = ApiService(); // removido
 
   final bool _isOnline = true; // Supabase is always "online"
   final bool _isSyncing = false;
@@ -241,31 +241,24 @@ class ServiceProvider with ChangeNotifier {
   }
 
   // PRODUÇÕES CASEIRAS (In-house Productions)
+  // TODO: implementar usando Supabase
   Future<List<ProducaoCaseira>> getProducoes() async {
-    return await _apiService.getInternalProductions();
+    return [];
   }
 
-  Future<void> addProducao(ProducaoCaseira producao) async {
-    final success = await _apiService.createInternalProduction(producao);
-    if (success) {
-      await _syncProducoes();
-    }
-  }
+  Future<void> addProducao(ProducaoCaseira producao) async {}
 
   Future<List<ProducaoIngrediente>> getProducaoIngredientes() async {
-    return await _apiService.getProductionIngredients();
+    return [];
   }
 
   Future<List<ProducaoIngrediente>> getProducaoIngredientesByProducao(
     int idProducao,
   ) async {
-    final allIngredients = await _apiService.getProductionIngredients();
-    return allIngredients.where((i) => i.id_producao == idProducao).toList();
+    return [];
   }
 
-  Future<void> addProducaoIngrediente(ProducaoIngrediente ingrediente) async {
-    await _apiService.addProductionIngredient(ingrediente);
-  }
+  Future<void> addProducaoIngrediente(ProducaoIngrediente ingrediente) async {}
 
   // Sync methods - simplified for compilation
   Future<void> _syncProdutosVenda() async {
