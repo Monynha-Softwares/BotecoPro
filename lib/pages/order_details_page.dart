@@ -53,7 +53,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     final service = Provider.of<ServiceProvider>(context, listen: false);
     final orders = await service.getOrders();
     try {
-      return orders.firstWhere((o) => o.id == _order.id!);
+      return orders.firstWhere((o) => o.id == _order.id);
     } catch (e) {
       return null;
     }
@@ -626,7 +626,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Preço unitário:'),
+                    const Text('Preço unitário:'),
                     Text(
                       formatCurrency(product.price),
                       style: const TextStyle(fontWeight: FontWeight.bold),
@@ -845,11 +845,11 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                   ),
-                  items: [
+                  items: const [
                     DropdownMenuItem(
                       value: PaymentMethod.cash,
                       child: Row(
-                        children: const [
+                        children: [
                           Icon(Icons.money),
                           SizedBox(width: 8),
                           Text('Dinheiro'),
@@ -859,7 +859,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                     DropdownMenuItem(
                       value: PaymentMethod.credit,
                       child: Row(
-                        children: const [
+                        children: [
                           Icon(Icons.credit_card),
                           SizedBox(width: 8),
                           Text('Cartão de Crédito'),
@@ -869,7 +869,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                     DropdownMenuItem(
                       value: PaymentMethod.debit,
                       child: Row(
-                        children: const [
+                        children: [
                           Icon(Icons.credit_card),
                           SizedBox(width: 8),
                           Text('Cartão de Débito'),
@@ -879,7 +879,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                     DropdownMenuItem(
                       value: PaymentMethod.pix,
                       child: Row(
-                        children: const [
+                        children: [
                           Icon(Icons.qr_code),
                           SizedBox(width: 8),
                           Text('PIX'),

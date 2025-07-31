@@ -1,47 +1,54 @@
-# Tarefas de Correção e Migração para Supabase
+Objetivo:
+Corrigir e atualizar o código base do aplicativo Flutter BotecoPro, utilizando exclusivamente a API provida pelo Supabase, conforme a nova estrutura de banco de dados.
 
-Este arquivo lista as principais tarefas para corrigir os problemas encontrados na análise da versão 0 do Boteco PRO e concluir a migração para o backend Supabase.
+Contexto:
+- Todos os scripts SQL da pasta `supabase/` já foram executados com sucesso.
+- A base de dados está atualizada com os domínios `core`, `client`, `order`, `invoice`, `staff` e `inventory`.
+- A comunicação com o Supabase deve ser feita exclusivamente por meio das views, funções e policies definidas no backend.
+- As credenciais de acesso estão disponíveis no arquivo `.env` do projeto.
 
-## 1. Configuração do Supabase
+### 🔒 Antes de modificar qualquer código:
+1. Carregue as variáveis do arquivo `.env` e teste a conectividade com o Supabase como cliente (usando `supabase_flutter`).
+2. Verifique se é possível autenticar, fazer um `select` simples e uma `rpc()` com sucesso.
 
-- [ ] Criar projeto no Supabase, obtendo `SUPABASE_URL` e `SUPABASE_ANON_KEY`.
-- [ ] Modelar tabelas e funções no diretório `BotecoPro-Backend/database/supabase` replicando as entidades: `fornecedores`, `categorias`, `produtos`, `produtos_venda`, `mesas`, `pedidos`, `pedido_itens`, `vendas` etc.
-- [ ] Habilitar o Realtime e configurar políticas de Row Level Security (RLS) para cada tabela.
-- [ ] Versionar scripts de seed e roles dentro de `database/supabase`.
+### 🔧 Etapas para corrigir o código base:
 
-## 2. Ajustes na Aplicação Flutter
+**Etapa 1 – Inicialização do Supabase:**
+- Substitua credenciais hardcoded pela leitura via `.env`.
+- Garanta que `Supabase.initialize` seja feito corretamente no `main.dart`.
 
-- [x] Adicionar dependências `supabase_flutter`, `google_sign_in`, `flutter_local_notifications` e `firebase_messaging` em `pubspec.yaml`.
-- [x] Inicializar o Supabase em `main.dart` utilizando as variáveis de ambiente.
-- [x] Implementar `supabase_auth_service.dart` com métodos de cadastro, login (email e Google), recuperação de senha e logout.
-- [x] Atualizar `AuthProvider` para utilizar `supabase.auth.onAuthStateChange`.
-- [x] Substituir `DatabaseService` por `SupabaseDatabaseService` em todo o app, removendo persistência via `SharedPreferences`.
-- [ ] Implementar streams de atualização em tempo real (`supabase.from(...).stream`) para pedidos e estoque.
-- [x] Ajustar telas de login e registro para tratar erros do Supabase.
-- [x] Implementar streams de atualização em tempo real (`supabase.from(...).stream`) para pedidos e estoque.
-- [ ] Ajustar telas de login e registro para tratar erros do Supabase.
+**Etapa 2 – Refatorar autenticação:**
+- Certifique-se de que login, registro e persistência de sessão usam `supabase.auth`.
+- Remova serviços antigos (`DatabaseService`, `ApiService`, `SharedPreferences`, etc.) que não são mais usados.
 
-## 3. Notificações e Edge Functions
+**Etapa 3 – Refatorar a camada de dados:**
+- Para cada domínio (ex: mesas, pedidos, vendas, produtos), crie serviços ou providers que consumam exclusivamente:
+  - `supabase.from('tabela').select()`
+  - `supabase.rpc('minha_funcao', params)`
+- Utilize as views e functions criadas para abstrair a lógica do app.
 
-- [ ] Armazenar token de push (`expo_push_token` ou `fcm_token`) em tabela de perfis/usuários.
-- [ ] Criar função de borda no Supabase que envie push quando um novo pedido for inserido.
-- [ ] Configurar webhook no Supabase chamando essa função.
+**Etapa 4 – Atualizações em tempo real:**
+- Implemente escuta via `supabase.channel().on(PostgresChange)` para pedidos e vendas.
+- Use `StreamBuilder` para refletir atualizações automáticas no app.
 
-## 4. Scripts do Codex
+**Etapa 5 – Sincronização e controle offline (opcional se brick for ativado depois):**
+- Planeje persistência local (com Hive, Isar ou Brick) se necessário.
+- Assegure que dados possam ser sincronizados via `stream()` ou manualmente.
 
-- [ ] Revisar `scripts/bootstrap.sh` e `codex_environment.sh` para garantir que não clonam repositórios quando já existem.
-- [ ] Validar se todas as variáveis de ambiente são verificadas corretamente em `check_env.sh`.
-- [ ] Criar um teste simples (shell) que execute os scripts em modo dry‑run para confirmar que a instalação do Supabase CLI e do Flutter ocorre sem erros.
+**Etapa 6 – Remoção de código legado:**
+- Elimine qualquer chamada HTTP direta, classes mock, ou serviços desatualizados.
+- Mantenha o código limpo, modular e testável.
 
-## 5. Testes Gerais
+**Etapa 7 – Testes manuais e UI:**
+- Teste os fluxos principais (login, listar mesas, abrir pedidos, pagar, etc.).
+- Verifique se as alterações em tempo real estão funcionando.
+- Adicione mensagens de erro e indicadores de carregamento onde necessário.
 
-- [ ] Testar cadastro, login e recuperação de sessão em Android, iOS e web.
-- [ ] Testar operações CRUD de cada módulo (fornecedores, produtos, mesas, pedidos etc.).
-- [ ] Validar fluxo em tempo real abrindo o app em dois dispositivos simultaneamente.
-- [ ] Verificar se as notificações push são disparadas quando um pedido é criado.
+---
 
-## 6. Limpeza
+⚠️ Atenção: Nenhum dado deve ser salvo localmente fora dos providers, a menos que seja para cache offline com controle de sincronização.
 
-- [x] Armazenar `SUPABASE_URL` e `SUPABASE_ANON_KEY` em arquivos `.env`, mantendo o `.env.example` atualizado.
-- [ ] Remover código de protótipo não mais utilizado (classes de mock e gravação em `SharedPreferences`).
+📦 Pacotes recomendados: `supabase_flutter`, `flutter_dotenv`, `riverpod`, `freezed`, `json_serializable`.
+
+🎯 Resultado esperado: um app funcional conectado exclusivamente ao Supabase, refletindo a nova estrutura de dados, com código limpo, modular e alinhado ao backend.
 

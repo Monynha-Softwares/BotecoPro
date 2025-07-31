@@ -15,7 +15,7 @@ It helps owners keep tables, orders, stock, recipes and in-house production unde
 - ✅ **Relatórios** - Dashboard com vendas diárias
 - ✅ **Tempo real** - Atualizações automáticas via Supabase
 
--## 🛠️ Tecnologias
+## 🛠️ Tecnologias
 
 - **Frontend:** Flutter (Dart)
 - **Backend:** PostgreSQL (Docker) em desenvolvimento / Supabase em produção
@@ -54,6 +54,10 @@ It helps owners keep tables, orders, stock, recipes and in-house production unde
    ```
 3. Aplique o esquema inicial executando `./scripts/init_postgres.sh`.
 4. Execute o aplicativo normalmente com `flutter run`.
+   Para rodar a versão web use `flutter run -d chrome`. Caso o navegador
+   não esteja disponível (como em ambientes de CI ou containers
+   minimalistas), utilize `flutter run -d web-server` para iniciar um
+   servidor local.
 
 ## 🧪 Testes
 

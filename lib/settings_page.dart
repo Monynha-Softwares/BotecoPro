@@ -118,10 +118,10 @@ class _SettingsPageState extends State<SettingsPage> {
             title: 'Sobre',
             icon: Icons.info_outline,
             children: [
-              ListTile(
-                title: const Text('Versão do aplicativo'),
-                subtitle: const Text('1.0.0'),
-                trailing: const Icon(Icons.check_circle, color: Colors.green),
+              const ListTile(
+                title: Text('Versão do aplicativo'),
+                subtitle: Text('1.0.0'),
+                trailing: Icon(Icons.check_circle, color: Colors.green),
               ),
               ListTile(
                 title: const Text('Sobre o Boteco PRO'),
@@ -211,7 +211,7 @@ class _SettingsPageState extends State<SettingsPage> {
           CircleAvatar(
             backgroundColor: botecoWine.withOpacity(0.2),
             radius: 40,
-            child: Icon(
+            child: const Icon(
               Icons.person,
               size: 40,
               color: botecoWine,
@@ -454,7 +454,7 @@ class _SettingsPageState extends State<SettingsPage> {
             CircleAvatar(
               backgroundColor: botecoWine.withOpacity(0.2),
               radius: 50,
-              child: Icon(
+              child: const Icon(
                 Icons.sports_bar,
                 size: 60,
                 color: botecoWine,
@@ -564,11 +564,11 @@ class _SettingsPageState extends State<SettingsPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Row(
+        title: const Row(
           children: [
             Icon(Icons.logout, color: botecoWine),
-            const SizedBox(width: 8),
-            const Text('Sair do aplicativo'),
+            SizedBox(width: 8),
+            Text('Sair do aplicativo'),
           ],
         ),
         content: const Text(

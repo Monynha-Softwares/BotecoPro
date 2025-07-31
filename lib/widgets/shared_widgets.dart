@@ -230,7 +230,7 @@ class BotecoLoader extends StatelessWidget {
               SizedBox(
                 width: size * 0.75,
                 height: size * 0.75,
-                child: CircularProgressIndicator(
+                child: const CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(botecoWine),
                   strokeWidth: 5,
                 ),
@@ -252,7 +252,7 @@ class BotecoLoader extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             message!,
-            style: TextStyle(
+            style: const TextStyle(
               color: botecoWine,
               fontWeight: FontWeight.bold,
             ),
@@ -416,11 +416,11 @@ class CategoryFilter extends StatelessWidget {
       child: Row(
         children: [
           FilterChip(
-            label: Row(
+            label: const Row(
               children: [
-                const Icon(Icons.filter_alt_off, size: 16),
-                const SizedBox(width: 4),
-                const Text('Todos'),
+                Icon(Icons.filter_alt_off, size: 16),
+                SizedBox(width: 4),
+                Text('Todos'),
               ],
             ),
             selected: selectedCategory == null,
@@ -438,11 +438,11 @@ class CategoryFilter extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           FilterChip(
-            label: Row(
+            label: const Row(
               children: [
-                const Icon(Icons.local_bar, size: 16),
-                const SizedBox(width: 4),
-                const Text('Bebidas'),
+                Icon(Icons.local_bar, size: 16),
+                SizedBox(width: 4),
+                Text('Bebidas'),
               ],
             ),
             selected: selectedCategory == ProductCategory.drink,
@@ -461,11 +461,11 @@ class CategoryFilter extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           FilterChip(
-            label: Row(
+            label: const Row(
               children: [
-                const Icon(Icons.restaurant, size: 16),
-                const SizedBox(width: 4),
-                const Text('Comidas'),
+                Icon(Icons.restaurant, size: 16),
+                SizedBox(width: 4),
+                Text('Comidas'),
               ],
             ),
             selected: selectedCategory == ProductCategory.food,
@@ -484,11 +484,11 @@ class CategoryFilter extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           FilterChip(
-            label: Row(
+            label: const Row(
               children: [
-                const Icon(Icons.category, size: 16),
-                const SizedBox(width: 4),
-                const Text('Outros'),
+                Icon(Icons.category, size: 16),
+                SizedBox(width: 4),
+                Text('Outros'),
               ],
             ),
             selected: selectedCategory == ProductCategory.other,

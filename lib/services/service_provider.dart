@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'supabase_database_service.dart';
-import 'api_service.dart';
 import '../models/data_models.dart';
 import '../adapters/model_adapters.dart';
 
@@ -9,13 +8,11 @@ const uuid = Uuid();
 
 /// ServiceProvider é responsável por gerenciar qual serviço de dados será usado.
 /// Agora usa o SupabaseDatabaseService para persistência e real-time.
-/// Mantém compatibilidade com ApiService para migração gradual.
 class ServiceProvider with ChangeNotifier {
   final SupabaseDatabaseService _supabaseService = SupabaseDatabaseService();
-  final ApiService _apiService = ApiService();
 
-  bool _isOnline = true; // Supabase is always "online"
-  bool _isSyncing = false;
+  final bool _isOnline = true; // Supabase is always "online"
+  final bool _isSyncing = false;
   DateTime? _lastSyncTime;
 
   bool get isOnline => _isOnline;
@@ -50,8 +47,8 @@ class ServiceProvider with ChangeNotifier {
     await _supabaseService.updateFornecedor(fornecedor);
   }
 
-  Future<void> deleteFornecedor(int id_fornecedor) async {
-    await _supabaseService.deleteFornecedor(id_fornecedor);
+  Future<void> deleteFornecedor(int idFornecedor) async {
+    await _supabaseService.deleteFornecedor(idFornecedor);
   }
 
   // CATEGORIAS (Categories)
@@ -77,10 +74,10 @@ class ServiceProvider with ChangeNotifier {
   }
 
   Future<void> updateEstoqueProduto(
-    int id_produto,
+    int idProduto,
     double novaQuantidade,
   ) async {
-    await _supabaseService.updateEstoqueProduto(id_produto, novaQuantidade);
+    await _supabaseService.updateEstoqueProduto(idProduto, novaQuantidade);
   }
 
   // ESTOQUE (Stock)
@@ -103,6 +100,10 @@ class ServiceProvider with ChangeNotifier {
     return await _supabaseService.getVendas();
   }
 
+  Stream<List<Venda>> streamVendas() {
+    return _supabaseService.streamVendas();
+  }
+
   Future<List<Sale>> getSales() async {
     final vendas = await getVendas();
     return vendas.map((venda) {
@@ -120,26 +121,30 @@ class ServiceProvider with ChangeNotifier {
     return await _supabaseService.getVendasAtivas();
   }
 
-  Future<Venda?> getVendaAtivaMesa(int id_mesa) async {
-    return await _supabaseService.getVendaAtivaMesa(id_mesa);
+  Future<Venda?> getVendaAtivaMesa(int idMesa) async {
+    return await _supabaseService.getVendaAtivaMesa(idMesa);
   }
 
   Future<void> addVenda(Venda venda) async {
     await _supabaseService.addVenda(venda);
   }
 
-  Future<void> closeVenda(int id_venda) async {
-    await _supabaseService.closeVenda(id_venda);
+  Future<void> closeVenda(int idVenda) async {
+    await _supabaseService.closeVenda(idVenda);
   }
 
-  Future<void> cancelVenda(int id_venda) async {
+  Future<void> cancelVenda(int idVenda) async {
     // For now, use close - implement cancel later if needed
-    await _supabaseService.closeVenda(id_venda);
+    await _supabaseService.closeVenda(idVenda);
   }
 
   // PEDIDOS (Orders)
   Future<List<Pedido>> getPedidos() async {
     return await _supabaseService.getPedidos();
+  }
+
+  Stream<List<Pedido>> streamPedidos() {
+    return _supabaseService.streamPedidos();
   }
 
   Future<List<Order>> getOrders() async {
@@ -156,20 +161,33 @@ class ServiceProvider with ChangeNotifier {
     return orders;
   }
 
+  Stream<List<Order>> streamOrders() {
+    return streamPedidos().asyncMap((pedidos) async {
+      List<Order> orders = [];
+      for (var pedido in pedidos) {
+        if (pedido.id_pedido != null) {
+          final items = await getPedidoItensByPedido(pedido.id_pedido!);
+          orders.add(OrderAdapter.fromPedido(pedido, items));
+        }
+      }
+      return orders;
+    });
+  }
+
   Future<void> addPedido(Pedido pedido) async {
     await _supabaseService.addPedido(pedido);
   }
 
-  Future<void> updatePedidoStatus(int id_pedido, String status) async {
-    await _supabaseService.updatePedidoStatus(id_pedido, status);
+  Future<void> updatePedidoStatus(int idPedido, String status) async {
+    await _supabaseService.updatePedidoStatus(idPedido, status);
   }
 
   Future<List<PedidoItem>> getPedidoItens() async {
     return await _supabaseService.getPedidoItens();
   }
 
-  Future<List<PedidoItem>> getPedidoItensByPedido(int id_pedido) async {
-    return await _supabaseService.getPedidoItensByPedido(id_pedido);
+  Future<List<PedidoItem>> getPedidoItensByPedido(int idPedido) async {
+    return await _supabaseService.getPedidoItensByPedido(idPedido);
   }
 
   Future<void> addPedidoItem(PedidoItem item) async {
@@ -189,8 +207,8 @@ class ServiceProvider with ChangeNotifier {
     return await _supabaseService.getReceitaIngredientes();
   }
 
-  Future<List<ReceitaIngrediente>> getReceitaIngredientesByReceita(int id_receita) async {
-    return await _supabaseService.getReceitaIngredientesByReceita(id_receita);
+  Future<List<ReceitaIngrediente>> getReceitaIngredientesByReceita(int idReceita) async {
+    return await _supabaseService.getReceitaIngredientesByReceita(idReceita);
   }
 
   Future<void> addReceitaIngrediente(ReceitaIngrediente ingrediente) async {
@@ -241,30 +259,28 @@ class ServiceProvider with ChangeNotifier {
   }
 
   // PRODUÇÕES CASEIRAS (In-house Productions)
+  // TODO: implementar usando Supabase
   Future<List<ProducaoCaseira>> getProducoes() async {
-    return await _apiService.getInternalProductions();
+    return await _supabaseService.getProducoes();
   }
 
   Future<void> addProducao(ProducaoCaseira producao) async {
-    final success = await _apiService.createInternalProduction(producao);
-    if (success) {
-      await _syncProducoes();
-    }
+    await _supabaseService.addProducao(producao);
+    await _syncProducoes();
   }
 
   Future<List<ProducaoIngrediente>> getProducaoIngredientes() async {
-    return await _apiService.getProductionIngredients();
+    return await _supabaseService.getProducaoIngredientes();
   }
 
   Future<List<ProducaoIngrediente>> getProducaoIngredientesByProducao(
-    int id_producao,
+    int idProducao,
   ) async {
-    final allIngredients = await _apiService.getProductionIngredients();
-    return allIngredients.where((i) => i.id_producao == id_producao).toList();
+    return await _supabaseService.getProducaoIngredientesByProducao(idProducao);
   }
 
   Future<void> addProducaoIngrediente(ProducaoIngrediente ingrediente) async {
-    await _apiService.addProductionIngredient(ingrediente);
+    await _supabaseService.addProducaoIngrediente(ingrediente);
   }
 
   // Sync methods - simplified for compilation
@@ -287,6 +303,24 @@ class ServiceProvider with ChangeNotifier {
   // ESTATÍSTICAS (Statistics)
   Future<double> getVendasDiarias() async {
     return await _supabaseService.getVendasDiarias();
+  }
+
+  Stream<double> streamVendasDiarias() {
+    return streamVendas().map((vendas) {
+      final today = DateTime.now();
+      final startOfDay = DateTime(today.year, today.month, today.day);
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+
+      final vendasHoje = vendas.where((v) {
+        return v.data_venda.isAfter(startOfDay) &&
+            v.data_venda.isBefore(endOfDay) &&
+            !v.status_aberta &&
+            !v.cancelada;
+      }).length;
+
+      // Reuse mock calculation from getVendasDiarias
+      return vendasHoje * 50.0;
+    });
   }
 
   Future<List<Produto>> getProdutosEstoqueBaixo(int threshold) async {

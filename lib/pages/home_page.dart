@@ -21,8 +21,8 @@ State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-int _activeTablesCount = 0;
-double _todaySales = 0;
+  int _activeTablesCount = 0;
+  late Stream<double> _salesStream;
 int _lowStockProductsCount = 0;
 List<TableModel> _tables = [];
 List<Order> _activeOrders = [];
@@ -30,8 +30,10 @@ bool _isLoading = true;
 
 @override
 void initState() {
-super.initState();
-_loadData();
+  super.initState();
+  final service = Provider.of<ServiceProvider>(context, listen: false);
+  _salesStream = service.streamVendasDiarias();
+  _loadData();
 }
 
 Future<void> _loadData() async {
@@ -44,15 +46,13 @@ await service.initializeData();
 
 final tables = await service.getTables();
 final activeOrders = await service.getActiveOrders();
-final todaySales = await service.getTodaySales();
-final lowStockProducts = await service.getLowStockProducts(10);
+  final lowStockProducts = await service.getLowStockProducts(10);
 
 if (mounted) {
 setState(() {
 _tables = tables;
 _activeOrders = activeOrders;
-_activeTablesCount = tables.where((table) => table != null && table.status == TableStatus.occupied).length;
-_todaySales = todaySales;
+_activeTablesCount = tables.where((table) => table.status == TableStatus.occupied).length;
 _lowStockProductsCount = lowStockProducts.length;
 _isLoading = false;
 });
@@ -130,15 +130,15 @@ color: Colors.blue.withOpacity(0.1),
 borderRadius: BorderRadius.circular(12),
 border: Border.all(color: Colors.blue, width: 1),
 ),
-child: Row(
+child: const Row(
 children: [
-const SizedBox(
+SizedBox(
 width: 20,
 height: 20,
 child: CircularProgressIndicator(strokeWidth: 2),
 ),
-const SizedBox(width: 16),
-const Text('Sincronizando dados com o servidor...'),
+SizedBox(width: 16),
+Text('Sincronizando dados com o servidor...'),
 ],
 ),
 ),
@@ -229,14 +229,20 @@ fontWeight: FontWeight.bold,
 ),
 ],
 ),
-const SizedBox(height: 8),
-Text(
-formatCurrency(_todaySales),
-style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-color: Theme.of(context).colorScheme.onPrimary,
-fontWeight: FontWeight.bold,
-),
-),
+          const SizedBox(height: 8),
+          StreamBuilder<double>(
+            stream: _salesStream,
+            builder: (context, snapshot) {
+              final total = snapshot.data ?? 0.0;
+              return Text(
+                formatCurrency(total),
+                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+              );
+            },
+          ),
 ],
 ),
 ),

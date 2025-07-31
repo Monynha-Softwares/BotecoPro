@@ -9,19 +9,18 @@ const Color botecoBrown = Color(0xFF4F3222);
 
 ThemeData get lightTheme => ThemeData(
       useMaterial3: true,
-      colorScheme: ColorScheme.light(
+      colorScheme: const ColorScheme.light(
         primary: botecoWine,
         secondary: botecoMustard,
         tertiary: botecoBrown,
-        surface: const Color(0xFFF5F5F5),
-        error: const Color(0xFFD32F2F),
+        surface: Color(0xFFF5F5F5),
+        error: Color(0xFFD32F2F),
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onTertiary: Colors.white,
-        onSurface: const Color(0xFF1E1E1E),
+        onSurface: Color(0xFF1E1E1E),
         onError: Colors.white,
-        outline: const Color(0xFFBDBDBD),
-        background: botecoBeige.withOpacity(0.15),
+        outline: Color(0xFFBDBDBD),
       ),
       brightness: Brightness.light,
       scaffoldBackgroundColor: botecoBeige.withOpacity(0.15),
@@ -149,7 +148,6 @@ ThemeData get darkTheme => ThemeData(
         onSurface: Colors.white,
         onError: Colors.black,
         outline: const Color(0xFF6E6E6E),
-        background: const Color(0xFF1E1E1E),
       ),
       brightness: Brightness.dark,
       scaffoldBackgroundColor: const Color(0xFF1E1E1E),

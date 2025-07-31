@@ -67,15 +67,6 @@ echo 'export CHROME_EXECUTABLE=/usr/bin/chromium-browser' >> ~/.bashrc
 flutter doctor -v || true
 echo "✅ Flutter instalado"
 
-#────────────────── 6. Clona repositórios do projeto
-echo "🔄 Clonando repositórios BotecoPro…"
-if [[ ! -d BotecoPro-Backend ]]; then
-  git clone "https://${GITHUB_TOKEN}@github.com/marcelo-m7/BotecoPro-Backend.git" BotecoPro-Backend
-fi
-if [[ ! -d BotecoPro-Apps ]]; then
-  git clone "https://${GITHUB_TOKEN}@github.com/marcelo-m7/BotecoPro-Apps.git" BotecoPro-Apps
-fi
-echo "✅ Repositórios clonados"
 
 #────────────────── ✅ Fim
 echo "🚀 Ambiente Monynha pronto para desenvolvimento!"

@@ -379,14 +379,12 @@ class SupabaseDatabaseService {
       await _supabase.from('vendas').insert(data);
 
       // Update mesa status
-      if (venda.id_mesa != null) {
-        await _supabase
-            .from('mesas')
-            .update({'status_ocupada': true})
-            .eq('id_mesa', venda.id_mesa!)
-            .eq('user_id', _userId!);
-      }
-    } catch (e) {
+      await _supabase
+          .from('mesas')
+          .update({'status_ocupada': true})
+          .eq('id_mesa', venda.id_mesa)
+          .eq('user_id', _userId!);
+        } catch (e) {
       debugPrint('Error adding venda: $e');
       throw Exception('Erro ao adicionar venda');
     }
@@ -689,19 +687,133 @@ class SupabaseDatabaseService {
     }
   }
 
+  // PRODUCAO CASEIRA
+  Future<List<ProducaoCaseira>> getProducoes() async {
+    if (_userId == null) return [];
+
+    try {
+      final response = await _supabase
+          .from('vw_producao_caseira_detalhes')
+          .select()
+          .eq('user_id', _userId!);
+
+      return response
+          .map<ProducaoCaseira>((data) => ProducaoCaseira.fromJson(data))
+          .toList();
+    } catch (e) {
+      debugPrint('Error getting producoes: $e');
+      return [];
+    }
+  }
+
+  Future<void> addProducao(ProducaoCaseira producao) async {
+    if (_userId == null) return;
+
+    try {
+      await _supabase.rpc('sp_cadastrar_producao_caseira', params: {
+        'p_nome': producao.nome,
+        'p_quantidade': producao.quantidade_gerada,
+        'p_unidade': producao.unidade_gerada,
+        'p_tempo_preparo': producao.tempo_preparo,
+        'p_data_inicio':
+            producao.data_inicio_producao?.toIso8601String(),
+        'p_data_fim': producao.data_fim_disponivel?.toIso8601String(),
+      });
+    } catch (e) {
+      debugPrint('Error adding producao: $e');
+      throw Exception('Erro ao cadastrar produção');
+    }
+  }
+
+  Future<List<ProducaoIngrediente>> getProducaoIngredientes() async {
+    if (_userId == null) return [];
+
+    try {
+      final response = await _supabase
+          .from('vw_producao_ingredientes')
+          .select()
+          .eq('user_id', _userId!);
+
+      return response
+          .map<ProducaoIngrediente>(
+              (data) => ProducaoIngrediente.fromJson(data))
+          .toList();
+    } catch (e) {
+      debugPrint('Error getting producao ingredientes: $e');
+      return [];
+    }
+  }
+
+  Future<List<ProducaoIngrediente>> getProducaoIngredientesByProducao(
+      int idProducao) async {
+    if (_userId == null) return [];
+
+    try {
+      final response = await _supabase
+          .from('vw_producao_ingredientes')
+          .select()
+          .eq('id_producao', idProducao)
+          .eq('user_id', _userId!);
+
+      return response
+          .map<ProducaoIngrediente>(
+              (data) => ProducaoIngrediente.fromJson(data))
+          .toList();
+    } catch (e) {
+      debugPrint('Error getting producao ingredientes by producao: $e');
+      return [];
+    }
+  }
+
+  Future<void> addProducaoIngrediente(ProducaoIngrediente ingrediente) async {
+    if (_userId == null) return;
+
+    try {
+      await _supabase.rpc('sp_adicionar_ingrediente_producao', params: {
+        'p_id_producao': ingrediente.id_producao,
+        'p_id_produto': ingrediente.id_produto,
+        'p_quantidade': ingrediente.quantidade_utilizada,
+      });
+    } catch (e) {
+      debugPrint('Error adding producao ingrediente: $e');
+      throw Exception('Erro ao adicionar ingrediente');
+    }
+  }
+
   // REAL-TIME STREAMS
   Stream<List<Pedido>> streamPedidos() {
     if (_userId == null) {
       return Stream.value([]);
     }
 
-    return _supabase
-        .from('pedidos')
-        .stream(primaryKey: ['id_pedido'])
-        .eq('user_id', _userId!)
-        .map(
-          (data) => data.map<Pedido>((item) => Pedido.fromJson(item)).toList(),
-        );
+    final controller = StreamController<List<Pedido>>();
+
+    Future<void> _fetch() async {
+      final data = await getPedidos();
+      if (!controller.isClosed) controller.add(data);
+    }
+
+    final channel = _supabase.channel('public:pedidos');
+    channel.onPostgresChanges(
+      event: supabase.PostgresChangeEvent.all,
+      schema: 'public',
+      table: 'pedidos',
+      filter: supabase.PostgresChangeFilter(
+        type: supabase.PostgresChangeFilterType.eq,
+        column: 'user_id',
+        value: _userId!,
+      ),
+      callback: (_) => _fetch(),
+    );
+    channel.subscribe();
+
+    controller
+      ..onListen = _fetch
+      ..onCancel = () async {
+        await _supabase.removeChannel(channel);
+      };
+
+    return controller.stream;
   }
 
   Stream<List<Mesa>> streamMesas() {
@@ -729,6 +841,41 @@ class SupabaseDatabaseService {
           (data) =>
               data.map<Estoque>((item) => Estoque.fromJson(item)).toList(),
         );
+  }
+
+  Stream<List<Venda>> streamVendas() {
+    if (_userId == null) {
+      return Stream.value([]);
+    }
+
+    final controller = StreamController<List<Venda>>();
+
+    Future<void> _fetch() async {
+      final data = await getVendas();
+      if (!controller.isClosed) controller.add(data);
+    }
+
+    final channel = _supabase.channel('public:vendas');
+    channel.onPostgresChanges(
+      event: supabase.PostgresChangeEvent.all,
+      schema: 'public',
+      table: 'vendas',
+      filter: supabase.PostgresChangeFilter(
+        type: supabase.PostgresChangeFilterType.eq,
+        column: 'user_id',
+        value: _userId!,
+      ),
+      callback: (_) => _fetch(),
+    );
+    channel.subscribe();
+
+    controller
+      ..onListen = _fetch
+      ..onCancel = () async {
+        await _supabase.removeChannel(channel);
+      };
+
+    return controller.stream;
   }
 
   // UTILITY METHODS
