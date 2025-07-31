@@ -113,7 +113,7 @@ crossAxisAlignment: CrossAxisAlignment.start,
 children: [
 Row(
 children: [
-CircleAvatar(
+const CircleAvatar(
 backgroundColor: Colors.white,
 radius: 30,
 child: Icon(
@@ -174,7 +174,7 @@ leading: Icon(
 Icons.sync,
 color: serviceProvider.isOnline ? Colors.green : Colors.grey,
 ),
-title: Text('Sincronização'),
+title: const Text('Sincronização'),
 subtitle: Text(
 serviceProvider.isOnline
 ? 'Modo Online'
@@ -219,7 +219,7 @@ leading: Icon(
 themeProvider.isDarkMode ? Icons.dark_mode : Icons.light_mode,
 color: Theme.of(context).colorScheme.primary,
 ),
-title: Text('Modo Escuro'),
+title: const Text('Modo Escuro'),
 trailing: Switch(
 value: themeProvider.isDarkMode,
 onChanged: (value) {
@@ -259,7 +259,7 @@ children: [
 CircleAvatar(
 backgroundColor: botecoWine.withOpacity(0.2),
 radius: 50,
-child: Icon(
+child: const Icon(
 Icons.person,
 size: 60,
 color: botecoWine,
@@ -331,7 +331,7 @@ backgroundColor: botecoWine.withOpacity(0.2),
 radius: 50,
 child: Stack(
 children: [
-Positioned.fill(
+const Positioned.fill(
 child: Icon(
 Icons.person,
 size: 60,
@@ -596,7 +596,7 @@ children: [
 CircleAvatar(
 backgroundColor: botecoWine.withOpacity(0.2),
 radius: 50,
-child: Icon(
+child: const Icon(
 Icons.sports_bar,
 size: 60,
 color: botecoWine,

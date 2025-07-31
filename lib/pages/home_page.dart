@@ -51,7 +51,7 @@ if (mounted) {
 setState(() {
 _tables = tables;
 _activeOrders = activeOrders;
-_activeTablesCount = tables.where((table) => table != null && table.status == TableStatus.occupied).length;
+_activeTablesCount = tables.where((table) => table.status == TableStatus.occupied).length;
 _todaySales = todaySales;
 _lowStockProductsCount = lowStockProducts.length;
 _isLoading = false;
@@ -130,15 +130,15 @@ color: Colors.blue.withOpacity(0.1),
 borderRadius: BorderRadius.circular(12),
 border: Border.all(color: Colors.blue, width: 1),
 ),
-child: Row(
+child: const Row(
 children: [
-const SizedBox(
+SizedBox(
 width: 20,
 height: 20,
 child: CircularProgressIndicator(strokeWidth: 2),
 ),
-const SizedBox(width: 16),
-const Text('Sincronizando dados com o servidor...'),
+SizedBox(width: 16),
+Text('Sincronizando dados com o servidor...'),
 ],
 ),
 ),

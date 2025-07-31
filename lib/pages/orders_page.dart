@@ -247,7 +247,7 @@ class _OrdersPageState extends State<OrdersPage> with SingleTickerProviderStateM
                         ),
                         Text(
                           formatCurrency(totalValue),
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             color: botecoWine,
                             fontSize: 16,
@@ -270,8 +270,8 @@ class _OrdersPageState extends State<OrdersPage> with SingleTickerProviderStateM
                           builder: (context) => OrderDetailsPage(order: order),
                         ),
                       ).then((_) => _loadOrders()),
-                      icon: Icon(Icons.visibility, size: 18, color: botecoWine),
-                      label: Text('Ver Detalhes', style: TextStyle(color: botecoWine)),
+                      icon: const Icon(Icons.visibility, size: 18, color: botecoWine),
+                      label: const Text('Ver Detalhes', style: TextStyle(color: botecoWine)),
                     ),
                   ],
                 ),

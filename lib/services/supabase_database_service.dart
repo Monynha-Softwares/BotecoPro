@@ -379,14 +379,12 @@ class SupabaseDatabaseService {
       await _supabase.from('vendas').insert(data);
 
       // Update mesa status
-      if (venda.id_mesa != null) {
-        await _supabase
-            .from('mesas')
-            .update({'status_ocupada': true})
-            .eq('id_mesa', venda.id_mesa!)
-            .eq('user_id', _userId!);
-      }
-    } catch (e) {
+      await _supabase
+          .from('mesas')
+          .update({'status_ocupada': true})
+          .eq('id_mesa', venda.id_mesa)
+          .eq('user_id', _userId!);
+        } catch (e) {
       debugPrint('Error adding venda: $e');
       throw Exception('Erro ao adicionar venda');
     }

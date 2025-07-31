@@ -257,11 +257,11 @@ class _RecipesPageState extends State<RecipesPage> {
                     decoration: const InputDecoration(
                       labelText: 'Tipo*',
                     ),
-                    items: [
+                    items: const [
                       DropdownMenuItem(
                         value: RecipeType.food,
                         child: Row(
-                          children: const [
+                          children: [
                             Icon(Icons.restaurant, size: 20),
                             SizedBox(width: 8),
                             Text('Comida'),
@@ -271,7 +271,7 @@ class _RecipesPageState extends State<RecipesPage> {
                       DropdownMenuItem(
                         value: RecipeType.drink,
                         child: Row(
-                          children: const [
+                          children: [
                             Icon(Icons.local_bar, size: 20),
                             SizedBox(width: 8),
                             Text('Bebida'),
@@ -406,11 +406,11 @@ class _RecipesPageState extends State<RecipesPage> {
                     decoration: const InputDecoration(
                       labelText: 'Tipo*',
                     ),
-                    items: [
+                    items: const [
                       DropdownMenuItem(
                         value: RecipeType.food,
                         child: Row(
-                          children: const [
+                          children: [
                             Icon(Icons.restaurant, size: 20),
                             SizedBox(width: 8),
                             Text('Comida'),
@@ -420,7 +420,7 @@ class _RecipesPageState extends State<RecipesPage> {
                       DropdownMenuItem(
                         value: RecipeType.drink,
                         child: Row(
-                          children: const [
+                          children: [
                             Icon(Icons.local_bar, size: 20),
                             SizedBox(width: 8),
                             Text('Bebida'),

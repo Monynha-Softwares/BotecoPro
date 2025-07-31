@@ -84,7 +84,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ).animate().fadeIn(duration: const Duration(milliseconds: 600)),
                   
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   Center(
                     child: Text(
                       "Gerenciamento de Bar e Restaurante",
@@ -107,8 +107,8 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.info_outline, color: botecoMustard),
-                        SizedBox(width: 12),
+                        const Icon(Icons.info_outline, color: botecoMustard),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,7 +120,7 @@ class _LoginPageState extends State<LoginPage> {
                                   color: botecoMustard,
                                 ),
                               ),
-                              SizedBox(height: 4),
+                              const SizedBox(height: 4),
                               Text(
                                 "Já preenchemos o formulário com uma conta de teste. Basta clicar em 'Entrar'.",
                                 style: textTheme.bodyMedium?.copyWith(
@@ -134,7 +134,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ).animate().fadeIn(delay: const Duration(milliseconds: 400)),
                   
-                  SizedBox(height: 24),
+                  const SizedBox(height: 24),
                   
                   // Email field
                   TextFormField(
@@ -142,7 +142,7 @@ class _LoginPageState extends State<LoginPage> {
                     decoration: InputDecoration(
                       labelText: "E-mail",
                       hintText: "Seu e-mail",
-                      prefixIcon: Icon(Icons.email_outlined, color: botecoWine),
+                      prefixIcon: const Icon(Icons.email_outlined, color: botecoWine),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     keyboardType: TextInputType.emailAddress,
@@ -157,7 +157,7 @@ class _LoginPageState extends State<LoginPage> {
                     },
                   ).animate().fadeIn(delay: const Duration(milliseconds: 600)),
                   
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   
                   // Password field
                   TextFormField(
@@ -166,7 +166,7 @@ class _LoginPageState extends State<LoginPage> {
                     decoration: InputDecoration(
                       labelText: "Senha",
                       hintText: "Sua senha",
-                      prefixIcon: Icon(Icons.lock_outline, color: botecoWine),
+                      prefixIcon: const Icon(Icons.lock_outline, color: botecoWine),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
@@ -187,7 +187,7 @@ class _LoginPageState extends State<LoginPage> {
                     },
                   ).animate().fadeIn(delay: const Duration(milliseconds: 800)),
                   
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   
                   // Remember me & Forgot password
                   Row(
@@ -228,7 +228,7 @@ class _LoginPageState extends State<LoginPage> {
                     ],
                   ).animate().fadeIn(delay: const Duration(milliseconds: 1000)),
                   
-                  SizedBox(height: 24),
+                  const SizedBox(height: 24),
                   
                   // Login button
                   ElevatedButton(
@@ -241,7 +241,7 @@ class _LoginPageState extends State<LoginPage> {
                       elevation: 2,
                     ),
                     child: authProvider.isLoading
-                        ? SizedBox(
+                        ? const SizedBox(
                             height: 24,
                             width: 24,
                             child: CircularProgressIndicator(
@@ -258,7 +258,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                   ).animate().fadeIn(delay: const Duration(milliseconds: 1200)),
                   
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   
                   // Error message
                   if (authProvider.error != null)
@@ -270,8 +270,8 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.error_outline, color: Colors.red),
-                          SizedBox(width: 12),
+                          const Icon(Icons.error_outline, color: Colors.red),
+                          const SizedBox(width: 12),
                           Expanded(
                             child: Text(
                               authProvider.error!,
@@ -284,7 +284,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ).animate().shake(),
                   
-                  SizedBox(height: 24),
+                  const SizedBox(height: 24),
                   
                   // OR separator
                   Row(
@@ -303,12 +303,12 @@ class _LoginPageState extends State<LoginPage> {
                     ],
                   ).animate().fadeIn(delay: const Duration(milliseconds: 1400)),
                   
-                  SizedBox(height: 24),
+                  const SizedBox(height: 24),
                   
                   // Google sign in button
                   OutlinedButton.icon(
                     onPressed: _loginWithGoogle,
-                    icon: Icon(Icons.login, color: botecoMustard),
+                    icon: const Icon(Icons.login, color: botecoMustard),
                     label: Text(
                       "Continuar com Google",
                       style: textTheme.titleSmall?.copyWith(
@@ -322,7 +322,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ).animate().fadeIn(delay: const Duration(milliseconds: 1600)),
                   
-                  SizedBox(height: 32),
+                  const SizedBox(height: 32),
                   
                   // Sign up link
                   Row(

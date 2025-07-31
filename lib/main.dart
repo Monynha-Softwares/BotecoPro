@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
@@ -10,10 +9,7 @@ import 'theme.dart';
 import 'pages/home_page.dart';
 import 'pages/tables_page.dart';
 import 'pages/products_page.dart';
-import 'pages/recipes_page.dart';
-import 'pages/production_page.dart';
 import 'pages/orders_page.dart';
-import 'reports_page.dart';
 import 'settings_page.dart';
 import 'widgets/bottom_navigation.dart';
 import 'widgets/app_drawer.dart';
@@ -22,7 +18,6 @@ import 'services/theme_provider.dart';
 import 'services/user_provider.dart';
 import 'services/sound_provider.dart';
 import 'services/supabase_database_service.dart';
-import 'providers/auth_provider.dart';
 import 'auth_wrapper.dart';
 
 void main() async {
@@ -65,15 +60,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-
+    final home = MainNavigationScreen();
     return MaterialApp(
-      title: 'Boteco PRO',
-      theme: lightTheme,
-      darkTheme: darkTheme,
-      themeMode: themeProvider.themeMode,
-      debugShowCheckedModeBanner: false,
-      home: AuthWrapper(init: init, child: const MainNavigationScreen()),
-    );
+        title: 'Boteco PRO',
+        theme: lightTheme,
+        darkTheme: darkTheme,
+        themeMode: themeProvider.themeMode,
+        debugShowCheckedModeBanner: false,
+        // home: AuthWrapper(init: init, child: const MainNavigationScreen()),
+        home: home);
   }
 }
 
