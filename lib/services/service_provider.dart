@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'supabase_database_service.dart';
-// import 'api_service.dart'; // Deletado: comunicação agora apenas via Supabase
 import '../models/data_models.dart';
 import '../adapters/model_adapters.dart';
 
@@ -9,10 +8,8 @@ const uuid = Uuid();
 
 /// ServiceProvider é responsável por gerenciar qual serviço de dados será usado.
 /// Agora usa o SupabaseDatabaseService para persistência e real-time.
-/// Mantém compatibilidade com ApiService para migração gradual.
 class ServiceProvider with ChangeNotifier {
   final SupabaseDatabaseService _supabaseService = SupabaseDatabaseService();
-  // final ApiService _apiService = ApiService(); // removido
 
   final bool _isOnline = true; // Supabase is always "online"
   final bool _isSyncing = false;
@@ -243,22 +240,27 @@ class ServiceProvider with ChangeNotifier {
   // PRODUÇÕES CASEIRAS (In-house Productions)
   // TODO: implementar usando Supabase
   Future<List<ProducaoCaseira>> getProducoes() async {
-    return [];
+    return await _supabaseService.getProducoes();
   }
 
-  Future<void> addProducao(ProducaoCaseira producao) async {}
+  Future<void> addProducao(ProducaoCaseira producao) async {
+    await _supabaseService.addProducao(producao);
+    await _syncProducoes();
+  }
 
   Future<List<ProducaoIngrediente>> getProducaoIngredientes() async {
-    return [];
+    return await _supabaseService.getProducaoIngredientes();
   }
 
   Future<List<ProducaoIngrediente>> getProducaoIngredientesByProducao(
     int idProducao,
   ) async {
-    return [];
+    return await _supabaseService.getProducaoIngredientesByProducao(idProducao);
   }
 
-  Future<void> addProducaoIngrediente(ProducaoIngrediente ingrediente) async {}
+  Future<void> addProducaoIngrediente(ProducaoIngrediente ingrediente) async {
+    await _supabaseService.addProducaoIngrediente(ingrediente);
+  }
 
   // Sync methods - simplified for compilation
   Future<void> _syncProdutosVenda() async {
