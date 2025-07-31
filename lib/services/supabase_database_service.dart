@@ -798,7 +798,11 @@ class SupabaseDatabaseService {
       event: supabase.PostgresChangeEvent.all,
       schema: 'public',
       table: 'pedidos',
-      filter: 'user_id=eq.${_userId!}',
+      filter: supabase.PostgresChangeFilter(
+        type: supabase.PostgresChangeFilterType.eq,
+        column: 'user_id',
+        value: _userId!,
+      ),
       callback: (_) => _fetch(),
     );
     channel.subscribe();
@@ -856,7 +860,11 @@ class SupabaseDatabaseService {
       event: supabase.PostgresChangeEvent.all,
       schema: 'public',
       table: 'vendas',
-      filter: 'user_id=eq.${_userId!}',
+      filter: supabase.PostgresChangeFilter(
+        type: supabase.PostgresChangeFilterType.eq,
+        column: 'user_id',
+        value: _userId!,
+      ),
       callback: (_) => _fetch(),
     );
     channel.subscribe();
