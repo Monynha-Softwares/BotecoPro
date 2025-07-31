@@ -687,6 +687,99 @@ class SupabaseDatabaseService {
     }
   }
 
+  // PRODUCAO CASEIRA
+  Future<List<ProducaoCaseira>> getProducoes() async {
+    if (_userId == null) return [];
+
+    try {
+      final response = await _supabase
+          .from('vw_producao_caseira_detalhes')
+          .select()
+          .eq('user_id', _userId!);
+
+      return response
+          .map<ProducaoCaseira>((data) => ProducaoCaseira.fromJson(data))
+          .toList();
+    } catch (e) {
+      debugPrint('Error getting producoes: $e');
+      return [];
+    }
+  }
+
+  Future<void> addProducao(ProducaoCaseira producao) async {
+    if (_userId == null) return;
+
+    try {
+      await _supabase.rpc('sp_cadastrar_producao_caseira', params: {
+        'p_nome': producao.nome,
+        'p_quantidade': producao.quantidade_gerada,
+        'p_unidade': producao.unidade_gerada,
+        'p_tempo_preparo': producao.tempo_preparo,
+        'p_data_inicio':
+            producao.data_inicio_producao?.toIso8601String(),
+        'p_data_fim': producao.data_fim_disponivel?.toIso8601String(),
+      });
+    } catch (e) {
+      debugPrint('Error adding producao: $e');
+      throw Exception('Erro ao cadastrar produção');
+    }
+  }
+
+  Future<List<ProducaoIngrediente>> getProducaoIngredientes() async {
+    if (_userId == null) return [];
+
+    try {
+      final response = await _supabase
+          .from('vw_producao_ingredientes')
+          .select()
+          .eq('user_id', _userId!);
+
+      return response
+          .map<ProducaoIngrediente>(
+              (data) => ProducaoIngrediente.fromJson(data))
+          .toList();
+    } catch (e) {
+      debugPrint('Error getting producao ingredientes: $e');
+      return [];
+    }
+  }
+
+  Future<List<ProducaoIngrediente>> getProducaoIngredientesByProducao(
+      int idProducao) async {
+    if (_userId == null) return [];
+
+    try {
+      final response = await _supabase
+          .from('vw_producao_ingredientes')
+          .select()
+          .eq('id_producao', idProducao)
+          .eq('user_id', _userId!);
+
+      return response
+          .map<ProducaoIngrediente>(
+              (data) => ProducaoIngrediente.fromJson(data))
+          .toList();
+    } catch (e) {
+      debugPrint('Error getting producao ingredientes by producao: $e');
+      return [];
+    }
+  }
+
+  Future<void> addProducaoIngrediente(ProducaoIngrediente ingrediente) async {
+    if (_userId == null) return;
+
+    try {
+      await _supabase.rpc('sp_adicionar_ingrediente_producao', params: {
+        'p_id_producao': ingrediente.id_producao,
+        'p_id_produto': ingrediente.id_produto,
+        'p_quantidade': ingrediente.quantidade_utilizada,
+      });
+    } catch (e) {
+      debugPrint('Error adding producao ingrediente: $e');
+      throw Exception('Erro ao adicionar ingrediente');
+    }
+  }
+
   // REAL-TIME STREAMS
   Stream<List<Pedido>> streamPedidos() {
     if (_userId == null) {
