@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'supabase_database_service.dart';
-// import 'api_service.dart'; // DEVE USAR EXCLUSIVAMENTE A API DO SUPABASE!
 import '../models/data_models.dart';
 import '../adapters/model_adapters.dart';
 
@@ -9,10 +8,8 @@ const uuid = Uuid();
 
 /// ServiceProvider é responsável por gerenciar qual serviço de dados será usado.
 /// Agora usa o SupabaseDatabaseService para persistência e real-time.
-/// Mantém compatibilidade com ApiService para migração gradual.
 class ServiceProvider with ChangeNotifier {
   final SupabaseDatabaseService _supabaseService = SupabaseDatabaseService();
-  final ApiService _apiService = ApiService();
 
   final bool _isOnline = true; // Supabase is always "online"
   final bool _isSyncing = false;
@@ -242,29 +239,26 @@ class ServiceProvider with ChangeNotifier {
 
   // PRODUÇÕES CASEIRAS (In-house Productions)
   Future<List<ProducaoCaseira>> getProducoes() async {
-    return await _apiService.getInternalProductions();
+    return await _supabaseService.getProducoes();
   }
 
   Future<void> addProducao(ProducaoCaseira producao) async {
-    final success = await _apiService.createInternalProduction(producao);
-    if (success) {
-      await _syncProducoes();
-    }
+    await _supabaseService.addProducao(producao);
+    await _syncProducoes();
   }
 
   Future<List<ProducaoIngrediente>> getProducaoIngredientes() async {
-    return await _apiService.getProductionIngredients();
+    return await _supabaseService.getProducaoIngredientes();
   }
 
   Future<List<ProducaoIngrediente>> getProducaoIngredientesByProducao(
     int idProducao,
   ) async {
-    final allIngredients = await _apiService.getProductionIngredients();
-    return allIngredients.where((i) => i.id_producao == idProducao).toList();
+    return await _supabaseService.getProducaoIngredientesByProducao(idProducao);
   }
 
   Future<void> addProducaoIngrediente(ProducaoIngrediente ingrediente) async {
-    await _apiService.addProductionIngredient(ingrediente);
+    await _supabaseService.addProducaoIngrediente(ingrediente);
   }
 
   // Sync methods - simplified for compilation
