@@ -786,13 +786,30 @@ class SupabaseDatabaseService {
       return Stream.value([]);
     }
 
-    return _supabase
-        .from('pedidos')
-        .stream(primaryKey: ['id_pedido'])
-        .eq('user_id', _userId!)
-        .map(
-          (data) => data.map<Pedido>((item) => Pedido.fromJson(item)).toList(),
-        );
+    final controller = StreamController<List<Pedido>>();
+
+    Future<void> _fetch() async {
+      final data = await getPedidos();
+      if (!controller.isClosed) controller.add(data);
+    }
+
+    final channel = _supabase.channel('public:pedidos');
+    channel.onPostgresChanges(
+      event: supabase.PostgresChangeEvent.all,
+      schema: 'public',
+      table: 'pedidos',
+      filter: 'user_id=eq.${_userId!}',
+      callback: (_) => _fetch(),
+    );
+    channel.subscribe();
+
+    controller
+      ..onListen = _fetch
+      ..onCancel = () async {
+        await _supabase.removeChannel(channel);
+      };
+
+    return controller.stream;
   }
 
   Stream<List<Mesa>> streamMesas() {
@@ -820,6 +837,37 @@ class SupabaseDatabaseService {
           (data) =>
               data.map<Estoque>((item) => Estoque.fromJson(item)).toList(),
         );
+  }
+
+  Stream<List<Venda>> streamVendas() {
+    if (_userId == null) {
+      return Stream.value([]);
+    }
+
+    final controller = StreamController<List<Venda>>();
+
+    Future<void> _fetch() async {
+      final data = await getVendas();
+      if (!controller.isClosed) controller.add(data);
+    }
+
+    final channel = _supabase.channel('public:vendas');
+    channel.onPostgresChanges(
+      event: supabase.PostgresChangeEvent.all,
+      schema: 'public',
+      table: 'vendas',
+      filter: 'user_id=eq.${_userId!}',
+      callback: (_) => _fetch(),
+    );
+    channel.subscribe();
+
+    controller
+      ..onListen = _fetch
+      ..onCancel = () async {
+        await _supabase.removeChannel(channel);
+      };
+
+    return controller.stream;
   }
 
   // UTILITY METHODS

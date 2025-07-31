@@ -18,15 +18,14 @@ class OrdersPage extends StatefulWidget {
 
 class _OrdersPageState extends State<OrdersPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  List<Order> _activeOrders = [];
-  List<Order> _completedOrders = [];
-  bool _isLoading = true;
+  late Stream<List<Order>> _ordersStream;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _loadOrders();
+    final service = Provider.of<ServiceProvider>(context, listen: false);
+    _ordersStream = service.streamOrders();
   }
 
   @override
@@ -35,21 +34,11 @@ class _OrdersPageState extends State<OrdersPage> with SingleTickerProviderStateM
     super.dispose();
   }
 
-  Future<void> _loadOrders() async {
-    setState(() {
-      _isLoading = true;
-    });
-
+  void _reloadStream() {
     final service = Provider.of<ServiceProvider>(context, listen: false);
-    final allOrders = await service.getOrders();
-
-    if (mounted) {
-      setState(() {
-        _activeOrders = allOrders.where((order) => !order.isClosed).toList();
-        _completedOrders = allOrders.where((order) => order.isClosed).toList();
-        _isLoading = false;
-      });
-    }
+    setState(() {
+      _ordersStream = service.streamOrders();
+    });
   }
 
   @override
@@ -80,21 +69,34 @@ class _OrdersPageState extends State<OrdersPage> with SingleTickerProviderStateM
               Icons.refresh,
               color: Theme.of(context).colorScheme.onPrimary,
             ),
-            onPressed: _loadOrders,
+            onPressed: _reloadStream,
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(
+      body: StreamBuilder<List<Order>>(
+        stream: _ordersStream,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(
               child: BotecoLoader(message: "Carregando pedidos..."),
-            )
-          : TabBarView(
-              controller: _tabController,
-              children: [
-                _buildOrdersList(_activeOrders, true),
-                _buildOrdersList(_completedOrders, false),
-              ],
-            ),
+            );
+          }
+
+          final allOrders = snapshot.data!;
+          final activeOrders =
+              allOrders.where((order) => !order.isClosed).toList();
+          final completedOrders =
+              allOrders.where((order) => order.isClosed).toList();
+
+          return TabBarView(
+            controller: _tabController,
+            children: [
+              _buildOrdersList(activeOrders, true),
+              _buildOrdersList(completedOrders, false),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -122,7 +124,7 @@ class _OrdersPageState extends State<OrdersPage> with SingleTickerProviderStateM
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
     return RefreshIndicator(
-      onRefresh: _loadOrders,
+      onRefresh: () async => _reloadStream(),
       color: botecoWine,
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -152,7 +154,7 @@ class _OrdersPageState extends State<OrdersPage> with SingleTickerProviderStateM
             MaterialPageRoute(
               builder: (context) => OrderDetailsPage(order: order),
             ),
-          ).then((_) => _loadOrders());
+          ).then((_) => _reloadStream());
         },
         borderRadius: BorderRadius.circular(16),
         child: Padding(
@@ -269,7 +271,7 @@ class _OrdersPageState extends State<OrdersPage> with SingleTickerProviderStateM
                         MaterialPageRoute(
                           builder: (context) => OrderDetailsPage(order: order),
                         ),
-                      ).then((_) => _loadOrders()),
+                      ).then((_) => _reloadStream()),
                       icon: const Icon(Icons.visibility, size: 18, color: botecoWine),
                       label: const Text('Ver Detalhes', style: TextStyle(color: botecoWine)),
                     ),

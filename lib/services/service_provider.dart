@@ -100,6 +100,10 @@ class ServiceProvider with ChangeNotifier {
     return await _supabaseService.getVendas();
   }
 
+  Stream<List<Venda>> streamVendas() {
+    return _supabaseService.streamVendas();
+  }
+
   Future<List<Sale>> getSales() async {
     final vendas = await getVendas();
     return vendas.map((venda) {
@@ -139,6 +143,10 @@ class ServiceProvider with ChangeNotifier {
     return await _supabaseService.getPedidos();
   }
 
+  Stream<List<Pedido>> streamPedidos() {
+    return _supabaseService.streamPedidos();
+  }
+
   Future<List<Order>> getOrders() async {
     final pedidos = await getPedidos();
     List<Order> orders = [];
@@ -151,6 +159,19 @@ class ServiceProvider with ChangeNotifier {
     }
 
     return orders;
+  }
+
+  Stream<List<Order>> streamOrders() {
+    return streamPedidos().asyncMap((pedidos) async {
+      List<Order> orders = [];
+      for (var pedido in pedidos) {
+        if (pedido.id_pedido != null) {
+          final items = await getPedidoItensByPedido(pedido.id_pedido!);
+          orders.add(OrderAdapter.fromPedido(pedido, items));
+        }
+      }
+      return orders;
+    });
   }
 
   Future<void> addPedido(Pedido pedido) async {
@@ -282,6 +303,24 @@ class ServiceProvider with ChangeNotifier {
   // ESTATÍSTICAS (Statistics)
   Future<double> getVendasDiarias() async {
     return await _supabaseService.getVendasDiarias();
+  }
+
+  Stream<double> streamVendasDiarias() {
+    return streamVendas().map((vendas) {
+      final today = DateTime.now();
+      final startOfDay = DateTime(today.year, today.month, today.day);
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+
+      final vendasHoje = vendas.where((v) {
+        return v.data_venda.isAfter(startOfDay) &&
+            v.data_venda.isBefore(endOfDay) &&
+            !v.status_aberta &&
+            !v.cancelada;
+      }).length;
+
+      // Reuse mock calculation from getVendasDiarias
+      return vendasHoje * 50.0;
+    });
   }
 
   Future<List<Produto>> getProdutosEstoqueBaixo(int threshold) async {
