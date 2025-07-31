@@ -15,7 +15,7 @@ It helps owners keep tables, orders, stock, recipes and in-house production unde
 - ✅ **Relatórios** - Dashboard com vendas diárias
 - ✅ **Tempo real** - Atualizações automáticas via Supabase
 
--## 🛠️ Tecnologias
+## 🛠️ Tecnologias
 
 - **Frontend:** Flutter (Dart)
 - **Backend:** PostgreSQL (Docker) em desenvolvimento / Supabase em produção
