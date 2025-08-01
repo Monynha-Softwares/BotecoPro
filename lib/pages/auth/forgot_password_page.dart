@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../theme.dart';
+import '../../l10n/l10n.dart';
 
 
 class ForgotPasswordPage extends StatefulWidget {
@@ -45,7 +46,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Recuperar senha'),
+        title: Text(context.l10n.forgotPasswordTitle),
         elevation: 0,
         backgroundColor: Colors.transparent,
         foregroundColor: colorScheme.onSurface,
@@ -84,7 +85,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         ),
         const SizedBox(height: 24),
         Text(
-          'Esqueceu sua senha?',
+          context.l10n.forgotPasswordTitle,
           style: textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.bold,
             color: botecoWine,
@@ -93,7 +94,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         ).animate().fadeIn(delay: 300.ms, duration: 600.ms),
         const SizedBox(height: 16),
         Text(
-          'Digite seu e-mail abaixo para receber um link de recuperação de senha',
+          context.l10n.forgotPasswordMessage,
           style: textTheme.bodyMedium?.copyWith(
             color: colorScheme.onSurface.withOpacity(0.7),
           ),
@@ -110,8 +111,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
-                  labelText: 'E-mail',
-                  hintText: 'Seu e-mail de cadastro',
+                  labelText: context.l10n.emailLabel,
+                  hintText: context.l10n.emailHint,
                   prefixIcon: const Icon(Icons.email_outlined, color: botecoWine),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -119,10 +120,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Por favor, insira seu e-mail';
+                    return context.l10n.emailEmpty;
                   }
                   if (!value.contains('@') || !value.contains('.')) {
-                    return 'Por favor, insira um e-mail válido';
+                    return context.l10n.emailInvalid;
                   }
                   return null;
                 },
@@ -155,9 +156,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           strokeWidth: 2,
                         ),
                       )
-                    : const Text(
-                        'Enviar link de recuperação',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    : Text(
+                        context.l10n.sendResetLink,
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
               ).animate().fadeIn(delay: 600.ms, duration: 600.ms).scale(
                 delay: 600.ms,
@@ -187,13 +188,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Lembrou sua senha?',
+              context.l10n.rememberPassword,
               style: textTheme.bodyMedium,
             ),
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
-                'Voltar para o login',
+                context.l10n.backToLogin,
                 style: textTheme.bodyMedium?.copyWith(
                   color: botecoWine,
                   fontWeight: FontWeight.bold,
@@ -220,7 +221,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           .shake(duration: 700.ms, curve: Curves.easeInOut),
         const SizedBox(height: 24),
         Text(
-          'E-mail enviado!',
+          context.l10n.emailSentTitle,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: botecoWine,
@@ -229,13 +230,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         ).animate().fadeIn(delay: 300.ms, duration: 600.ms),
         const SizedBox(height: 16),
         Text(
-          'Enviamos um link de recuperação de senha para ${_emailController.text}',
+          context.l10n.emailSentMessage(_emailController.text),
           style: Theme.of(context).textTheme.bodyMedium,
           textAlign: TextAlign.center,
         ).animate().fadeIn(delay: 400.ms, duration: 600.ms),
         const SizedBox(height: 16),
         Text(
-          'Verifique sua caixa de entrada e spam.',
+          context.l10n.checkSpam,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontStyle: FontStyle.italic,
                 color: Colors.grey[600],
@@ -254,7 +255,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             ),
           ),
           icon: const Icon(Icons.arrow_back),
-          label: const Text('Voltar para o login'),
+          label: Text(context.l10n.backToLogin),
         ).animate().fadeIn(delay: 600.ms, duration: 600.ms).slideY(
           begin: 0.2, 
           end: 0,

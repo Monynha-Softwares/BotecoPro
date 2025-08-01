@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../theme.dart';
+import '../../l10n/l10n.dart';
 
 
 class SignupPage extends StatefulWidget {
@@ -93,7 +94,7 @@ class _SignupPageState extends State<SignupPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Criar conta'),
+        title: Text(context.l10n.signUpTitle),
         elevation: 0,
         backgroundColor: Colors.transparent,
         foregroundColor: colorScheme.onSurface,
@@ -125,7 +126,7 @@ class _SignupPageState extends State<SignupPage> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Crie sua conta no Boteco PRO',
+                  context.l10n.signUpTitle,
                   style: textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: botecoWine,
@@ -134,7 +135,7 @@ class _SignupPageState extends State<SignupPage> {
                 ).animate().fadeIn(delay: 300.ms, duration: 600.ms),
                 const SizedBox(height: 8),
                 Text(
-                  'Preencha os dados abaixo para começar',
+                  context.l10n.signUpSubtitle,
                   style: textTheme.bodyMedium?.copyWith(
                     color: colorScheme.onSurface.withOpacity(0.7),
                   ),
@@ -152,8 +153,8 @@ class _SignupPageState extends State<SignupPage> {
                       TextFormField(
                         controller: _nameController,
                         decoration: InputDecoration(
-                          labelText: 'Nome completo',
-                          hintText: 'Seu nome completo',
+                          labelText: context.l10n.nameLabel,
+                          hintText: context.l10n.nameHint,
                           prefixIcon: const Icon(Icons.person_outline, color: botecoWine),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -161,7 +162,7 @@ class _SignupPageState extends State<SignupPage> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Por favor, insira seu nome';
+                            return context.l10n.nameEmpty;
                           }
                           return null;
                         },
@@ -178,8 +179,8 @@ class _SignupPageState extends State<SignupPage> {
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
-                          labelText: 'E-mail',
-                          hintText: 'Seu melhor e-mail',
+                          labelText: context.l10n.emailLabel,
+                          hintText: context.l10n.emailHint,
                           prefixIcon: const Icon(Icons.email_outlined, color: botecoWine),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -187,10 +188,10 @@ class _SignupPageState extends State<SignupPage> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Por favor, insira seu e-mail';
+                            return context.l10n.emailEmpty;
                           }
                           if (!value.contains('@') || !value.contains('.')) {
-                            return 'Por favor, insira um e-mail válido';
+                            return context.l10n.emailInvalid;
                           }
                           return null;
                         },
@@ -207,8 +208,8 @@ class _SignupPageState extends State<SignupPage> {
                         controller: _passwordController,
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
-                          labelText: 'Senha',
-                          hintText: 'Crie uma senha forte',
+                          labelText: context.l10n.passwordLabel,
+                          hintText: context.l10n.passwordHint,
                           prefixIcon: const Icon(Icons.lock_outline, color: botecoWine),
                           suffixIcon: IconButton(
                             icon: Icon(
@@ -223,10 +224,10 @@ class _SignupPageState extends State<SignupPage> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Por favor, crie uma senha';
+                            return context.l10n.passwordEmpty;
                           }
                           if (value.length < 6) {
-                            return 'A senha deve ter pelo menos 6 caracteres';
+                            return context.l10n.passwordLength;
                           }
                           return null;
                         },
@@ -243,8 +244,8 @@ class _SignupPageState extends State<SignupPage> {
                         controller: _confirmPasswordController,
                         obscureText: _obscureConfirmPassword,
                         decoration: InputDecoration(
-                          labelText: 'Confirmar senha',
-                          hintText: 'Confirme sua senha',
+                          labelText: context.l10n.confirmPasswordLabel,
+                          hintText: context.l10n.confirmPasswordHint,
                           prefixIcon: const Icon(Icons.lock_outline, color: botecoWine),
                           suffixIcon: IconButton(
                             icon: Icon(
@@ -259,10 +260,10 @@ class _SignupPageState extends State<SignupPage> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Por favor, confirme sua senha';
+                            return context.l10n.confirmPasswordEmpty;
                           }
                           if (value != _passwordController.text) {
-                            return 'As senhas não conferem';
+                            return context.l10n.passwordsNotMatch;
                           }
                           return null;
                         },
@@ -289,26 +290,26 @@ class _SignupPageState extends State<SignupPage> {
                           Expanded(
                             child: RichText(
                               text: TextSpan(
-                                text: 'Eu aceito os ',
+                                text: context.l10n.acceptTerms,
                                 style: textTheme.bodyMedium?.copyWith(
                                   color: colorScheme.onSurface,
                                 ),
                                 children: [
                                   TextSpan(
-                                    text: 'Termos de Uso',
+                                    text: context.l10n.termsOfUse,
                                     style: textTheme.bodyMedium?.copyWith(
                                       color: botecoWine,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   TextSpan(
-                                    text: ' e ',
+                                    text: context.l10n.and,
                                     style: textTheme.bodyMedium?.copyWith(
                                       color: colorScheme.onSurface,
                                     ),
                                   ),
                                   TextSpan(
-                                    text: 'Política de Privacidade',
+                                    text: context.l10n.privacyPolicy,
                                     style: textTheme.bodyMedium?.copyWith(
                                       color: botecoWine,
                                       fontWeight: FontWeight.bold,
@@ -344,8 +345,8 @@ class _SignupPageState extends State<SignupPage> {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Text(
-                                'Criar conta',
+                            : Text(
+                                context.l10n.signUpButton,
                                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                               ),
                       ).animate().fadeIn(delay: 1000.ms, duration: 600.ms).scale(
@@ -376,7 +377,7 @@ class _SignupPageState extends State<SignupPage> {
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Text(
-                              'Ou continue com',
+                              context.l10n.orContinueWith,
                               style: textTheme.bodyMedium?.copyWith(
                                 color: Colors.grey.shade600,
                               ),
@@ -408,7 +409,7 @@ class _SignupPageState extends State<SignupPage> {
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              'Continuar com Google',
+                              context.l10n.continueWithGoogle,
                               style: textTheme.bodyLarge?.copyWith(
                                 fontWeight: FontWeight.w500,
                                 color: colorScheme.onSurface,
@@ -433,13 +434,13 @@ class _SignupPageState extends State<SignupPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Já tem uma conta?',
+                      context.l10n.alreadyHaveAccount,
                       style: textTheme.bodyMedium,
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context),
                       child: Text(
-                        'Faça login',
+                        context.l10n.loginLink,
                         style: textTheme.bodyMedium?.copyWith(
                           color: botecoWine,
                           fontWeight: FontWeight.bold,

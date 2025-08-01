@@ -63,6 +63,21 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final userProvider = Provider.of<UserProvider>(context);
+    Locale locale;
+    switch (userProvider.language) {
+      case 'English (US)':
+        locale = const Locale('en');
+        break;
+      case 'Español':
+        locale = const Locale('es');
+        break;
+      case 'Français':
+        locale = const Locale('fr');
+        break;
+      default:
+        locale = const Locale('pt');
+    }
     const home = MainNavigationScreen();
     return MaterialApp(
         title: 'Boteco PRO',
@@ -72,6 +87,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
+        locale: locale,
         home: AuthWrapper(init: init, child: home));
   }
 }
