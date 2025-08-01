@@ -112,18 +112,7 @@ class _SignupPageState extends State<SignupPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Logo and Header
-                Center(
-                  child: Image.network(
-                    "https://pixabay.com/get/g2502430dc39b87f02c6eecb4d224ebfd02bcdcace53ca39aa536e985f5dde79d16fb40d4b250dbf0d89c831bac64b6781a77b7004e5478461bd3792c19ae9acd_1280.png",
-                    height: 100,
-                    width: 100,
-                  ),
-                ).animate().fadeIn(duration: 600.ms).slideY(
-                  begin: 0.2, 
-                  end: 0,
-                  curve: Curves.easeOutQuad,
-                  duration: 800.ms
-                ),
+                const SizedBox(height: 100),
                 const SizedBox(height: 16),
                 Text(
                   context.l10n.signUpTitle,
@@ -402,8 +391,8 @@ class _SignupPageState extends State<SignupPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Image.network(
-                              'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg',
+                            Image.asset(
+                              'assets/images/google_g_logo.svg',
                               height: 20,
                               width: 20,
                             ),

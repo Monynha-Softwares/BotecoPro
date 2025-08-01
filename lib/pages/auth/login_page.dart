@@ -270,8 +270,12 @@ class _LoginPageState extends State<LoginPage> {
                   // Google sign in button
                   OutlinedButton.icon(
                     onPressed: _loginWithGoogle,
-                    icon: const Icon(Icons.login, color: botecoMustard),
-                      label: Text(
+                    icon: Image.asset(
+                      'assets/images/google_g_logo.svg',
+                      height: 20,
+                      width: 20,
+                    ),
+                    label: Text(
                       context.l10n.continueWithGoogle,
                       style: textTheme.titleSmall?.copyWith(
                         color: colorScheme.onSurface,
