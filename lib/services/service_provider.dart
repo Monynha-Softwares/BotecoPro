@@ -29,9 +29,11 @@ class ServiceProvider with ChangeNotifier {
     debugPrint('toggleOnlineMode called - Supabase is always online');
   }
 
-  // Sincronizar dados - não necessário com Supabase (real-time)
+  // Sincronizar dados pendentes com o Supabase
   Future<void> syncData() async {
-    debugPrint('syncData called - Supabase handles this automatically');
+    await _supabaseService.syncPendingOperations();
+    _lastSyncTime = DateTime.now();
+    notifyListeners();
   }
 
   // FORNECEDORES (Suppliers)
