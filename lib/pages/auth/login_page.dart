@@ -5,6 +5,7 @@ import '../../providers/auth_provider.dart';
 import '../../theme.dart';
 import 'signup_page.dart';
 import 'forgot_password_page.dart';
+import '../../l10n/l10n.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -42,6 +43,7 @@ class _LoginPageState extends State<LoginPage> {
     if (_formKey.currentState?.validate() ?? false) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       await authProvider.signInWithEmail(
+        context,
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
@@ -71,26 +73,26 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
                   // Logo or App Name
                   SizedBox(height: screenSize.height * 0.08),
-                  Center(
-                    child: Text(
-                      "Boteco PRO",
-                      style: textTheme.displaySmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: botecoWine,
+                    Center(
+                      child: Text(
+                        context.l10n.appName,
+                        style: textTheme.displaySmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: botecoWine,
+                        ),
                       ),
-                    ),
-                  ).animate().fadeIn(duration: const Duration(milliseconds: 600)),
+                    ).animate().fadeIn(duration: const Duration(milliseconds: 600)),
                   
                   const SizedBox(height: 12),
-                  Center(
-                    child: Text(
-                      "Gerenciamento de Bar e Restaurante",
-                      style: textTheme.titleMedium?.copyWith(
-                        color: colorScheme.onSurface.withOpacity(0.7),
+                    Center(
+                      child: Text(
+                        context.l10n.tagline,
+                        style: textTheme.titleMedium?.copyWith(
+                          color: colorScheme.onSurface.withOpacity(0.7),
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ).animate().fadeIn(delay: const Duration(milliseconds: 200), duration: const Duration(milliseconds: 600)),
+                    ).animate().fadeIn(delay: const Duration(milliseconds: 200), duration: const Duration(milliseconds: 600)),
                   
                   SizedBox(height: screenSize.height * 0.06),
                   

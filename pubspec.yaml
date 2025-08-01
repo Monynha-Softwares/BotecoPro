@@ -14,7 +14,9 @@ dependencies:
   table_calendar: ^3.0.0
   flutter_slidable: ^3.0.0
   flutter_svg: ^2.0.0
-  intl: ^0.18.0
+  intl: ^0.20.2
+  flutter_localizations:
+    sdk: flutter
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.0
@@ -37,6 +39,7 @@ dev_dependencies:
   supabase: any
 flutter:
   uses-material-design: true
+  generate: true
 
   assets:
     - assets/sounds/
