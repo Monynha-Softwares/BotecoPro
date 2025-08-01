@@ -5,4 +5,6 @@
 : "${POSTGRES_USER:?POSTGRES_USER não definido}"
 : "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD não definido}"
 : "${POSTGRES_DB:?POSTGRES_DB não definido}"
+: "${POSTGRES_HOST:?POSTGRES_HOST não definido}"
+: "${POSTGRES_PORT:?POSTGRES_PORT não definido}"
 echo "🔍 Variáveis ok"
