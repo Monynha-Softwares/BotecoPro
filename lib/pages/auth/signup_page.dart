@@ -347,7 +347,7 @@ class _SignupPageState extends State<SignupPage> {
                               )
                             : Text(
                                 context.l10n.signUpButton,
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                               ),
                       ).animate().fadeIn(delay: 1000.ms, duration: 600.ms).scale(
                         delay: 1000.ms,

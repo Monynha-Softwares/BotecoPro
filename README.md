@@ -62,69 +62,27 @@ It helps owners keep tables, orders, stock, recipes and in-house production unde
 
 ## 🧪 Testes
 
-Este repositório utiliza **Flutter Test** para validar os widgets e
-funcionalidades principais do aplicativo. Os testes podem ser executados localmente
-com o comando:
+Exemplos de testes:
 
 ```bash
+flutter doctor
 flutter test
-```
+dart analyse
+dart fix --apply
+flutter run -d Chrome
 
+```
+Sempre execute `flutter doctor` para verificar se existem componentes em falta. Se necessário, instale-os.
 Uma pipeline do **GitHub Actions** roda automaticamente em cada *push* e *pull request*,
 executando `flutter analyze` e `flutter test` para garantir a qualidade do código.
 Os relatórios de cobertura são disponibilizados como artefato da execução.
 Um workflow separado realiza o *deploy* da versão web no GitHub Pages
 sempre que há alterações na branch `main`.
 
----
-
-## ⚙️ Deployment / Database setup
-
-Para garantir que todas as tabelas utilizem **Row Level Security** em produção,
-execute o script `supabase/tables/rls_policies.sql` no banco de dados do
-Supabase.
-
-1. Acesse o painel do projeto em <https://app.supabase.com/> e abra o SQL Editor
-   (ou utilize o Supabase CLI).
-2. Cole o conteúdo do arquivo e execute todas as instruções.
-3. Verifique na aba **RLS Policies** de cada tabela que as políticas foram
-   criadas corretamente.
-
-Também é recomendável habilitar **Regional Replication** no painel do Supabase
-(menu *Database › Replication*) para obter uma réplica de leitura em outra
-região e reduzir a latência dos clientes.
-
-Para otimizar as consultas mais comuns crie os seguintes índices manuais:
-
-```sql
-CREATE INDEX IF NOT EXISTS idx_produtos_user_nome ON produtos (user_id, nome);
-CREATE INDEX IF NOT EXISTS idx_vendas_user_data ON vendas (user_id, data_venda DESC);
-CREATE INDEX IF NOT EXISTS idx_pedidos_user_data ON pedidos (user_id, data_pedido DESC);
-```
-
-Com o Supabase CLI o mesmo pode ser feito via:
-
-```bash
-supabase db execute supabase/tables/rls_policies.sql
-```
-
-
-**Desenvolvido com ❤️ para a gestão de bares e restaurantes**
-
----
-
 
 ## 🤝 Contributing & License
 
 This is an academic project but pull-requests are welcome for educational purposes.
 Code released under the **MIT License** – see [LICENSE](LICENSE).
-
 ---
-
-### 🙌 Acknowledgements
-
-* Open-source Flutter community for awesome packages
-
----
-
 > *“Gestão simples, cerveja gelada e boteco lotado.”* – **Boteco PRO**
