@@ -23,9 +23,6 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    // Pre-fill with test account
-    _emailController.text = 'admin@boteco.pro';
-    _passwordController.text = 'admin123';
   }
 
   @override

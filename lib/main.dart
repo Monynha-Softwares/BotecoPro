@@ -66,8 +66,7 @@ class MyApp extends StatelessWidget {
         darkTheme: darkTheme,
         themeMode: themeProvider.themeMode,
         debugShowCheckedModeBanner: false,
-        // home: AuthWrapper(init: init, child: const MainNavigationScreen()),
-        home: home);
+        home: AuthWrapper(init: init, child: home));
   }
 }
 
