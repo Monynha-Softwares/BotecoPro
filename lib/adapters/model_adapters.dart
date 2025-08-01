@@ -16,16 +16,19 @@ class OrderAdapter {
     );
   }
 
-  static Order fromPedido(Pedido pedido, List<PedidoItem> items) {
-    // Convert Pedido to Order
+  static Order fromPedido(
+    Pedido pedido,
+    List<OrderItem> items,
+  ) {
     return Order(
       id: pedido.id_pedido?.toString() ?? uuid.v4(),
       tableId: pedido.id_mesa.toString(),
       tableNumber: pedido.id_mesa,
       createdAt: pedido.data_pedido,
       status: _mapPedidoStatus(pedido.status_pedido),
-      items: items.map((item) => OrderItemAdapter.fromPedidoItem(item)).toList(),
-      isClosed: pedido.status_pedido == 'entregue' || pedido.status_pedido == 'cancelado',
+      items: items,
+      isClosed:
+          pedido.status_pedido == 'entregue' || pedido.status_pedido == 'cancelado',
     );
   }
 
@@ -75,11 +78,14 @@ class OrderItemAdapter {
     );
   }
 
-  static OrderItem fromPedidoItem(PedidoItem item) {
+  static OrderItem fromPedidoItem(
+    PedidoItem item, {
+    required String productName,
+  }) {
     return OrderItem(
       id: item.id_pedido_item?.toString() ?? uuid.v4(),
       productId: item.id_item.toString(),
-      productName: item.observacao ?? 'Produto', // This would need proper mapping
+      productName: productName,
       quantity: item.quantidade.toInt(),
       price: item.preco_unitario,
       notes: item.observacao ?? '',
@@ -101,18 +107,22 @@ class RecipeAdapter {
       nome: recipe.name,
       tipo_receita: recipe.type == RecipeType.food ? 'porcao' : 'cocktail',
       preco_venda: recipe.price,
-      tempo_preparo_minutos: 15, // Default value
+      tempo_preparo_minutos: recipe.preparationMinutes,
     );
   }
 
-  static Recipe fromReceita(Receita receita, List<ReceitaIngrediente> ingredientes) {
+  static Recipe fromReceita(
+    Receita receita,
+    List<RecipeIngredient> ingredientes,
+  ) {
     return Recipe(
       id: receita.id_receita?.toString() ?? uuid.v4(),
       name: receita.nome,
       type: receita.tipo_receita == 'cocktail' ? RecipeType.drink : RecipeType.food,
       price: receita.preco_venda,
+      preparationMinutes: receita.tempo_preparo_minutos,
       instructions: '', // Not in DB model
-      ingredients: ingredientes.map((i) => RecipeIngredientAdapter.fromReceitaIngrediente(i)).toList(),
+      ingredients: ingredientes,
     );
   }
 }
@@ -126,13 +136,17 @@ class RecipeIngredientAdapter {
     );
   }
 
-  static RecipeIngredient fromReceitaIngrediente(ReceitaIngrediente ingredient) {
+  static RecipeIngredient fromReceitaIngrediente(
+    ReceitaIngrediente ingredient, {
+    required String productName,
+    required String unit,
+  }) {
     return RecipeIngredient(
       id: ingredient.id?.toString() ?? uuid.v4(),
       productId: ingredient.id_produto.toString(),
-      productName: 'Produto', // Would need proper mapping
+      productName: productName,
       quantity: ingredient.quantidade_utilizada.toInt(),
-      unit: 'unidade', // Default value
+      unit: unit,
     );
   }
 }
@@ -149,7 +163,11 @@ class ProductionAdapter {
     );
   }
 
-  static InternalProduction fromProducaoCaseira(ProducaoCaseira producao, List<ProducaoIngrediente> ingredientes) {
+  static InternalProduction fromProducaoCaseira(
+    ProducaoCaseira producao,
+    List<ProducaoIngrediente> ingredientes,
+    Map<int, Produto> produtos,
+  ) {
     return InternalProduction(
       id: producao.id_producao?.toString() ?? uuid.v4(),
       name: producao.nome,
@@ -158,7 +176,13 @@ class ProductionAdapter {
       createdAt: producao.data_inicio_producao,
       finalizedAt: producao.data_fim_disponivel,
       status: producao.data_fim_disponivel != null ? ProductionStatus.finalized : ProductionStatus.inProgress,
-      ingredients: ingredientes.map((i) => ProductionIngredientAdapter.fromProducaoIngrediente(i)).toList(),
+      ingredients: ingredientes
+          .map((i) => ProductionIngredientAdapter.fromProducaoIngrediente(
+                i,
+                productName: produtos[i.id_produto]?.nome ?? 'Produto',
+                unit: produtos[i.id_produto]?.unidade_base ?? 'unidade',
+              ))
+          .toList(),
     );
   }
 }
@@ -172,13 +196,17 @@ class ProductionIngredientAdapter {
     );
   }
 
-  static ProductionIngredient fromProducaoIngrediente(ProducaoIngrediente ingredient) {
+  static ProductionIngredient fromProducaoIngrediente(
+    ProducaoIngrediente ingredient, {
+    required String productName,
+    required String unit,
+  }) {
     return ProductionIngredient(
       id: ingredient.id?.toString() ?? uuid.v4(),
       productId: ingredient.id_produto.toString(),
-      productName: 'Produto', // Would need proper mapping
+      productName: productName,
       quantity: ingredient.quantidade_utilizada.toInt(),
-      unit: 'unidade', // Default value
+      unit: unit,
     );
   }
 }

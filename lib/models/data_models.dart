@@ -1220,6 +1220,7 @@ class Recipe {
   String name;
   RecipeType type;
   double price;
+  int? preparationMinutes;
   String instructions;
   List<RecipeIngredient> ingredients;
 
@@ -1228,6 +1229,7 @@ class Recipe {
     required this.name,
     required this.type,
     required this.price,
+    this.preparationMinutes,
     this.instructions = '',
     List<RecipeIngredient>? ingredients,
   })
@@ -1238,6 +1240,7 @@ class Recipe {
     String? name,
     RecipeType? type,
     double? price,
+    int? preparationMinutes,
     String? instructions,
     List<RecipeIngredient>? ingredients,
   }) {
@@ -1246,6 +1249,7 @@ class Recipe {
       name: name ?? this.name,
       type: type ?? this.type,
       price: price ?? this.price,
+      preparationMinutes: preparationMinutes ?? this.preparationMinutes,
       instructions: instructions ?? this.instructions,
       ingredients: ingredients ?? this.ingredients,
     );
@@ -1257,6 +1261,7 @@ class Recipe {
       'name': name,
       'type': type.index,
       'price': price,
+      'preparationMinutes': preparationMinutes,
       'instructions': instructions,
       'ingredients': ingredients.map((i) => i.toJson()).toList(),
     };
@@ -1268,6 +1273,7 @@ class Recipe {
       name: json['name'],
       type: RecipeType.values[json['type']],
       price: json['price'].toDouble(),
+      preparationMinutes: json['preparationMinutes'],
       instructions: json['instructions'] ?? '',
       ingredients: (json['ingredients'] as List?)
           ?.map((i) => RecipeIngredient.fromJson(i))

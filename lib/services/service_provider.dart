@@ -149,11 +149,23 @@ class ServiceProvider with ChangeNotifier {
 
   Future<List<Order>> getOrders() async {
     final pedidos = await getPedidos();
+    final produtos = await getProdutos();
+    final produtoMap = <int, Produto>{
+      for (var p in produtos)
+        if (p.id_produto != null) p.id_produto!: p,
+    };
+
     List<Order> orders = [];
 
     for (var pedido in pedidos) {
       if (pedido.id_pedido != null) {
-        final items = await getPedidoItensByPedido(pedido.id_pedido!);
+        final itemsDb = await getPedidoItensByPedido(pedido.id_pedido!);
+        final items = itemsDb
+            .map((i) => OrderItemAdapter.fromPedidoItem(
+                  i,
+                  productName: produtoMap[i.id_item]?.nome ?? 'Produto',
+                ))
+            .toList();
         orders.add(OrderAdapter.fromPedido(pedido, items));
       }
     }
@@ -163,10 +175,22 @@ class ServiceProvider with ChangeNotifier {
 
   Stream<List<Order>> streamOrders() {
     return streamPedidos().asyncMap((pedidos) async {
+      final produtos = await getProdutos();
+      final produtoMap = <int, Produto>{
+        for (var p in produtos)
+          if (p.id_produto != null) p.id_produto!: p,
+      };
+
       List<Order> orders = [];
       for (var pedido in pedidos) {
         if (pedido.id_pedido != null) {
-          final items = await getPedidoItensByPedido(pedido.id_pedido!);
+          final itemsDb = await getPedidoItensByPedido(pedido.id_pedido!);
+          final items = itemsDb
+              .map((i) => OrderItemAdapter.fromPedidoItem(
+                    i,
+                    productName: produtoMap[i.id_item]?.nome ?? 'Produto',
+                  ))
+              .toList();
           orders.add(OrderAdapter.fromPedido(pedido, items));
         }
       }
@@ -230,7 +254,8 @@ class ServiceProvider with ChangeNotifier {
       nome: recipe.name,
       tipo_receita: recipe.type == RecipeType.food ? 'porcao' : 'cocktail',
       preco_venda: recipe.price,
-      tempo_preparo_minutos: receitas[index].tempo_preparo_minutos,
+      tempo_preparo_minutos:
+          recipe.preparationMinutes ?? receitas[index].tempo_preparo_minutos,
       id_categoria: receitas[index].id_categoria,
     );
 
@@ -361,6 +386,11 @@ class ServiceProvider with ChangeNotifier {
       // Get active sale for this table
       final venda = await getVendaAtivaMesa(intId);
       if (venda != null) {
+        final produtos = await getProdutos();
+        final produtoMap = <int, Produto>{
+          for (var p in produtos)
+            if (p.id_produto != null) p.id_produto!: p,
+        };
         // Get all pedidos for this sale
         final pedidos = await getPedidos();
         final pedidosVenda = pedidos
@@ -378,15 +408,20 @@ class ServiceProvider with ChangeNotifier {
           }
 
           // Create an Order with the first pedido
+          final orderItems = allItems
+              .map((item) => OrderItemAdapter.fromPedidoItem(
+                    item,
+                    productName: produtoMap[item.id_item]?.nome ?? 'Produto',
+                  ))
+              .toList();
+
           return Order(
             id: venda.id_venda?.toString() ?? uuid.v4(),
             tableId: tableId,
             tableNumber: intId,
             createdAt: venda.data_venda,
-            items: allItems
-                .map((item) => OrderItemAdapter.fromPedidoItem(item))
-                .toList(),
-            status: OrderStatus.pending, // Would need proper mapping
+            items: orderItems,
+            status: OrderStatus.pending,
           );
         }
       }
@@ -397,6 +432,12 @@ class ServiceProvider with ChangeNotifier {
   Future<List<Order>> getActiveOrders() async {
     // Get all active vendas
     final vendasAtivas = await getVendasAtivas();
+    final produtos = await getProdutos();
+    final produtoMap = <int, Produto>{
+      for (var p in produtos)
+        if (p.id_produto != null) p.id_produto!: p,
+    };
+
     List<Order> orders = [];
 
     for (var venda in vendasAtivas) {
@@ -416,16 +457,20 @@ class ServiceProvider with ChangeNotifier {
           }
         }
 
-        // Create an Order with the venda
+        final orderItems = allItems
+            .map((item) => OrderItemAdapter.fromPedidoItem(
+                  item,
+                  productName: produtoMap[item.id_item]?.nome ?? 'Produto',
+                ))
+            .toList();
+
         final order = Order(
           id: venda.id_venda?.toString() ?? uuid.v4(),
           tableId: venda.id_mesa.toString(),
           tableNumber: venda.id_mesa,
           createdAt: venda.data_venda,
-          items: allItems
-              .map((item) => OrderItemAdapter.fromPedidoItem(item))
-              .toList(),
-          status: OrderStatus.pending, // Would need proper mapping
+          items: orderItems,
+          status: OrderStatus.pending,
         );
 
         orders.add(order);
@@ -560,13 +605,28 @@ class ServiceProvider with ChangeNotifier {
   // Recipe methods
   Future<List<Recipe>> getRecipes() async {
     final receitas = await getReceitas();
+    final produtos = await getProdutos();
+    final produtoMap = <int, Produto>{
+      for (var p in produtos)
+        if (p.id_produto != null) p.id_produto!: p,
+    };
+
     List<Recipe> recipes = [];
 
     for (var receita in receitas) {
       if (receita.id_receita != null) {
-        final ingredientes = await getReceitaIngredientesByReceita(
+        final ingredientesDb = await getReceitaIngredientesByReceita(
           receita.id_receita!,
         );
+
+        final ingredientes = ingredientesDb
+            .map((i) => RecipeIngredientAdapter.fromReceitaIngrediente(
+                  i,
+                  productName: produtoMap[i.id_produto]?.nome ?? 'Produto',
+                  unit: produtoMap[i.id_produto]?.unidade_base ?? 'unidade',
+                ))
+            .toList();
+
         recipes.add(RecipeAdapter.fromReceita(receita, ingredientes));
       }
     }
@@ -609,6 +669,11 @@ class ServiceProvider with ChangeNotifier {
   // Production methods
   Future<List<InternalProduction>> getInternalProductions() async {
     final producoes = await getProducoes();
+    final produtos = await getProdutos();
+    final produtoMap = <int, Produto>{
+      for (var p in produtos)
+        if (p.id_produto != null) p.id_produto!: p,
+    };
     List<InternalProduction> productions = [];
 
     for (var producao in producoes) {
@@ -617,7 +682,11 @@ class ServiceProvider with ChangeNotifier {
           producao.id_producao!,
         );
         productions.add(
-          ProductionAdapter.fromProducaoCaseira(producao, ingredientes),
+          ProductionAdapter.fromProducaoCaseira(
+            producao,
+            ingredientes,
+            produtoMap,
+          ),
         );
       }
     }
