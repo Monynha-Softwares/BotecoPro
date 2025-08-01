@@ -266,7 +266,6 @@ class ServiceProvider with ChangeNotifier {
 
   Future<void> addProducao(ProducaoCaseira producao) async {
     await _supabaseService.addProducao(producao);
-    await _syncProducoes();
   }
 
   Future<List<ProducaoIngrediente>> getProducaoIngredientes() async {
@@ -281,23 +280,6 @@ class ServiceProvider with ChangeNotifier {
 
   Future<void> addProducaoIngrediente(ProducaoIngrediente ingrediente) async {
     await _supabaseService.addProducaoIngrediente(ingrediente);
-  }
-
-  // Sync methods - simplified for compilation
-  Future<void> _syncProdutosVenda() async {
-    debugPrint('_syncProdutosVenda called - implement when needed');
-  }
-
-  Future<void> _syncProducoes() async {
-    debugPrint('_syncProducoes called - implement when needed');
-  }
-
-  Future<void> _syncProducaoIngredientes() async {
-    debugPrint('_syncProducaoIngredientes called - implement when needed');
-  }
-
-  Future<void> _syncEstoque() async {
-    debugPrint('_syncEstoque called - implement when needed');
   }
 
   // ESTATÍSTICAS (Statistics)
