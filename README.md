@@ -53,7 +53,7 @@ It helps owners keep tables, orders, stock, recipes and in-house production unde
    ```bash
    docker compose up -d
    ```
-4. Aplique o esquema inicial executando `./scripts/init_postgres.sh` (use `--seed` caso queira gerar dados de exemplo).
+4. Aplique o esquema inicial executando `./scripts/init_postgres.sh` (use `--seed` caso queira gerar dados de exemplo). Caso prefira gerar esses dados ao iniciar o app, defina `CREATE_SAMPLE_DATA=true` no `.env`.
 5. Execute o aplicativo normalmente com `flutter run`.
    Para rodar a versão web use `flutter run -d chrome`. Caso o navegador
    não esteja disponível (como em ambientes de CI ou containers

@@ -114,18 +114,6 @@ abstract class AppLocalizations {
   /// **'Bar and Restaurant Management'**
   String get tagline;
 
-  /// No description provided for @testAccount.
-  ///
-  /// In en, this message translates to:
-  /// **'Test Account'**
-  String get testAccount;
-
-  /// No description provided for @testAccountDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'We have filled the form with a test account. Just press \'Sign in\'.'**
-  String get testAccountDescription;
-
   /// No description provided for @emailLabel.
   ///
   /// In en, this message translates to:

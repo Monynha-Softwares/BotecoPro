@@ -34,7 +34,8 @@ void main() async {
     );
 
     final databaseService = SupabaseDatabaseService();
-    await databaseService.initializeData();
+    final shouldSeed = dotenv.env['CREATE_SAMPLE_DATA'] == 'true';
+    await databaseService.initializeData(createSampleData: shouldSeed);
   }();
 
   SystemChrome.setPreferredOrientations([
