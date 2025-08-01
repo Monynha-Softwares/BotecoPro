@@ -260,19 +260,24 @@ class SupabaseDatabaseService {
     }
   }
 
-  Future<void> updateProduto(Produto produto) async {
+  Future<void> updateProduto(
+    Produto produto,
+    ProdutoVenda produtoVenda,
+  ) async {
     if (_userId == null || produto.id_produto == null) return;
 
     try {
-      final data = produto.toJson();
-      data['user_id'] = _userId;
-      data.remove('id_produto');
-
-      await _supabase
-          .from('produtos')
-          .update(data)
-          .eq('id_produto', produto.id_produto!)
-          .eq('user_id', _userId!);
+      await _supabase.rpc('sp_atualizar_produto', params: {
+        'p_id_produto': produto.id_produto,
+        'p_nome': produto.nome,
+        'p_unidade_base': produto.unidade_base,
+        'p_tipo_produto': produto.tipo_produto,
+        'p_controla_estoque': produto.controla_estoque,
+        'p_id_categoria': produto.id_categoria,
+        'p_descricao_venda': produtoVenda.descricao_venda,
+        'p_quantidade_base': produtoVenda.quantidade_base,
+        'p_preco_venda': produtoVenda.preco_venda,
+      });
     } catch (e) {
       debugPrint('Error updating produto: $e');
       throw Exception('Erro ao atualizar produto');

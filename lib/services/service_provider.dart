@@ -783,24 +783,32 @@ class ServiceProvider with ChangeNotifier {
       id_categoria: _getCategoriaId(product.category),
     );
 
-    await _supabaseService.updateProduto(produtos[index]);
-
-    // Update produto venda
+    // Update produto venda information
     final produtosVenda = await getProdutosVenda();
     final pvIndex = produtosVenda.indexWhere(
       (pv) => pv.id_produto == produtoId,
     );
 
+    ProdutoVenda? pv;
     if (pvIndex != -1) {
-      produtosVenda[pvIndex] = ProdutoVenda(
+      pv = ProdutoVenda(
         id_venda: produtosVenda[pvIndex].id_venda,
         id_produto: produtoId,
         descricao_venda: '${product.name} (Padrão)',
         quantidade_base: produtosVenda[pvIndex].quantidade_base,
         preco_venda: product.price,
       );
+    } else {
+      pv = ProdutoVenda(
+        id_produto: produtoId,
+        descricao_venda: '${product.name} (Padrão)',
+        quantidade_base: 1,
+        preco_venda: product.price,
+      );
+    }
 
-      // TODO: implement update of produto_venda when Supabase schema is ready
+    if (pv != null) {
+      await _supabaseService.updateProduto(produtos[index], pv);
     }
   }
 
