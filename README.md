@@ -53,8 +53,9 @@ It helps owners keep tables, orders, stock, recipes and in-house production unde
    ```bash
    docker compose up -d
    ```
-4. Aplique o esquema inicial executando `./scripts/init_postgres.sh` (use `--seed` caso queira gerar dados de exemplo). Caso prefira gerar esses dados ao iniciar o app, defina `CREATE_SAMPLE_DATA=true` no `.env`.
-5. Execute o aplicativo normalmente com `flutter run`.
+4. Aplique o esquema inicial executando `./scripts/init_postgres.sh` (use `--seed` caso queira gerar dados de exemplo). Este script carrega o schema e aplica as políticas de segurança definidas em `supabase/tables/rls_policies.sql`. Caso prefira gerar esses dados ao iniciar o app, defina `CREATE_SAMPLE_DATA=true` no `.env`.
+5. Se estiver utilizando o Supabase CLI, execute `supabase db push` e certifique-se de incluir o arquivo `supabase/tables/rls_policies.sql` (já disponível em `supabase/migrations`) para que as políticas RLS sejam criadas no projeto remoto.
+6. Execute o aplicativo normalmente com `flutter run`.
    Para rodar a versão web use `flutter run -d chrome`. Caso o navegador
    não esteja disponível (como em ambientes de CI ou containers
    minimalistas), utilize `flutter run -d web-server` para iniciar um
