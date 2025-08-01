@@ -2,8 +2,6 @@
   "@@locale": "pt",
   "appName": "Boteco PRO",
   "tagline": "Gerenciamento de Bar e Restaurante",
-  "testAccount": "Conta de Teste",
-  "testAccountDescription": "Já preenchemos o formulário com uma conta de teste. Basta clicar em 'Entrar'.",
   "emailLabel": "E-mail",
   "emailHint": "Seu e-mail",
   "emailEmpty": "Por favor, informe seu e-mail",

@@ -45,6 +45,20 @@ It helps owners keep tables, orders, stock, recipes and in-house production unde
 - **Fornecedores:** Gestão de fornecedores
 - **Receitas:** Cadastro de receitas próprias
 
+## 📦 Ambiente de Desenvolvimento
+
+1. Copie o arquivo `.env.example` para `.env` e preencha `SUPABASE_URL` e `SUPABASE_ANON_KEY` com as credenciais do seu projeto (as demais variáveis já possuem valores padrão para o Postgres local).
+2. Certifique-se de ter o **Docker** instalado.
+3. Inicie o banco local com:
+   ```bash
+   docker compose up -d
+   ```
+4. Aplique o esquema inicial executando `./scripts/init_postgres.sh` (use `--seed` caso queira gerar dados de exemplo). Caso prefira gerar esses dados ao iniciar o app, defina `CREATE_SAMPLE_DATA=true` no `.env`.
+5. Execute o aplicativo normalmente com `flutter run`.
+   Para rodar a versão web use `flutter run -d chrome`. Caso o navegador
+   não esteja disponível (como em ambientes de CI ou containers
+   minimalistas), utilize `flutter run -d web-server` para iniciar um
+   servidor local.
 
 ## 🧪 Testes
 
@@ -70,7 +84,5 @@ sempre que há alterações na branch `main`.
 
 This is an academic project but pull-requests are welcome for educational purposes.
 Code released under the **MIT License** – see [LICENSE](LICENSE).
-
 ---
-
 > *“Gestão simples, cerveja gelada e boteco lotado.”* – **Boteco PRO**

@@ -15,13 +15,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get tagline => 'Gerenciamento de Bar e Restaurante';
 
   @override
-  String get testAccount => 'Conta de Teste';
-
-  @override
-  String get testAccountDescription =>
-      'Já preenchemos o formulário com uma conta de teste. Basta clicar em \'Entrar\'.';
-
-  @override
   String get emailLabel => 'E-mail';
 
   @override

@@ -19,9 +19,9 @@ class ServiceProvider with ChangeNotifier {
   bool get isSyncing => _isSyncing;
   DateTime? get lastSyncTime => _lastSyncTime;
 
-  // Initialize the database
-  Future<void> initializeData() async {
-    await _supabaseService.initializeData();
+  // Initialize the database. Pass [createSampleData] to generate example data.
+  Future<void> initializeData({bool createSampleData = false}) async {
+    await _supabaseService.initializeData(createSampleData: createSampleData);
   }
 
   // Método para alternar entre online e offline - não necessário com Supabase

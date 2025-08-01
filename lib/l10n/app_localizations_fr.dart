@@ -15,13 +15,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get tagline => 'Bar and Restaurant Management';
 
   @override
-  String get testAccount => 'Test Account';
-
-  @override
-  String get testAccountDescription =>
-      'We have filled the form with a test account. Just press \'Sign in\'.';
-
-  @override
   String get emailLabel => 'Email';
 
   @override

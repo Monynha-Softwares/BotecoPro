@@ -14,12 +14,12 @@ class SupabaseDatabaseService {
   // Current user ID for row-level security
   String? get _userId => _supabase.auth.currentUser?.id;
 
-  // Initialize data - create sample data if needed
-  Future<void> initializeData() async {
+  // Initialize data. Sample data can optionally be created for empty accounts
+  Future<void> initializeData({bool createSampleData = false}) async {
     try {
       // Check if user has any data
       final fornecedores = await getFornecedores();
-      if (fornecedores.isEmpty) {
+      if (createSampleData && fornecedores.isEmpty) {
         await _createSampleData();
       }
     } catch (e) {

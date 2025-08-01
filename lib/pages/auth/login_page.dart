@@ -96,43 +96,6 @@ class _LoginPageState extends State<LoginPage> {
                   
                   SizedBox(height: screenSize.height * 0.06),
                   
-                  // Test Account Banner
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: botecoMustard.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: botecoMustard.withOpacity(0.3))
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.info_outline, color: botecoMustard),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                context.l10n.testAccount,
-                                style: textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: botecoMustard,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                context.l10n.testAccountDescription,
-                                style: textTheme.bodyMedium?.copyWith(
-                                  color: colorScheme.onSurface,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ).animate().fadeIn(delay: const Duration(milliseconds: 400)),
-                  
                   const SizedBox(height: 24),
                   
                   // Email field
