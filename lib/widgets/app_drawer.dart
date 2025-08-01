@@ -6,7 +6,7 @@ import '../services/theme_provider.dart';
 import '../services/user_provider.dart';
 import '../services/sound_provider.dart';
 import '../theme.dart';
-import '../main.dart';
+import '../pages/auth/login_page.dart';
 import '../reports_page.dart';
 import '../settings_page.dart';
 
@@ -653,34 +653,20 @@ final serviceProvider = Provider.of<ServiceProvider>(context, listen: false);
 serviceProvider.toggleOnlineMode(false);
 
 Navigator.pop(context);
+  // Show success message
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(
+      content: Text('Logout realizado com sucesso!'),
+      backgroundColor: Colors.green,
+    ),
+  );
 
-// Show success message and restart the app
-ScaffoldMessenger.of(context).showSnackBar(
-SnackBar(
-content: const Text('Logout realizado com sucesso!'),
-backgroundColor: Colors.green,
-duration: const Duration(seconds: 2),
-action: SnackBarAction(
-label: 'OK',
-textColor: Colors.white,
-onPressed: () {
-// Restart app (go to splash screen)
-Navigator.of(context).pushAndRemoveUntil(
-MaterialPageRoute(builder: (_) => const SplashScreen()),
-(route) => false
-);
-},
-),
-),
-);
+  // Navigate to login screen removing all routes
+  Navigator.of(context).pushAndRemoveUntil(
+    MaterialPageRoute(builder: (_) => const LoginPage()),
+    (route) => false,
+  );
 
-// Navigate back to splash screen after a short delay
-Future.delayed(const Duration(seconds: 2), () {
-Navigator.of(context).pushAndRemoveUntil(
-MaterialPageRoute(builder: (_) => const SplashScreen()),
-(route) => false
-);
-});
 },
 style: ElevatedButton.styleFrom(
 backgroundColor: Theme.of(context).colorScheme.primary,
