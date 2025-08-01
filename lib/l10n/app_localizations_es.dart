@@ -189,6 +189,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get aboutBoteco => 'About Boteco PRO';
 
   @override
+  String get aboutBotecoDescription =>
+      'Boteco PRO es un sistema de gestión completo para bares y restaurantes. Administra mesas, productos, proveedores, existencias y mucho más.';
+
+  @override
+  String get aboutBotecoRights =>
+      '© 2023 Boteco PRO\nTodos los derechos reservados';
+
+  @override
   String get infoLicenses => 'Information and licenses';
 
   @override

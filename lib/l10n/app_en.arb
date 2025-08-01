@@ -59,6 +59,8 @@
   "about": "About",
   "appVersion": "App version",
   "aboutBoteco": "About Boteco PRO",
+  "aboutBotecoDescription": "Boteco PRO is a complete management system for bars and restaurants. Manage tables, products, suppliers, stocks and much more.",
+  "aboutBotecoRights": "© 2023 Boteco PRO\nAll rights reserved",
   "infoLicenses": "Information and licenses",
   "logoutSystem": "Log out",
   "logoutApp": "Log out of the app",
