@@ -48,7 +48,7 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 24),
           _buildSection(
             context: context,
-            title: 'Aparência',
+            title: context.l10n.appearance,
             icon: Icons.palette,
             children: [
               _buildThemeSettings(context, themeProvider),
@@ -57,7 +57,7 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 24),
           _buildSection(
             context: context,
-            title: 'Sincronização',
+            title: context.l10n.sync,
             icon: Icons.sync,
             children: [
               _buildSyncSettings(context, serviceProvider),
@@ -66,7 +66,7 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 24),
           _buildSection(
             context: context,
-            title: 'Notificações',
+            title: context.l10n.notifications,
             icon: Icons.notifications,
             children: [
               SwitchListTile(
@@ -122,7 +122,7 @@ class _SettingsPageState extends State<SettingsPage> {
             children: [
               ListTile(
                 title: Text(context.l10n.appVersion),
-                subtitle: Text('1.0.0'),
+                subtitle: Text(context.l10n.appVersionNumber),
                 trailing: const Icon(Icons.check_circle, color: Colors.green),
               ),
               ListTile(
@@ -138,9 +138,9 @@ class _SettingsPageState extends State<SettingsPage> {
             child: OutlinedButton.icon(
               onPressed: () => _showLogoutConfirmation(context),
               icon: const Icon(Icons.logout, color: Colors.red),
-              label: const Text(
-                'Sair do Sistema',
-                style: TextStyle(color: Colors.red),
+              label: Text(
+                context.l10n.logoutSystemLabel,
+                style: const TextStyle(color: Colors.red),
               ),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: Colors.red),
@@ -344,34 +344,34 @@ class _SettingsPageState extends State<SettingsPage> {
             children: [
               TextField(
                 controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Nome',
-                  prefixIcon: Icon(Icons.person),
+                decoration: InputDecoration(
+                  labelText: context.l10n.nameLabel,
+                  prefixIcon: const Icon(Icons.person),
                 ),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  prefixIcon: Icon(Icons.email),
+                decoration: InputDecoration(
+                  labelText: context.l10n.emailLabel,
+                  prefixIcon: const Icon(Icons.email),
                 ),
                 keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: establishmentController,
-                decoration: const InputDecoration(
-                  labelText: 'Estabelecimento',
-                  prefixIcon: Icon(Icons.business),
+                decoration: InputDecoration(
+                  labelText: context.l10n.establishment,
+                  prefixIcon: const Icon(Icons.business),
                 ),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: positionController,
-                decoration: const InputDecoration(
-                  labelText: 'Cargo',
-                  prefixIcon: Icon(Icons.badge),
+                decoration: InputDecoration(
+                  labelText: context.l10n.position,
+                  prefixIcon: const Icon(Icons.badge),
                 ),
               ),
             ],
@@ -475,22 +475,21 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Boteco PRO',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Text(
+              context.l10n.appName,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             Text('${context.l10n.appVersion} ${context.l10n.appVersionNumber}'),
             const SizedBox(height: 16),
-            const Text(
-              'Boteco PRO é um sistema de gestão completo para bares e restaurantes. '
-              'Gerencie mesas, produtos, fornecedores, estoques e muito mais.',
+            Text(
+              context.l10n.aboutBotecoDescription,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-            const Text(
-              '© 2023 Boteco PRO\nTodos os direitos reservados',
+            Text(
+              context.l10n.aboutBotecoRights,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12),
+              style: const TextStyle(fontSize: 12),
             ),
           ],
         ),
