@@ -18,6 +18,7 @@ import 'services/service_provider.dart';
 import 'services/theme_provider.dart';
 import 'services/user_provider.dart';
 import 'services/sound_provider.dart';
+import 'providers/auth_provider.dart';
 import 'services/supabase_database_service.dart';
 import 'auth_wrapper.dart';
 
@@ -44,6 +45,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (context) => AuthProvider()),
         ChangeNotifierProvider(create: (context) => ThemeProvider()),
         ChangeNotifierProvider(create: (context) => UserProvider()),
         ChangeNotifierProvider(create: (context) => ServiceProvider()),

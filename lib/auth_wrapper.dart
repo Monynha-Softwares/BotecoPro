@@ -21,26 +21,20 @@ class AuthWrapper extends StatelessWidget {
           );
         }
 
-        return ChangeNotifierProvider(
-          create: (_) => AuthProvider(),
-          child: Consumer<AuthProvider>(
-            builder: (context, authProvider, _) {
-              if (authProvider.status == AuthStatus.initial) {
-                return const Scaffold(
-                  body: Center(child: CircularProgressIndicator()),
-                );
-              }
+        final authProvider = Provider.of<AuthProvider>(context);
+        if (authProvider.status == AuthStatus.initial) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
 
-              // If authenticated, show the main app content
-              if (authProvider.isAuthenticated) {
-                return child;
-              }
+        // If authenticated, show the main app content
+        if (authProvider.isAuthenticated) {
+          return child;
+        }
 
-              // If not authenticated, show login screen
-              return const LoginPage();
-            },
-          ),
-        );
+        // If not authenticated, show login screen
+        return const LoginPage();
       },
     );
   }

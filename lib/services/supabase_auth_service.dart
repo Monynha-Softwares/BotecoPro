@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import 'package:google_sign_in/google_sign_in.dart';
 import '../models/auth_user.dart';
@@ -11,7 +13,9 @@ class SupabaseAuthService {
   SupabaseAuthService._internal();
 
   final supabase.SupabaseClient _supabase = supabase.Supabase.instance.client;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    clientId: kIsWeb ? dotenv.env['GOOGLE_WEB_CLIENT_ID'] : null,
+  );
 
   // Current user getter
   AuthUser? get currentUser {
