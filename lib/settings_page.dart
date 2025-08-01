@@ -24,7 +24,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final userProvider = Provider.of<UserProvider>(context);
     final serviceProvider = Provider.of<ServiceProvider>(context);
     final soundProvider = Provider.of<SoundProvider>(context);
-    
+
     return Scaffold(
       appBar: CustomAppBar(title: context.l10n.settings),
       body: ListView(
@@ -73,7 +73,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 title: Text(context.l10n.enableNotifications),
                 subtitle: Text(context.l10n.stockAlerts),
                 value: userProvider.notificationsEnabled,
-                onChanged: (value) => userProvider.setNotificationsEnabled(value),
+                onChanged: (value) =>
+                    userProvider.setNotificationsEnabled(value),
                 activeColor: botecoWine,
               ),
             ],
@@ -119,10 +120,10 @@ class _SettingsPageState extends State<SettingsPage> {
             title: context.l10n.about,
             icon: Icons.info_outline,
             children: [
-              const ListTile(
+              ListTile(
                 title: Text(context.l10n.appVersion),
                 subtitle: Text('1.0.0'),
-                trailing: Icon(Icons.check_circle, color: Colors.green),
+                trailing: const Icon(Icons.check_circle, color: Colors.green),
               ),
               ListTile(
                 title: Text(context.l10n.aboutBoteco),
@@ -138,12 +139,13 @@ class _SettingsPageState extends State<SettingsPage> {
               onPressed: () => _showLogoutConfirmation(context),
               icon: const Icon(Icons.logout, color: Colors.red),
               label: const Text(
-                'Sair do Sistema', 
+                'Sair do Sistema',
                 style: TextStyle(color: Colors.red),
               ),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: Colors.red),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
             ),
           ),
@@ -204,7 +206,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _buildProfileCard(BuildContext context, UserProvider userProvider) {
     final user = userProvider.userProfile;
-    
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -246,7 +248,8 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Widget _buildThemeSettings(BuildContext context, ThemeProvider themeProvider) {
+  Widget _buildThemeSettings(
+      BuildContext context, ThemeProvider themeProvider) {
     return Column(
       children: [
         SwitchListTile(
@@ -263,13 +266,14 @@ class _SettingsPageState extends State<SettingsPage> {
           },
           activeColor: botecoWine,
         ),
-        if (!themeProvider.isSystemMode) ...[  
+        if (!themeProvider.isSystemMode) ...[
           SwitchListTile(
             title: Text(context.l10n.darkMode),
             subtitle: Text(context.l10n.useDarkTheme),
             value: themeProvider.isDarkMode,
             onChanged: (value) {
-              themeProvider.setThemeMode(value ? ThemeMode.dark : ThemeMode.light);
+              themeProvider
+                  .setThemeMode(value ? ThemeMode.dark : ThemeMode.light);
             },
             activeColor: botecoWine,
           ),
@@ -278,13 +282,14 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Widget _buildSyncSettings(BuildContext context, ServiceProvider serviceProvider) {
+  Widget _buildSyncSettings(
+      BuildContext context, ServiceProvider serviceProvider) {
     return Column(
       children: [
         SwitchListTile(
           title: Text(context.l10n.onlineMode),
           subtitle: Text(
-            serviceProvider.isOnline 
+            serviceProvider.isOnline
                 ? context.l10n.connectedServer
                 : context.l10n.offlineMode,
           ),
@@ -292,7 +297,7 @@ class _SettingsPageState extends State<SettingsPage> {
           onChanged: (value) => serviceProvider.toggleOnlineMode(value),
           activeColor: botecoWine,
         ),
-        if (serviceProvider.isOnline) ...[  
+        if (serviceProvider.isOnline) ...[
           ListTile(
             title: Text(context.l10n.lastSync),
             subtitle: Text(
@@ -322,10 +327,11 @@ class _SettingsPageState extends State<SettingsPage> {
   void _showEditProfileDialog(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final user = userProvider.userProfile;
-    
+
     final nameController = TextEditingController(text: user.name);
     final emailController = TextEditingController(text: user.email);
-    final establishmentController = TextEditingController(text: user.establishment);
+    final establishmentController =
+        TextEditingController(text: user.establishment);
     final positionController = TextEditingController(text: user.position);
 
     showDialog(
@@ -388,9 +394,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 establishment: establishmentController.text.trim(),
                 position: positionController.text.trim(),
               );
-              
+
               userProvider.updateUserProfile(newProfile);
-              
+
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -500,7 +506,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   void _showSoundTestDialog(BuildContext context) {
     final soundProvider = Provider.of<SoundProvider>(context, listen: false);
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -516,43 +522,43 @@ class _SettingsPageState extends State<SettingsPage> {
               children: [
                 ElevatedButton(
                   onPressed: () => soundProvider.playMesaAberta(),
-            child: Text(context.l10n.tableOpened),
+                  child: Text(context.l10n.tableOpened),
                 ),
                 ElevatedButton(
                   onPressed: () => soundProvider.playMesaFechada(),
-            child: Text(context.l10n.tableClosed),
+                  child: Text(context.l10n.tableClosed),
                 ),
                 ElevatedButton(
                   onPressed: () => soundProvider.playPedidoAdicionado(),
-            child: Text(context.l10n.orderAdded),
+                  child: Text(context.l10n.orderAdded),
                 ),
                 ElevatedButton(
                   onPressed: () => soundProvider.playPedidoEntregue(),
-            child: Text(context.l10n.orderDelivered),
+                  child: Text(context.l10n.orderDelivered),
                 ),
                 ElevatedButton(
                   onPressed: () => soundProvider.playVendaFechada(),
-            child: Text(context.l10n.saleClosed),
+                  child: Text(context.l10n.saleClosed),
                 ),
                 ElevatedButton(
                   onPressed: () => soundProvider.playProdutoAdicionado(),
-            child: Text(context.l10n.productAdded),
+                  child: Text(context.l10n.productAdded),
                 ),
                 ElevatedButton(
                   onPressed: () => soundProvider.playSucesso(),
-            child: Text(context.l10n.success),
+                  child: Text(context.l10n.success),
                 ),
                 ElevatedButton(
                   onPressed: () => soundProvider.playErro(),
-            child: Text(context.l10n.error),
+                  child: Text(context.l10n.error),
                 ),
                 ElevatedButton(
                   onPressed: () => soundProvider.playNotificacao(),
-            child: Text(context.l10n.notification),
+                  child: Text(context.l10n.notification),
                 ),
                 ElevatedButton(
                   onPressed: () => soundProvider.playNavegacao(),
-            child: Text(context.l10n.navigation),
+                  child: Text(context.l10n.navigation),
                 ),
               ],
             ),
@@ -592,7 +598,8 @@ class _SettingsPageState extends State<SettingsPage> {
             onPressed: () {
               Navigator.pop(context);
               // Get AuthProvider and sign out
-              final authProvider = Provider.of<AuthProvider>(context, listen: false);
+              final authProvider =
+                  Provider.of<AuthProvider>(context, listen: false);
               authProvider.signOut();
             },
             style: ElevatedButton.styleFrom(

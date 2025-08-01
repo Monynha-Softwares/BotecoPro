@@ -31,7 +31,7 @@ class _TablesPageState extends State<TablesPage> {
 
     final service = Provider.of<ServiceProvider>(context, listen: false);
     final tables = await service.getTables();
-    tables.sort((a, b) => (a.number ?? 0).compareTo(b.number ?? 0));
+    tables.sort((a, b) => a.number.compareTo(b.number));
 
     if (mounted) {
       setState(() {

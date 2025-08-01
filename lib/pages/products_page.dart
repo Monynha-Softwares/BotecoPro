@@ -741,7 +741,6 @@ class _ProductsPageState extends State<ProductsPage> {
   }
 
   void _showStockAdjustmentDialog(Product product) {
-    final TextEditingController stockController = TextEditingController(text: product.stockQuantity.toString());
     final int currentStock = product.stockQuantity;
     int adjustment = 0;
     bool isAddition = true;
