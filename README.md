@@ -45,85 +45,31 @@ It helps owners keep tables, orders, stock, recipes and in-house production unde
 - **Fornecedores:** Gestão de fornecedores
 - **Receitas:** Cadastro de receitas próprias
 
-## 📦 Ambiente de Desenvolvimento
-
-1. Copie o arquivo `.env.example` para `.env` e preencha `SUPABASE_URL` e `SUPABASE_ANON_KEY` com as credenciais do seu projeto (as demais variáveis já possuem valores padrão para o Postgres local).
-2. Certifique-se de ter o **Docker** instalado.
-3. Inicie o banco local com:
-   ```bash
-   docker compose up -d
-   ```
-4. Aplique o esquema inicial executando `./scripts/init_postgres.sh` (use `--seed` caso queira gerar dados de exemplo).
-5. Execute o aplicativo normalmente com `flutter run`.
-   Para rodar a versão web use `flutter run -d chrome`. Caso o navegador
-   não esteja disponível (como em ambientes de CI ou containers
-   minimalistas), utilize `flutter run -d web-server` para iniciar um
-   servidor local.
 
 ## 🧪 Testes
 
-Este repositório utiliza **Flutter Test** para validar os widgets e
-funcionalidades principais do aplicativo. Os testes podem ser executados localmente
-com o comando:
+Exemplos de testes:
 
 ```bash
+flutter doctor
 flutter test
-```
+dart analyse
+dart fix --apply
+flutter run -d Chrome
 
+```
+Sempre execute `flutter doctor` para verificar se existem componentes em falta. Se necessário, instale-os.
 Uma pipeline do **GitHub Actions** roda automaticamente em cada *push* e *pull request*,
 executando `flutter analyze` e `flutter test` para garantir a qualidade do código.
 Os relatórios de cobertura são disponibilizados como artefato da execução.
 Um workflow separado realiza o *deploy* da versão web no GitHub Pages
 sempre que há alterações na branch `main`.
 
----
-
-## ⚙️ Deployment / Database setup
-
-Para garantir que todas as tabelas utilizem **Row Level Security** em produção,
-execute o script `supabase/tables/rls_policies.sql` no banco de dados do
-Supabase.
-
-1. Acesse o painel do projeto em <https://app.supabase.com/> e abra o SQL Editor
-   (ou utilize o Supabase CLI).
-2. Cole o conteúdo do arquivo e execute todas as instruções.
-3. Verifique na aba **RLS Policies** de cada tabela que as políticas foram
-   criadas corretamente.
-
-Também é recomendável habilitar **Regional Replication** no painel do Supabase
-(menu *Database › Replication*) para obter uma réplica de leitura em outra
-região e reduzir a latência dos clientes.
-
-Para otimizar as consultas mais comuns crie os seguintes índices manuais:
-
-```sql
-CREATE INDEX IF NOT EXISTS idx_produtos_user_nome ON produtos (user_id, nome);
-CREATE INDEX IF NOT EXISTS idx_vendas_user_data ON vendas (user_id, data_venda DESC);
-CREATE INDEX IF NOT EXISTS idx_pedidos_user_data ON pedidos (user_id, data_pedido DESC);
-```
-
-Com o Supabase CLI o mesmo pode ser feito via:
-
-```bash
-supabase db execute supabase/tables/rls_policies.sql
-```
-
-
-**Desenvolvido com ❤️ para a gestão de bares e restaurantes**
-
----
-
 
 ## 🤝 Contributing & License
 
 This is an academic project but pull-requests are welcome for educational purposes.
 Code released under the **MIT License** – see [LICENSE](LICENSE).
-
----
-
-### 🙌 Acknowledgements
-
-* Open-source Flutter community for awesome packages
 
 ---
 
