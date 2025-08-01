@@ -327,4 +327,150 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get genericError => 'An error occurred. Please try again later.';
+
+  @override
+  String get profileUpdatedSuccess => 'Profile updated successfully!';
+
+  @override
+  String get openTable => 'Open Table';
+
+  @override
+  String get add => 'Add';
+
+  @override
+  String get addNewTable => 'Add New Table';
+
+  @override
+  String get addNewRecipe => 'Add New Recipe';
+
+  @override
+  String get addNewSupplier => 'Add New Supplier';
+
+  @override
+  String get addNewProduct => 'Add New Product';
+
+  @override
+  String get adjustStock => 'Adjust Stock';
+
+  @override
+  String get attention => 'Attention';
+
+  @override
+  String get position => 'Position';
+
+  @override
+  String get establishment => 'Establishment';
+
+  @override
+  String get createdAtLabel => 'Created at:';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get editSupplier => 'Edit Supplier';
+
+  @override
+  String get editProduct => 'Edit Product';
+
+  @override
+  String get editProduction => 'Edit Production';
+
+  @override
+  String get editRecipe => 'Edit Recipe';
+
+  @override
+  String get englishUs => 'English (US)';
+
+  @override
+  String get spanish => 'Español';
+
+  @override
+  String get french => 'Français';
+
+  @override
+  String get portugueseBrazil => 'Portuguese (Brazil)';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get confirmCloseWithPendingItems =>
+      'There are items not yet delivered. Mark all as delivered and close the table?';
+
+  @override
+  String get closeTable => 'Close Table';
+
+  @override
+  String get finalizedAtLabel => 'Finalized at:';
+
+  @override
+  String get finalize => 'Finalize';
+
+  @override
+  String get paymentMethodLabel => 'Payment Method:';
+
+  @override
+  String get ingredients => 'Ingredients';
+
+  @override
+  String get noIngredients => 'No ingredients added';
+
+  @override
+  String get newTable => 'New Table';
+
+  @override
+  String get newProduction => 'New Production';
+
+  @override
+  String get newHomeProduction => 'New Homemade Production';
+
+  @override
+  String get newRecipe => 'New Recipe';
+
+  @override
+  String get newSupplier => 'New Supplier';
+
+  @override
+  String get newProduct => 'New Product';
+
+  @override
+  String get periodLabel => 'Period:';
+
+  @override
+  String get unitPriceLabel => 'Unit price:';
+
+  @override
+  String get quantityProducedLabel => 'Quantity Produced:';
+
+  @override
+  String get quantityLabel => 'Quantity:';
+
+  @override
+  String get remove => 'Remove';
+
+  @override
+  String get selectLanguage => 'Select Language';
+
+  @override
+  String get systemTheme => 'System Theme';
+
+  @override
+  String get aboutApp => 'About the App';
+
+  @override
+  String get logoutSystemQuestion =>
+      'Are you sure you want to log out of the system?';
+
+  @override
+  String get viewDetails => 'View Details';
+
+  @override
+  String get viewAllOrders => 'View all orders';
+
+  @override
+  String get statusLabel => 'Status:';
+
+  @override
+  String get observationsLabel => 'Observations:';
 }

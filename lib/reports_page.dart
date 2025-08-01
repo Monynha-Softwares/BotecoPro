@@ -167,7 +167,7 @@ class _ReportsPageState extends State<ReportsPage> with SingleTickerProviderStat
                     );
                   },
                   icon: const Icon(Icons.receipt_long, size: 16),
-                  label: const Text('Ver todos os pedidos'),
+                  label: Text(context.l10n.viewAllOrders),
                   style: TextButton.styleFrom(
                     foregroundColor: Theme.of(context).colorScheme.primary,
                   ),
@@ -347,7 +347,7 @@ class _ReportsPageState extends State<ReportsPage> with SingleTickerProviderStat
         children: [
           Row(
             children: [
-              const Text('Período:'),
+              Text(context.l10n.periodLabel),
               const SizedBox(width: 8),
               DropdownButton<String>(
                 value: _selectedPeriod,

@@ -337,7 +337,7 @@ class _SettingsPageState extends State<SettingsPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Editar Perfil'),
+        title: Text(context.l10n.editProfile),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -399,8 +399,8 @@ class _SettingsPageState extends State<SettingsPage> {
 
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Perfil atualizado com sucesso!'),
+                SnackBar(
+                  content: Text(context.l10n.profileUpdatedSuccess),
                   backgroundColor: Colors.green,
                 ),
               );
@@ -422,35 +422,35 @@ class _SettingsPageState extends State<SettingsPage> {
     showDialog(
       context: context,
       builder: (context) => SimpleDialog(
-        title: const Text('Selecionar Idioma'),
+        title: Text(context.l10n.selectLanguage),
         children: [
           SimpleDialogOption(
             onPressed: () {
               userProvider.setLanguage('Português (Brasil)');
               Navigator.pop(context);
             },
-            child: const Text('Português (Brasil)'),
+            child: Text(context.l10n.portugueseBrazil),
           ),
           SimpleDialogOption(
             onPressed: () {
               userProvider.setLanguage('English (US)');
               Navigator.pop(context);
             },
-            child: const Text('English (US)'),
+            child: Text(context.l10n.englishUs),
           ),
           SimpleDialogOption(
             onPressed: () {
               userProvider.setLanguage('Español');
               Navigator.pop(context);
             },
-            child: const Text('Español'),
+            child: Text(context.l10n.spanish),
           ),
           SimpleDialogOption(
             onPressed: () {
               userProvider.setLanguage('Français');
               Navigator.pop(context);
             },
-            child: const Text('Français'),
+            child: Text(context.l10n.french),
           ),
         ],
       ),
@@ -479,7 +479,7 @@ class _SettingsPageState extends State<SettingsPage> {
               'Boteco PRO',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            const Text('Versão 1.0.0'),
+            Text('${context.l10n.appVersion} ${context.l10n.appVersionNumber}'),
             const SizedBox(height: 16),
             const Text(
               'Boteco PRO é um sistema de gestão completo para bares e restaurantes. '

@@ -75,7 +75,7 @@ class _ProductionPageState extends State<ProductionPage> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         icon: const Icon(Icons.add),
-        label: const Text('Nova Produção'),
+        label: Text(context.l10n.newProduction),
       ).animate().scale(delay: const Duration(milliseconds: 300)),
     );
   }
@@ -216,7 +216,7 @@ class _ProductionPageState extends State<ProductionPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Quantidade Produzida:'),
+                        Text(context.l10n.quantityProducedLabel),
                         Text(
                           '${production.quantity} ${production.unit}',
                           style: const TextStyle(fontWeight: FontWeight.bold),
@@ -228,7 +228,7 @@ class _ProductionPageState extends State<ProductionPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Finalizada em:'),
+                          Text(context.l10n.finalizedAtLabel),
                           Text(
                             formatDateTime(production.finalizedAt!),
                             style: const TextStyle(fontWeight: FontWeight.bold),
@@ -247,7 +247,7 @@ class _ProductionPageState extends State<ProductionPage> {
                     TextButton.icon(
                       onPressed: () => _showAddIngredientDialog(production),
                       icon: const Icon(Icons.add_circle_outline, size: 18),
-                      label: const Text('Ingredientes'),
+                      label: Text(context.l10n.ingredients),
                       style: TextButton.styleFrom(
                         foregroundColor: Theme.of(context).colorScheme.primary,
                       ),
@@ -256,7 +256,7 @@ class _ProductionPageState extends State<ProductionPage> {
                     TextButton.icon(
                       onPressed: () => _showFinalizeProductionDialog(production),
                       icon: const Icon(Icons.check_circle_outline, size: 18),
-                      label: const Text('Finalizar'),
+                      label: Text(context.l10n.finalize),
                       style: TextButton.styleFrom(
                         foregroundColor: Colors.green,
                       ),
@@ -266,7 +266,7 @@ class _ProductionPageState extends State<ProductionPage> {
                   TextButton.icon(
                     onPressed: isFinalized ? null : () => _showEditProductionDialog(production),
                     icon: const Icon(Icons.edit, size: 18),
-                    label: const Text('Editar'),
+                    label: Text(context.l10n.edit),
                     style: TextButton.styleFrom(
                       foregroundColor: isFinalized ? Colors.grey : Theme.of(context).colorScheme.primary,
                     ),
@@ -296,7 +296,7 @@ class _ProductionPageState extends State<ProductionPage> {
       builder: (context) => StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            title: const Text('Nova Produção Caseira'),
+            title: Text(context.l10n.newHomeProduction),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -467,7 +467,7 @@ class _ProductionPageState extends State<ProductionPage> {
       builder: (context) => StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            title: const Text('Editar Produção'),
+            title: Text(context.l10n.editProduction),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -653,7 +653,7 @@ class _ProductionPageState extends State<ProductionPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Quantidade:'),
+                    Text(context.l10n.quantityLabel),
                     QuantitySelector(
                       quantity: quantity,
                       onChanged: (value) {
@@ -877,7 +877,7 @@ class _ProductionPageState extends State<ProductionPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Status:'),
+                Text(context.l10n.statusLabel),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
@@ -911,7 +911,7 @@ class _ProductionPageState extends State<ProductionPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Quantidade:'),
+                Text(context.l10n.quantityLabel),
                 Text(
                   '${production.quantity} ${production.unit}',
                   style: const TextStyle(fontWeight: FontWeight.bold),
@@ -922,7 +922,7 @@ class _ProductionPageState extends State<ProductionPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Criada em:'),
+                Text(context.l10n.createdAtLabel),
                 Text(
                   formatDateTime(production.createdAt),
                   style: const TextStyle(fontWeight: FontWeight.bold),
@@ -934,7 +934,7 @@ class _ProductionPageState extends State<ProductionPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Finalizada em:'),
+                  Text(context.l10n.finalizedAtLabel),
                   Text(
                     formatDateTime(production.finalizedAt!),
                     style: const TextStyle(fontWeight: FontWeight.bold),
@@ -944,21 +944,21 @@ class _ProductionPageState extends State<ProductionPage> {
             ],
             if (production.notes.isNotEmpty) ...[  
               const SizedBox(height: 16),
-              const Text(
-                'Observaçu00f5es:',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              Text(
+                context.l10n.observationsLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(production.notes),
             ],
             const SizedBox(height: 16),
-            const Text(
-              'Ingredientes:',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            Text(
+              context.l10n.ingredients,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             if (production.ingredients.isEmpty)
-              const Text('Nenhum ingrediente adicionado')
+              Text(context.l10n.noIngredients)
             else
               Column(
                 children: production.ingredients.map((ingredient) => Padding(
@@ -980,7 +980,7 @@ class _ProductionPageState extends State<ProductionPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Fechar'),
+            child: Text(context.l10n.close),
           ),
         ],
       ),

@@ -63,7 +63,7 @@ class _TablesPageState extends State<TablesPage> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         icon: const Icon(Icons.add),
-        label: const Text('Nova Mesa'),
+        label: Text(context.l10n.newTable),
       ).animate().scale(delay: const Duration(milliseconds: 300)),
     );
   }
@@ -326,7 +326,7 @@ class _TablesPageState extends State<TablesPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Abrir Mesa'),
+        title: Text(context.l10n.openTable),
         content: Text('Deseja iniciar um novo atendimento na mesa ${table.number}?'),
         actions: [
           TextButton(
@@ -383,7 +383,7 @@ class _TablesPageState extends State<TablesPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Adicionar Nova Mesa'),
+        title: Text(context.l10n.addNewTable),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

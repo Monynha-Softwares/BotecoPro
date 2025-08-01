@@ -69,7 +69,7 @@ class _SuppliersPageState extends State<SuppliersPage> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         icon: const Icon(Icons.add),
-        label: const Text('Novo Fornecedor'),
+        label: Text(context.l10n.newSupplier),
       ).animate().scale(delay: const Duration(milliseconds: 300)),
     );
   }
@@ -196,7 +196,7 @@ class _SuppliersPageState extends State<SuppliersPage> {
                 TextButton.icon(
                   onPressed: () => _showEditSupplierDialog(supplier),
                   icon: const Icon(Icons.edit, size: 18),
-                  label: const Text('Editar'),
+                  label: Text(context.l10n.edit),
                   style: TextButton.styleFrom(
                     foregroundColor: Theme.of(context).colorScheme.primary,
                   ),
@@ -205,7 +205,7 @@ class _SuppliersPageState extends State<SuppliersPage> {
                 TextButton.icon(
                   onPressed: () => _showDeleteConfirmation(supplier),
                   icon: const Icon(Icons.delete, size: 18),
-                  label: const Text('Excluir'),
+                  label: Text(context.l10n.delete),
                   style: TextButton.styleFrom(
                     foregroundColor: Theme.of(context).colorScheme.error,
                   ),
@@ -230,7 +230,7 @@ class _SuppliersPageState extends State<SuppliersPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Adicionar Novo Fornecedor'),
+        title: Text(context.l10n.addNewSupplier),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -343,7 +343,7 @@ class _SuppliersPageState extends State<SuppliersPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Editar Fornecedor'),
+        title: Text(context.l10n.editSupplier),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,

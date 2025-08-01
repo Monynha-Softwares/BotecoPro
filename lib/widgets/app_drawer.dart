@@ -174,7 +174,7 @@ leading: Icon(
 Icons.sync,
 color: serviceProvider.isOnline ? Colors.green : Colors.grey,
 ),
-title: const Text('Sincronização'),
+  title: Text(context.l10n.sync),
 subtitle: Text(
 serviceProvider.isOnline
 ? 'Modo Online'
@@ -219,7 +219,7 @@ leading: Icon(
 themeProvider.isDarkMode ? Icons.dark_mode : Icons.light_mode,
 color: Theme.of(context).colorScheme.primary,
 ),
-title: const Text('Modo Escuro'),
+  title: Text(context.l10n.darkMode),
 trailing: Switch(
 value: themeProvider.isDarkMode,
 onChanged: (value) {
@@ -250,7 +250,7 @@ final user = userProvider.userProfile;
 showDialog(
 context: context,
 builder: (context) => AlertDialog(
-title: const Text('Perfil do Usuário'),
+  title: Text(context.l10n.userProfile),
 content: SizedBox(
 width: double.maxFinite,
 child: Column(
@@ -275,12 +275,12 @@ const SizedBox(height: 16),
 const Divider(),
 ListTile(
 leading: const Icon(Icons.business),
-title: const Text('Estabelecimento'),
+      title: Text(context.l10n.establishment),
 subtitle: Text(user.establishment),
 ),
 ListTile(
 leading: const Icon(Icons.badge),
-title: const Text('Cargo'),
+      title: Text(context.l10n.position),
 subtitle: Text(user.position),
 ),
 ],
@@ -288,8 +288,8 @@ subtitle: Text(user.position),
 ),
 actions: [
 TextButton(
-onPressed: () => Navigator.pop(context),
-child: const Text('Fechar'),
+  onPressed: () => Navigator.pop(context),
+  child: Text(context.l10n.close),
 ),
 ElevatedButton(
 onPressed: () {
@@ -321,7 +321,7 @@ final positionController = TextEditingController(text: user.position);
 showDialog(
 context: context,
 builder: (context) => AlertDialog(
-title: const Text('Editar Perfil'),
+  title: Text(context.l10n.editProfile),
 content: SingleChildScrollView(
 child: Column(
 mainAxisSize: MainAxisSize.min,
@@ -401,8 +401,8 @@ actions: [
 TextButton(
 onPressed: () => Navigator.pop(context),
 child: Text(
-'Cancelar',
-style: TextStyle(color: Theme.of(context).colorScheme.error),
+  context.l10n.cancel,
+  style: TextStyle(color: Theme.of(context).colorScheme.error),
 ),
 ),
 ElevatedButton(
@@ -418,12 +418,12 @@ position: positionController.text.trim(),
 userProvider.updateUserProfile(newProfile);
 
 Navigator.pop(context);
-ScaffoldMessenger.of(context).showSnackBar(
-const SnackBar(
-content: Text('Perfil atualizado com sucesso!'),
-backgroundColor: Colors.green,
-),
-);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.l10n.profileUpdatedSuccess),
+        backgroundColor: Colors.green,
+      ),
+    );
 },
 style: ElevatedButton.styleFrom(
 backgroundColor: Theme.of(context).colorScheme.primary,
@@ -453,14 +453,14 @@ context: context,
 builder: (context) => StatefulBuilder(
 builder: (context, setState) {
 return AlertDialog(
-title: const Text('Configurações'),
+  title: Text(context.l10n.settings),
 content: Column(
 mainAxisSize: MainAxisSize.min,
 crossAxisAlignment: CrossAxisAlignment.start,
 children: [
 ListTile(
 leading: const Icon(Icons.brightness_auto),
-title: const Text('Tema do Sistema'),
+      title: Text(context.l10n.systemTheme),
 trailing: Switch(
 value: systemTheme,
 onChanged: (value) {
@@ -476,7 +476,7 @@ darkMode = false;
 ),
 ListTile(
 leading: const Icon(Icons.dark_mode),
-title: const Text('Modo Escuro'),
+      title: Text(context.l10n.darkMode),
 trailing: Switch(
 value: darkMode,
 onChanged: systemTheme ? null : (value) {
@@ -488,7 +488,7 @@ darkMode = value;
 ),
 ListTile(
 leading: const Icon(Icons.notifications),
-title: const Text('Notificações'),
+      title: Text(context.l10n.notifications),
 trailing: Switch(
 value: notifications,
 onChanged: (value) {
@@ -500,7 +500,7 @@ notifications = value;
 ),
 ListTile(
 leading: const Icon(Icons.language),
-title: const Text('Idioma'),
+      title: Text(context.l10n.language),
 subtitle: Text(language),
 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
 onTap: () {
@@ -508,7 +508,7 @@ onTap: () {
 showDialog(
 context: context,
 builder: (context) => SimpleDialog(
-title: const Text('Selecionar Idioma'),
+  title: Text(context.l10n.selectLanguage),
 children: [
 SimpleDialogOption(
 onPressed: () {
@@ -517,7 +517,7 @@ language = 'Português (Brasil)';
 });
 Navigator.pop(context);
 },
-child: const Text('Português (Brasil)'),
+  child: Text(context.l10n.portugueseBrazil),
 ),
 SimpleDialogOption(
 onPressed: () {
@@ -526,7 +526,7 @@ language = 'English (US)';
 });
 Navigator.pop(context);
 },
-child: const Text('English (US)'),
+  child: Text(context.l10n.englishUs),
 ),
 SimpleDialogOption(
 onPressed: () {
@@ -535,7 +535,7 @@ language = 'Español';
 });
 Navigator.pop(context);
 },
-child: const Text('Español'),
+  child: Text(context.l10n.spanish),
 ),
 ],
 ),
@@ -546,8 +546,8 @@ child: const Text('Español'),
 ),
 actions: [
 TextButton(
-onPressed: () => Navigator.pop(context),
-child: const Text('Cancelar'),
+  onPressed: () => Navigator.pop(context),
+  child: Text(context.l10n.cancel),
 ),
 ElevatedButton(
 onPressed: () {
@@ -589,7 +589,7 @@ void _showAboutDialog(BuildContext context) {
 showDialog(
 context: context,
 builder: (context) => AlertDialog(
-title: const Text('Sobre o App'),
+  title: Text(context.l10n.aboutApp),
 content: Column(
 mainAxisSize: MainAxisSize.min,
 children: [
@@ -607,7 +607,7 @@ const Text(
 'Boteco PRO',
 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
 ),
-const Text('Versão 1.0.0'),
+Text('${context.l10n.appVersion} ${context.l10n.appVersionNumber}'),
 const SizedBox(height: 16),
 const Text(
 'Boteco PRO é um sistema de gestão completo para bares e restaurantes. '
@@ -624,8 +624,8 @@ style: TextStyle(fontSize: 12),
 ),
 actions: [
 TextButton(
-onPressed: () => Navigator.pop(context),
-child: const Text('Fechar'),
+  onPressed: () => Navigator.pop(context),
+  child: Text(context.l10n.close),
 ),
 ],
 ),
@@ -636,8 +636,8 @@ void _showLogoutConfirmation(BuildContext context) {
 showDialog(
 context: context,
 builder: (context) => AlertDialog(
-title: const Text('Sair do Sistema'),
-content: const Text('Tem certeza que deseja sair do sistema?'),
+  title: Text(context.l10n.logoutSystem),
+  content: Text(context.l10n.logoutSystemQuestion),
 actions: [
 TextButton(
 onPressed: () => Navigator.pop(context),
@@ -672,8 +672,8 @@ style: ElevatedButton.styleFrom(
 backgroundColor: Theme.of(context).colorScheme.primary,
 ),
 child: Text(
-'Sair',
-style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+  context.l10n.logout,
+  style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
 ),
 ),
 ],
