@@ -71,18 +71,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Center(
-          child: Image.network(
-            "https://pixabay.com/get/g6793a386fc3d515b838b77528c46fe9bab87f7779df687abcb8f12aeb76f5cd2128b53f16cfb7580771b150cb4572d1bda21d02be88c6209366894babdb2cd41_1280.png",
-            height: 120,
-            width: 120,
-          ),
-        ).animate().fadeIn(duration: 600.ms).slideY(
-          begin: 0.2, 
-          end: 0,
-          curve: Curves.easeOutQuad,
-          duration: 800.ms
-        ),
+        const SizedBox(height: 120),
         const SizedBox(height: 24),
         Text(
           context.l10n.forgotPasswordTitle,
