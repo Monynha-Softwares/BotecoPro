@@ -284,7 +284,6 @@ class ServiceProvider with ChangeNotifier {
   }
 
   // PRODUÇÕES CASEIRAS (In-house Productions)
-  // TODO: implementar usando Supabase
   Future<List<ProducaoCaseira>> getProducoes() async {
     return await _supabaseService.getProducoes();
   }

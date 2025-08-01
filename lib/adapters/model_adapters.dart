@@ -212,14 +212,18 @@ class ProductionIngredientAdapter {
 }
 
 class ProductAdapter {
-  static Produto toProduto(Product product) {
+  static Produto toProduto(
+    Product product, {
+    required String tipoProduto,
+    required int idCategoria,
+  }) {
     return Produto(
       id_produto: int.tryParse(product.id),
       nome: product.name,
       unidade_base: product.unit,
-      tipo_produto: 'compra', // Default value
+      tipo_produto: tipoProduto,
       controla_estoque: true,
-      id_categoria: 1, // Default category
+      id_categoria: idCategoria,
     );
   }
 
