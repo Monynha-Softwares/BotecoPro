@@ -65,6 +65,10 @@ echo 'export CHROME_EXECUTABLE=/usr/bin/chromium-browser' >> ~/.bashrc
 flutter doctor -v || true
 echo "✅ Flutter instalado"
 
+<<<<<<< Updated upstream
+=======
+#────────────────── 6. Clona repositórios do projeto
+>>>>>>> Stashed changes
 
 #────────────────── ✅ Fim
 echo "🚀 Ambiente Monynha pronto para desenvolvimento!"
