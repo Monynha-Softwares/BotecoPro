@@ -113,7 +113,7 @@ class _LoginPageState extends State<LoginPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Conta de Teste",
+                                context.l10n.testAccount,
                                 style: textTheme.titleSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: botecoMustard,
@@ -121,7 +121,7 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                "Já preenchemos o formulário com uma conta de teste. Basta clicar em 'Entrar'.",
+                                context.l10n.testAccountDescription,
                                 style: textTheme.bodyMedium?.copyWith(
                                   color: colorScheme.onSurface,
                                 ),
@@ -139,18 +139,18 @@ class _LoginPageState extends State<LoginPage> {
                   TextFormField(
                     controller: _emailController,
                     decoration: InputDecoration(
-                      labelText: "E-mail",
-                      hintText: "Seu e-mail",
+                      labelText: context.l10n.emailLabel,
+                      hintText: context.l10n.emailHint,
                       prefixIcon: const Icon(Icons.email_outlined, color: botecoWine),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return "Por favor, informe seu e-mail";
+                        return context.l10n.emailEmpty;
                       }
                       if (!value.contains("@") || !value.contains(".")) {
-                        return "Por favor, informe um e-mail válido";
+                        return context.l10n.emailInvalid;
                       }
                       return null;
                     },
@@ -163,8 +163,8 @@ class _LoginPageState extends State<LoginPage> {
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
-                      labelText: "Senha",
-                      hintText: "Sua senha",
+                      labelText: context.l10n.passwordLabel,
+                      hintText: context.l10n.passwordHint,
                       prefixIcon: const Icon(Icons.lock_outline, color: botecoWine),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -177,10 +177,10 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return "Por favor, informe sua senha";
+                        return context.l10n.passwordEmpty;
                       }
                       if (value.length < 6) {
-                        return "A senha deve ter pelo menos 6 caracteres";
+                        return context.l10n.passwordLength;
                       }
                       return null;
                     },
@@ -204,12 +204,12 @@ class _LoginPageState extends State<LoginPage> {
                             },
                           ),
                           Text(
-                            "Lembrar-me",
+                            context.l10n.rememberMe,
                             style: textTheme.bodyMedium,
                           ),
                         ],
                       ),
-                      TextButton(
+                          TextButton(
                         onPressed: () {
                           Navigator.push(
                             context,
@@ -217,7 +217,7 @@ class _LoginPageState extends State<LoginPage> {
                           );
                         },
                         child: Text(
-                          "Esqueceu a senha?",
+                            context.l10n.forgotPassword,
                           style: textTheme.bodyMedium?.copyWith(
                             color: botecoWine,
                             fontWeight: FontWeight.w600,
@@ -249,7 +249,7 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           )
                         : Text(
-                            "Entrar",
+                            context.l10n.loginButton,
                             style: textTheme.titleMedium?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -292,7 +292,7 @@ class _LoginPageState extends State<LoginPage> {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text(
-                          "OU",
+                          context.l10n.orSeparator,
                           style: textTheme.bodyMedium?.copyWith(
                             color: colorScheme.outline,
                           ),
@@ -308,8 +308,8 @@ class _LoginPageState extends State<LoginPage> {
                   OutlinedButton.icon(
                     onPressed: _loginWithGoogle,
                     icon: const Icon(Icons.login, color: botecoMustard),
-                    label: Text(
-                      "Continuar com Google",
+                      label: Text(
+                      context.l10n.continueWithGoogle,
                       style: textTheme.titleSmall?.copyWith(
                         color: colorScheme.onSurface,
                       ),
@@ -328,7 +328,7 @@ class _LoginPageState extends State<LoginPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Não tem uma conta?",
+                        context.l10n.noAccount,
                         style: textTheme.bodyMedium,
                       ),
                       TextButton(
@@ -339,7 +339,7 @@ class _LoginPageState extends State<LoginPage> {
                           );
                         },
                         child: Text(
-                          "Cadastre-se",
+                          context.l10n.signUp,
                           style: textTheme.bodyLarge?.copyWith(
                             color: botecoWine,
                             fontWeight: FontWeight.bold,

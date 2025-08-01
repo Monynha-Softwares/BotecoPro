@@ -8,6 +8,7 @@ import 'services/sound_provider.dart';
 import 'widgets/shared_widgets.dart';
 import 'theme.dart';
 import 'providers/auth_provider.dart';
+import 'l10n/l10n.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -25,20 +26,20 @@ class _SettingsPageState extends State<SettingsPage> {
     final soundProvider = Provider.of<SoundProvider>(context);
     
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Configurações'),
+      appBar: CustomAppBar(title: context.l10n.settings),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           _buildSection(
             context: context,
-            title: 'Perfil',
+            title: context.l10n.profile,
             icon: Icons.person,
             children: [
               _buildProfileCard(context, userProvider),
               const SizedBox(height: 16),
               ActionButton(
                 icon: Icons.edit,
-                label: 'Editar Perfil',
+                label: context.l10n.editProfile,
                 onPressed: () => _showEditProfileDialog(context),
                 backgroundColor: botecoWine,
               ),
@@ -69,8 +70,8 @@ class _SettingsPageState extends State<SettingsPage> {
             icon: Icons.notifications,
             children: [
               SwitchListTile(
-                title: const Text('Ativar notificações'),
-                subtitle: const Text('Receber alertas de estoque e pedidos'),
+                title: Text(context.l10n.enableNotifications),
+                subtitle: Text(context.l10n.stockAlerts),
                 value: userProvider.notificationsEnabled,
                 onChanged: (value) => userProvider.setNotificationsEnabled(value),
                 activeColor: botecoWine,
@@ -80,11 +81,11 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 24),
           _buildSection(
             context: context,
-            title: 'Idioma',
+            title: context.l10n.language,
             icon: Icons.language,
             children: [
               ListTile(
-                title: const Text('Idioma do aplicativo'),
+                title: Text(context.l10n.appLanguage),
                 subtitle: Text(userProvider.language),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                 onTap: () => _showLanguageSelector(context, userProvider),
@@ -94,19 +95,19 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 24),
           _buildSection(
             context: context,
-            title: 'Sons e Efeitos',
+            title: context.l10n.sounds,
             icon: Icons.music_note,
             children: [
               SwitchListTile(
-                title: const Text('Efeitos sonoros'),
-                subtitle: const Text('Sons temáticos de boteco'),
+                title: Text(context.l10n.soundEffects),
+                subtitle: Text(context.l10n.themedSounds),
                 value: soundProvider.isSoundEnabled,
                 onChanged: (value) => soundProvider.toggleSound(value),
                 activeColor: botecoWine,
               ),
               ListTile(
-                title: const Text('Testar sons'),
-                subtitle: const Text('Ouça os efeitos sonoros'),
+                title: Text(context.l10n.testSounds),
+                subtitle: Text(context.l10n.soundEffects),
                 trailing: const Icon(Icons.volume_up),
                 onTap: () => _showSoundTestDialog(context),
               ),
@@ -115,17 +116,17 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 24),
           _buildSection(
             context: context,
-            title: 'Sobre',
+            title: context.l10n.about,
             icon: Icons.info_outline,
             children: [
               const ListTile(
-                title: Text('Versão do aplicativo'),
+                title: Text(context.l10n.appVersion),
                 subtitle: Text('1.0.0'),
                 trailing: Icon(Icons.check_circle, color: Colors.green),
               ),
               ListTile(
-                title: const Text('Sobre o Boteco PRO'),
-                subtitle: const Text('Informações e licenças'),
+                title: Text(context.l10n.aboutBoteco),
+                subtitle: Text(context.l10n.infoLicenses),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                 onTap: () => _showAboutDialog(context),
               ),
@@ -249,8 +250,8 @@ class _SettingsPageState extends State<SettingsPage> {
     return Column(
       children: [
         SwitchListTile(
-          title: const Text('Usar tema do sistema'),
-          subtitle: const Text('Seguir configurações do dispositivo'),
+          title: Text(context.l10n.useSystemTheme),
+          subtitle: Text(context.l10n.followDevice),
           value: themeProvider.isSystemMode,
           onChanged: (value) {
             if (value) {
@@ -264,8 +265,8 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         if (!themeProvider.isSystemMode) ...[  
           SwitchListTile(
-            title: const Text('Modo escuro'),
-            subtitle: const Text('Utilizar tema escuro'),
+            title: Text(context.l10n.darkMode),
+            subtitle: Text(context.l10n.useDarkTheme),
             value: themeProvider.isDarkMode,
             onChanged: (value) {
               themeProvider.setThemeMode(value ? ThemeMode.dark : ThemeMode.light);
@@ -281,11 +282,11 @@ class _SettingsPageState extends State<SettingsPage> {
     return Column(
       children: [
         SwitchListTile(
-          title: const Text('Modo online'),
+          title: Text(context.l10n.onlineMode),
           subtitle: Text(
             serviceProvider.isOnline 
-                ? 'Conectado ao servidor'
-                : 'Modo offline - usando dados locais',
+                ? context.l10n.connectedServer
+                : context.l10n.offlineMode,
           ),
           value: serviceProvider.isOnline,
           onChanged: (value) => serviceProvider.toggleOnlineMode(value),
@@ -293,11 +294,11 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         if (serviceProvider.isOnline) ...[  
           ListTile(
-            title: const Text('Última sincronização'),
+            title: Text(context.l10n.lastSync),
             subtitle: Text(
               serviceProvider.lastSyncTime != null
                   ? formatDateTime(serviceProvider.lastSyncTime!)
-                  : 'Nunca sincronizado',
+                  : context.l10n.neverSynced,
             ),
             trailing: IconButton(
               icon: const Icon(Icons.refresh),
@@ -374,7 +375,7 @@ class _SettingsPageState extends State<SettingsPage> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Cancelar',
+              context.l10n.cancel,
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),
@@ -402,7 +403,7 @@ class _SettingsPageState extends State<SettingsPage> {
               backgroundColor: Theme.of(context).colorScheme.primary,
             ),
             child: Text(
-              'Salvar',
+              context.l10n.save,
               style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
             ),
           ),
@@ -438,6 +439,13 @@ class _SettingsPageState extends State<SettingsPage> {
             },
             child: const Text('Español'),
           ),
+          SimpleDialogOption(
+            onPressed: () {
+              userProvider.setLanguage('Français');
+              Navigator.pop(context);
+            },
+            child: const Text('Français'),
+          ),
         ],
       ),
     );
@@ -447,7 +455,7 @@ class _SettingsPageState extends State<SettingsPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Sobre o App'),
+        title: Text(context.l10n.aboutBoteco),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -483,7 +491,7 @@ class _SettingsPageState extends State<SettingsPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Fechar'),
+            child: Text(context.l10n.close),
           ),
         ],
       ),
@@ -496,11 +504,11 @@ class _SettingsPageState extends State<SettingsPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Teste de Sons'),
+        title: Text(context.l10n.testSoundsTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Clique nos botões abaixo para testar os efeitos sonoros:'),
+            Text(context.l10n.clickButtons),
             const SizedBox(height: 16),
             Wrap(
               spacing: 8,
@@ -508,43 +516,43 @@ class _SettingsPageState extends State<SettingsPage> {
               children: [
                 ElevatedButton(
                   onPressed: () => soundProvider.playMesaAberta(),
-                  child: const Text('Mesa Aberta'),
+            child: Text(context.l10n.tableOpened),
                 ),
                 ElevatedButton(
                   onPressed: () => soundProvider.playMesaFechada(),
-                  child: const Text('Mesa Fechada'),
+            child: Text(context.l10n.tableClosed),
                 ),
                 ElevatedButton(
                   onPressed: () => soundProvider.playPedidoAdicionado(),
-                  child: const Text('Pedido Adicionado'),
+            child: Text(context.l10n.orderAdded),
                 ),
                 ElevatedButton(
                   onPressed: () => soundProvider.playPedidoEntregue(),
-                  child: const Text('Pedido Entregue'),
+            child: Text(context.l10n.orderDelivered),
                 ),
                 ElevatedButton(
                   onPressed: () => soundProvider.playVendaFechada(),
-                  child: const Text('Venda Fechada'),
+            child: Text(context.l10n.saleClosed),
                 ),
                 ElevatedButton(
                   onPressed: () => soundProvider.playProdutoAdicionado(),
-                  child: const Text('Produto Adicionado'),
+            child: Text(context.l10n.productAdded),
                 ),
                 ElevatedButton(
                   onPressed: () => soundProvider.playSucesso(),
-                  child: const Text('Sucesso'),
+            child: Text(context.l10n.success),
                 ),
                 ElevatedButton(
                   onPressed: () => soundProvider.playErro(),
-                  child: const Text('Erro'),
+            child: Text(context.l10n.error),
                 ),
                 ElevatedButton(
                   onPressed: () => soundProvider.playNotificacao(),
-                  child: const Text('Notificação'),
+            child: Text(context.l10n.notification),
                 ),
                 ElevatedButton(
                   onPressed: () => soundProvider.playNavegacao(),
-                  child: const Text('Navegação'),
+            child: Text(context.l10n.navigation),
                 ),
               ],
             ),
@@ -553,7 +561,7 @@ class _SettingsPageState extends State<SettingsPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Fechar'),
+            child: Text(context.l10n.close),
           ),
         ],
       ),
@@ -564,21 +572,19 @@ class _SettingsPageState extends State<SettingsPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.logout, color: botecoWine),
-            SizedBox(width: 8),
-            Text('Sair do aplicativo'),
+            const Icon(Icons.logout, color: botecoWine),
+            const SizedBox(width: 8),
+            Text(context.l10n.logoutApp),
           ],
         ),
-        content: const Text(
-          'Tem certeza que deseja sair do aplicativo? Você precisará fazer login novamente para acessar suas informações.',
-        ),
+        content: Text(context.l10n.logoutQuestion),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Cancelar',
+              context.l10n.cancel,
               style: TextStyle(color: Colors.grey[600]),
             ),
           ),
@@ -596,7 +602,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: const Text('Sair'),
+            child: Text(context.l10n.logout),
           ),
         ],
       ),
