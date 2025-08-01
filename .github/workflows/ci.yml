@@ -30,7 +30,9 @@ jobs:
       - name: Analyze
         run: flutter analyze
       - name: Run tests
-        run: flutter test --coverage
+        run: |
+          set -e
+          flutter test --coverage
       - name: Upload coverage
         uses: actions/upload-artifact@v3
         with:

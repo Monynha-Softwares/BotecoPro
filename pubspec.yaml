@@ -36,6 +36,8 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^2.0.0
 
+  mocktail: ^1.0.0
+
   supabase: any
 flutter:
   uses-material-design: true
