@@ -77,6 +77,25 @@ sempre que há alterações na branch `main`.
 
 ---
 
+## ⚙️ Deployment / Database setup
+
+Para garantir que todas as tabelas utilizem **Row Level Security** em produção,
+execute o script `supabase/tables/rls_policies.sql` no banco de dados do
+Supabase.
+
+1. Acesse o painel do projeto em <https://app.supabase.com/> e abra o SQL Editor
+   (ou utilize o Supabase CLI).
+2. Cole o conteúdo do arquivo e execute todas as instruções.
+3. Verifique na aba **RLS Policies** de cada tabela que as políticas foram
+   criadas corretamente.
+
+Com o Supabase CLI o mesmo pode ser feito via:
+
+```bash
+supabase db execute supabase/tables/rls_policies.sql
+```
+
+
 **Desenvolvido com ❤️ para a gestão de bares e restaurantes**
 
 ---
