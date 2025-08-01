@@ -230,6 +230,7 @@ class _RecipesPageState extends State<RecipesPage> {
     final TextEditingController nameController = TextEditingController();
     final TextEditingController priceController = TextEditingController();
     final TextEditingController instructionsController = TextEditingController();
+    final TextEditingController prepTimeController = TextEditingController();
     
     RecipeType selectedType = RecipeType.food;
 
@@ -298,6 +299,14 @@ class _RecipesPageState extends State<RecipesPage> {
                   ),
                   const SizedBox(height: 16),
                   TextField(
+                    controller: prepTimeController,
+                    decoration: const InputDecoration(
+                      labelText: 'Tempo de Preparo (min)',
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
                     controller: instructionsController,
                     decoration: const InputDecoration(
                       labelText: 'Modo de Preparo',
@@ -321,6 +330,8 @@ class _RecipesPageState extends State<RecipesPage> {
                   final name = nameController.text.trim();
                   final priceText = priceController.text.trim();
                   final instructions = instructionsController.text.trim();
+                  final prepText = prepTimeController.text.trim();
+                  final prepTime = int.tryParse(prepText);
                   
                   if (name.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -348,6 +359,7 @@ class _RecipesPageState extends State<RecipesPage> {
                     name: name,
                     type: selectedType,
                     price: price,
+                    preparationMinutes: prepTime,
                     instructions: instructions,
                   );
                   
@@ -380,6 +392,8 @@ class _RecipesPageState extends State<RecipesPage> {
     final TextEditingController nameController = TextEditingController(text: recipe.name);
     final TextEditingController priceController = TextEditingController(text: recipe.price.toString());
     final TextEditingController instructionsController = TextEditingController(text: recipe.instructions);
+    final TextEditingController prepTimeController =
+        TextEditingController(text: recipe.preparationMinutes?.toString() ?? '');
     
     var selectedType = recipe.type;
 
@@ -446,6 +460,14 @@ class _RecipesPageState extends State<RecipesPage> {
                   ),
                   const SizedBox(height: 16),
                   TextField(
+                    controller: prepTimeController,
+                    decoration: const InputDecoration(
+                      labelText: 'Tempo de Preparo (min)',
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
                     controller: instructionsController,
                     decoration: const InputDecoration(
                       labelText: 'Modo de Preparo',
@@ -468,6 +490,8 @@ class _RecipesPageState extends State<RecipesPage> {
                   final name = nameController.text.trim();
                   final priceText = priceController.text.trim();
                   final instructions = instructionsController.text.trim();
+                  final prepText = prepTimeController.text.trim();
+                  final prepTime = int.tryParse(prepText);
                   
                   if (name.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -495,6 +519,7 @@ class _RecipesPageState extends State<RecipesPage> {
                     name: name,
                     type: selectedType,
                     price: price,
+                    preparationMinutes: prepTime,
                     instructions: instructions,
                   );
                   
