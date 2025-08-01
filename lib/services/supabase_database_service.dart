@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import '../models/data_models.dart';
+import 'local_cache_service.dart';
 
 class SupabaseDatabaseService {
   static final SupabaseDatabaseService _instance =
@@ -20,10 +21,13 @@ class SupabaseDatabaseService {
     return _instance;
   }
 
-  SupabaseDatabaseService._internal();
+  SupabaseDatabaseService._internal() {
+    LocalCacheService.init();
+  }
 
   supabase.SupabaseClient? _client;
   String? _overrideUserId;
+  final LocalCacheService _cache = LocalCacheService();
 
   supabase.SupabaseClient get _supabase =>
       _client ??= supabase.Supabase.instance.client;
@@ -166,12 +170,13 @@ class SupabaseDatabaseService {
           .eq('user_id', _userId!)
           .order('nome');
 
-      return response
-          .map<Fornecedor>((data) => Fornecedor.fromJson(data))
-          .toList();
+      final list =
+          response.map<Fornecedor>((data) => Fornecedor.fromJson(data)).toList();
+      await _cache.saveFornecedores(list);
+      return list;
     } catch (e) {
       debugPrint('Error getting fornecedores: $e');
-      return [];
+      return await _cache.getFornecedores();
     }
   }
 
@@ -186,7 +191,12 @@ class SupabaseDatabaseService {
       await _supabase.from('fornecedores').insert(data);
     } catch (e) {
       debugPrint('Error adding fornecedor: $e');
-      throw Exception('Erro ao adicionar fornecedor');
+      await _cache.upsertFornecedor(fornecedor);
+      await _cache.addPending({
+        'table': 'fornecedores',
+        'action': 'add',
+        'data': fornecedor.toJson(),
+      });
     }
   }
 
@@ -203,9 +213,15 @@ class SupabaseDatabaseService {
           .update(data)
           .eq('id_fornecedor', fornecedor.id_fornecedor!)
           .eq('user_id', _userId!);
+      await _cache.upsertFornecedor(fornecedor);
     } catch (e) {
       debugPrint('Error updating fornecedor: $e');
-      throw Exception('Erro ao atualizar fornecedor');
+      await _cache.upsertFornecedor(fornecedor);
+      await _cache.addPending({
+        'table': 'fornecedores',
+        'action': 'update',
+        'data': fornecedor.toJson(),
+      });
     }
   }
 
@@ -218,9 +234,15 @@ class SupabaseDatabaseService {
           .delete()
           .eq('id_fornecedor', id)
           .eq('user_id', _userId!);
+      await _cache.removeFornecedor(id);
     } catch (e) {
       debugPrint('Error deleting fornecedor: $e');
-      throw Exception('Erro ao excluir fornecedor');
+      await _cache.removeFornecedor(id);
+      await _cache.addPending({
+        'table': 'fornecedores',
+        'action': 'delete',
+        'data': {'id_fornecedor': id},
+      });
     }
   }
 
@@ -963,6 +985,49 @@ class SupabaseDatabaseService {
       debugPrint('Error getting vendas diarias: $e');
       return 0.0;
     }
+  }
+
+  Future<void> syncPendingOperations() async {
+    final ops = await _cache.pendingOperations();
+    for (final op in ops) {
+      if (op['table'] == 'fornecedores') {
+        final fornecedor =
+            Fornecedor.fromJson(Map<String, dynamic>.from(op['data']));
+        try {
+          final data = fornecedor.toJson();
+          data['user_id'] = _userId;
+          data.remove('id_fornecedor');
+          switch (op['action']) {
+            case 'add':
+              await _supabase.from('fornecedores').insert(data);
+              break;
+            case 'update':
+              if (fornecedor.id_fornecedor != null) {
+                await _supabase
+                    .from('fornecedores')
+                    .update(data)
+                    .eq('id_fornecedor', fornecedor.id_fornecedor!)
+                    .eq('user_id', _userId!);
+              }
+              break;
+            case 'delete':
+              if (fornecedor.id_fornecedor != null) {
+                await _supabase
+                    .from('fornecedores')
+                    .delete()
+                    .eq('id_fornecedor', fornecedor.id_fornecedor!)
+                    .eq('user_id', _userId!);
+              }
+              break;
+            default:
+              break;
+          }
+        } catch (e) {
+          debugPrint('Error syncing fornecedor: $e');
+        }
+      }
+    }
+    await _cache.clearPending();
   }
 
   // Legacy compatibility methods for existing code
