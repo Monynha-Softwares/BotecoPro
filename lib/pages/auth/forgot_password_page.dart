@@ -26,7 +26,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   Future<void> _resetPassword() async {
     if (_formKey.currentState?.validate() ?? false) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final success = await authProvider.resetPassword(_emailController.text.trim());
+      final success =
+          await authProvider.resetPassword(context, _emailController.text.trim());
       
       if (success) {
         setState(() {

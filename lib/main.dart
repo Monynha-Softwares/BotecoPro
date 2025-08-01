@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -18,6 +19,7 @@ import 'services/theme_provider.dart';
 import 'services/user_provider.dart';
 import 'services/sound_provider.dart';
 import 'services/supabase_database_service.dart';
+import 'auth_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -66,6 +68,8 @@ class MyApp extends StatelessWidget {
         darkTheme: darkTheme,
         themeMode: themeProvider.themeMode,
         debugShowCheckedModeBanner: false,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: AuthWrapper(init: init, child: home));
   }
 }

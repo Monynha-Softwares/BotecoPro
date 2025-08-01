@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import 'package:google_sign_in/google_sign_in.dart';
 import '../models/auth_user.dart';
+import '../l10n/app_localizations.dart';
 
 class SupabaseAuthService {
   // Singleton pattern
@@ -177,34 +178,35 @@ class SupabaseAuthService {
   }
 
   // Get error message from Exception
-  String getMessageFromErrorCode(Exception e) {
+  String getMessageFromErrorCode(BuildContext context, Exception e) {
+    final l10n = AppLocalizations.of(context)!;
     final String errorCode = e.toString().replaceAll('Exception: ', '');
     
     switch (errorCode) {
       case 'invalid-email':
-        return 'O e-mail informado é inválido.';
+        return l10n.invalidEmailError;
       case 'user-not-found':
-        return 'Usuário não encontrado. Verifique seu e-mail e senha.';
+        return l10n.userNotFoundError;
       case 'wrong-password':
-        return 'Senha incorreta. Tente novamente.';
+        return l10n.wrongPasswordError;
       case 'weak-password':
-        return 'A senha deve ter pelo menos 6 caracteres.';
+        return l10n.weakPasswordError;
       case 'email-already-in-use':
-        return 'Este e-mail já está em uso por outro usuário.';
+        return l10n.emailInUseError;
       case 'operation-not-allowed':
-        return 'Operação não permitida. Contate o suporte.';
+        return l10n.operationNotAllowedError;
       case 'user-disabled':
-        return 'Esta conta foi desativada. Contate o suporte.';
+        return l10n.userDisabledError;
       case 'too-many-requests':
-        return 'Muitas tentativas. Tente novamente mais tarde.';
+        return l10n.tooManyRequestsError;
       case 'google-auth-failed':
-        return 'Falha na autenticação com Google. Tente novamente.';
+        return l10n.googleAuthFailedError;
       case 'sign-out-failed':
-        return 'Erro ao sair da conta. Tente novamente.';
+        return l10n.signOutFailedError;
       case 'update-failed':
-        return 'Erro ao atualizar perfil. Tente novamente.';
+        return l10n.updateFailedError;
       default:
-        return 'Ocorreu um erro ao processar sua solicitação. Tente novamente mais tarde.';
+        return l10n.unknownError;
     }
   }
 

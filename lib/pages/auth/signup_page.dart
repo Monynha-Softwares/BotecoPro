@@ -57,6 +57,7 @@ class _SignupPageState extends State<SignupPage> {
 
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final success = await authProvider.signUpWithEmail(
+        context,
         _emailController.text.trim(),
         _passwordController.text.trim(),
         _nameController.text.trim(),

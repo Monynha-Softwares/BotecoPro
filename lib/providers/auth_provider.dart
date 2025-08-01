@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/auth_user.dart';
 import '../services/supabase_auth_service.dart';
 import '../services/user_provider.dart';
+import '../l10n/app_localizations.dart';
 
 enum AuthStatus { initial, authenticated, unauthenticated }
 
@@ -52,7 +53,8 @@ class AuthProvider with ChangeNotifier {
   bool get isUnauthenticated => _status == AuthStatus.unauthenticated;
 
   // Sign in with email and password
-  Future<bool> signInWithEmail(String email, String password) async {
+  Future<bool> signInWithEmail(
+      BuildContext context, String email, String password) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -64,8 +66,8 @@ class AuthProvider with ChangeNotifier {
       return true;
     } catch (e) {
       _error = e is Exception
-          ? _authService.getMessageFromErrorCode(e)
-          : 'Ocorreu um erro. Tente novamente mais tarde.';
+          ? _authService.getMessageFromErrorCode(context, e)
+          : AppLocalizations.of(context)!.genericError;
       _isLoading = false;
       notifyListeners();
       return false;
@@ -74,7 +76,7 @@ class AuthProvider with ChangeNotifier {
 
   // Sign up with email and password
   Future<bool> signUpWithEmail(
-      String email, String password, String displayName) async {
+      BuildContext context, String email, String password, String displayName) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -95,8 +97,8 @@ class AuthProvider with ChangeNotifier {
       }
     } catch (e) {
       _error = e is Exception
-          ? _authService.getMessageFromErrorCode(e)
-          : 'Ocorreu um erro. Tente novamente mais tarde.';
+          ? _authService.getMessageFromErrorCode(context, e)
+          : AppLocalizations.of(context)!.genericError;
       _isLoading = false;
       notifyListeners();
       return false;
@@ -149,7 +151,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   // Reset password
-  Future<bool> resetPassword(String email) async {
+  Future<bool> resetPassword(BuildContext context, String email) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -161,8 +163,8 @@ class AuthProvider with ChangeNotifier {
       return true;
     } catch (e) {
       _error = e is Exception
-          ? _authService.getMessageFromErrorCode(e)
-          : 'Ocorreu um erro. Tente novamente mais tarde.';
+          ? _authService.getMessageFromErrorCode(context, e)
+          : AppLocalizations.of(context)!.genericError;
       _isLoading = false;
       notifyListeners();
       return false;
