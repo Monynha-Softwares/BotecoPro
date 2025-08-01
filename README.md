@@ -47,13 +47,14 @@ It helps owners keep tables, orders, stock, recipes and in-house production unde
 
 ## 📦 Ambiente de Desenvolvimento
 
-1. Certifique-se de ter o **Docker** instalado.
-2. Inicie o banco local com:
+1. Copie o arquivo `.env.example` para `.env` e preencha `SUPABASE_URL` e `SUPABASE_ANON_KEY` com as credenciais do seu projeto (as demais variáveis já possuem valores padrão para o Postgres local).
+2. Certifique-se de ter o **Docker** instalado.
+3. Inicie o banco local com:
    ```bash
    docker compose up -d
    ```
-3. Aplique o esquema inicial executando `./scripts/init_postgres.sh`.
-4. Execute o aplicativo normalmente com `flutter run`.
+4. Aplique o esquema inicial executando `./scripts/init_postgres.sh` (use `--seed` caso queira gerar dados de exemplo).
+5. Execute o aplicativo normalmente com `flutter run`.
    Para rodar a versão web use `flutter run -d chrome`. Caso o navegador
    não esteja disponível (como em ambientes de CI ou containers
    minimalistas), utilize `flutter run -d web-server` para iniciar um
@@ -88,6 +89,18 @@ Supabase.
 2. Cole o conteúdo do arquivo e execute todas as instruções.
 3. Verifique na aba **RLS Policies** de cada tabela que as políticas foram
    criadas corretamente.
+
+Também é recomendável habilitar **Regional Replication** no painel do Supabase
+(menu *Database › Replication*) para obter uma réplica de leitura em outra
+região e reduzir a latência dos clientes.
+
+Para otimizar as consultas mais comuns crie os seguintes índices manuais:
+
+```sql
+CREATE INDEX IF NOT EXISTS idx_produtos_user_nome ON produtos (user_id, nome);
+CREATE INDEX IF NOT EXISTS idx_vendas_user_data ON vendas (user_id, data_venda DESC);
+CREATE INDEX IF NOT EXISTS idx_pedidos_user_data ON pedidos (user_id, data_pedido DESC);
+```
 
 Com o Supabase CLI o mesmo pode ser feito via:
 
