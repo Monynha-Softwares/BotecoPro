@@ -1,23 +1,26 @@
-## 🔧 Tarefas identificadas automaticamente – Auditoria Codex
+## Plano para Tornar o BotecoPro Operacional
 
-### Bugs críticos
-- [ ] `ServiceProvider.updateProduct` chama `_supabaseService.updateProduto`, mas esse método não existe em `supabase_database_service.dart`.
-- [ ] `ServiceProvider.updateRecipe` depende de `_supabaseService.updateReceita`, também ausente no serviço Supabase.
-- [ ] Script `scripts/init_postgres.sh` referencia `database/postgres/schema.sql`, porém o schema está em `db_init/tables/schema.sql`.
-- [ ] `scripts/clone_repos.sh` clona repositórios sem checar se as pastas já existem, podendo sobrescrever dados locais.
+### 1. Scripts e banco de dados
+- [ ] Corrigir `scripts/init_postgres.sh` para utilizar `supabase/tables/schema.sql`, aplicar `rls_policies.sql` e rodar `seed.sql` apenas quando requisitado.
+- [ ] Ajustar `scripts/clone_repos.sh` para checar a existência das pastas antes de clonar e ler `GITHUB_TOKEN` do ambiente.
 
-### Inconsistências estruturais
-- [ ] Métodos de sincronização `_syncProdutosVenda`, `_syncProducoes`, `_syncProducaoIngredientes` e `_syncEstoque` em `service_provider.dart` estão vazios.
-- [ ] Várias operações de produção ainda utilizam `ApiService` ao invés de `SupabaseDatabaseService`, contrariando a migração para Supabase.
+### 2. Autenticação e fluxo inicial
+- [ ] Garantir que `AuthWrapper` seja o ponto de entrada no `main.dart` para exigir login antes da navegação.
+- [ ] Remover contas de teste pré-preenchidas das telas de login e cadastro.
+- [ ] Centralizar todas as operações de login, cadastro e reset de senha no `SupabaseAuthService` usando `supabase.auth`.
 
-### Melhorias de código
-- [ ] Implementar atualização de `produto_venda` em `updateProduct` quando o schema do Supabase estiver finalizado.
-- [ ] Criar métodos `updateProduto` e `updateReceita` em `SupabaseDatabaseService` para permitir edição de produtos e receitas.
-- [ ] Ajustar `check_env.sh` para validar também `POSTGRES_HOST` e `POSTGRES_PORT`.
+### 3. Internacionalização
+- [ ] Adicionar `flutter_localizations` e gerar arquivos `.arb` para PT, EN, ES e FR.
+- [ ] Substituir strings literais nas páginas por chamadas de tradução.
+- [ ] Traduzir mensagens de erro do Supabase conforme o idioma escolhido e aplicar locale salvo pelo `UserProvider`.
 
-### Scripts SQL com falhas
-- [ ] Revisar `db_init/tables/rls_policies.sql` para garantir que todas as tabelas referenciadas existem e que as políticas cobrem inserts e updates.
+### 4. Serviços e dados
+- [ ] Finalizar `updateProduto` e `updateReceita` em `SupabaseDatabaseService` e atualizar `ServiceProvider.updateProduct` para alterar `produto_venda`.
+- [ ] Remover ou implementar métodos `_syncProdutosVenda`, `_syncProducoes`, `_syncProducaoIngredientes` e `_syncEstoque`.
+- [ ] Eliminar dependências do `ApiService` legado em todo o projeto.
+- [ ] Revisar adaptadores em `lib/adapters/model_adapters.dart` para não usar valores padrão arbitrários e exigir todos os campos necessários.
 
-### Requisitos pendentes do app
-- [ ] Finalizar a substituição do `ApiService` antigo por chamadas diretas ao Supabase em todas as telas.
-- [ ] Validar a criação de dados iniciais e seeds utilizando os scripts em `db_init/`.
+### 5. Qualidade e testes
+- [ ] Configurar pipeline CI (GitHub Actions) executando `flutter analyze`, `flutter test` e `supabase db lint`.
+- [ ] Criar testes de fluxo para login, pedidos e estoque e corrigir avisos do linter.
+- [ ] Documentar no README procedimentos para produção (RLS, índices, armazenamento de imagens e logs).
