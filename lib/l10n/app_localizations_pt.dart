@@ -327,4 +327,149 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get genericError => 'Ocorreu um erro. Tente novamente mais tarde.';
+
+  @override
+  String get profileUpdatedSuccess => 'Perfil atualizado com sucesso!';
+
+  @override
+  String get openTable => 'Abrir Mesa';
+
+  @override
+  String get add => 'Adicionar';
+
+  @override
+  String get addNewTable => 'Adicionar Nova Mesa';
+
+  @override
+  String get addNewRecipe => 'Adicionar Nova Receita';
+
+  @override
+  String get addNewSupplier => 'Adicionar Novo Fornecedor';
+
+  @override
+  String get addNewProduct => 'Adicionar Novo Produto';
+
+  @override
+  String get adjustStock => 'Ajustar Estoque';
+
+  @override
+  String get attention => 'Atenção';
+
+  @override
+  String get position => 'Cargo';
+
+  @override
+  String get establishment => 'Estabelecimento';
+
+  @override
+  String get createdAtLabel => 'Criada em:';
+
+  @override
+  String get edit => 'Editar';
+
+  @override
+  String get editSupplier => 'Editar Fornecedor';
+
+  @override
+  String get editProduct => 'Editar Produto';
+
+  @override
+  String get editProduction => 'Editar Produção';
+
+  @override
+  String get editRecipe => 'Editar Receita';
+
+  @override
+  String get englishUs => 'English (US)';
+
+  @override
+  String get spanish => 'Español';
+
+  @override
+  String get french => 'Français';
+
+  @override
+  String get portugueseBrazil => 'Português (Brasil)';
+
+  @override
+  String get delete => 'Excluir';
+
+  @override
+  String get confirmCloseWithPendingItems =>
+      'Existem itens que ainda não foram entregues. Deseja marcar todos como entregues e fechar a mesa?';
+
+  @override
+  String get closeTable => 'Fechar Mesa';
+
+  @override
+  String get finalizedAtLabel => 'Finalizada em:';
+
+  @override
+  String get finalize => 'Finalizar';
+
+  @override
+  String get paymentMethodLabel => 'Forma de Pagamento:';
+
+  @override
+  String get ingredients => 'Ingredientes';
+
+  @override
+  String get noIngredients => 'Nenhum ingrediente adicionado';
+
+  @override
+  String get newTable => 'Nova Mesa';
+
+  @override
+  String get newProduction => 'Nova Produção';
+
+  @override
+  String get newHomeProduction => 'Nova Produção Caseira';
+
+  @override
+  String get newRecipe => 'Nova Receita';
+
+  @override
+  String get newSupplier => 'Novo Fornecedor';
+
+  @override
+  String get newProduct => 'Novo Produto';
+
+  @override
+  String get periodLabel => 'Período:';
+
+  @override
+  String get unitPriceLabel => 'Preço unitário:';
+
+  @override
+  String get quantityProducedLabel => 'Quantidade Produzida:';
+
+  @override
+  String get quantityLabel => 'Quantidade:';
+
+  @override
+  String get remove => 'Remover';
+
+  @override
+  String get selectLanguage => 'Selecionar Idioma';
+
+  @override
+  String get systemTheme => 'Tema do Sistema';
+
+  @override
+  String get aboutApp => 'Sobre o App';
+
+  @override
+  String get logoutSystemQuestion => 'Tem certeza que deseja sair do sistema?';
+
+  @override
+  String get viewDetails => 'Ver Detalhes';
+
+  @override
+  String get viewAllOrders => 'Ver todos os pedidos';
+
+  @override
+  String get statusLabel => 'Status:';
+
+  @override
+  String get observationsLabel => 'Observações:';
 }

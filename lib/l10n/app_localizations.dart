@@ -719,6 +719,294 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An error occurred. Please try again later.'**
   String get genericError;
+
+  /// No description provided for @profileUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated successfully!'**
+  String get profileUpdatedSuccess;
+
+  /// No description provided for @openTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Table'**
+  String get openTable;
+
+  /// No description provided for @add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// No description provided for @addNewTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Table'**
+  String get addNewTable;
+
+  /// No description provided for @addNewRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Recipe'**
+  String get addNewRecipe;
+
+  /// No description provided for @addNewSupplier.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Supplier'**
+  String get addNewSupplier;
+
+  /// No description provided for @addNewProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Product'**
+  String get addNewProduct;
+
+  /// No description provided for @adjustStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust Stock'**
+  String get adjustStock;
+
+  /// No description provided for @attention.
+  ///
+  /// In en, this message translates to:
+  /// **'Attention'**
+  String get attention;
+
+  /// No description provided for @position.
+  ///
+  /// In en, this message translates to:
+  /// **'Position'**
+  String get position;
+
+  /// No description provided for @establishment.
+  ///
+  /// In en, this message translates to:
+  /// **'Establishment'**
+  String get establishment;
+
+  /// No description provided for @createdAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Created at:'**
+  String get createdAtLabel;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @editSupplier.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Supplier'**
+  String get editSupplier;
+
+  /// No description provided for @editProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Product'**
+  String get editProduct;
+
+  /// No description provided for @editProduction.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Production'**
+  String get editProduction;
+
+  /// No description provided for @editRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Recipe'**
+  String get editRecipe;
+
+  /// No description provided for @englishUs.
+  ///
+  /// In en, this message translates to:
+  /// **'English (US)'**
+  String get englishUs;
+
+  /// No description provided for @spanish.
+  ///
+  /// In en, this message translates to:
+  /// **'Español'**
+  String get spanish;
+
+  /// No description provided for @french.
+  ///
+  /// In en, this message translates to:
+  /// **'Français'**
+  String get french;
+
+  /// No description provided for @portugueseBrazil.
+  ///
+  /// In en, this message translates to:
+  /// **'Portuguese (Brazil)'**
+  String get portugueseBrazil;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @confirmCloseWithPendingItems.
+  ///
+  /// In en, this message translates to:
+  /// **'There are items not yet delivered. Mark all as delivered and close the table?'**
+  String get confirmCloseWithPendingItems;
+
+  /// No description provided for @closeTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Close Table'**
+  String get closeTable;
+
+  /// No description provided for @finalizedAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Finalized at:'**
+  String get finalizedAtLabel;
+
+  /// No description provided for @finalize.
+  ///
+  /// In en, this message translates to:
+  /// **'Finalize'**
+  String get finalize;
+
+  /// No description provided for @paymentMethodLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Method:'**
+  String get paymentMethodLabel;
+
+  /// No description provided for @ingredients.
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredients'**
+  String get ingredients;
+
+  /// No description provided for @noIngredients.
+  ///
+  /// In en, this message translates to:
+  /// **'No ingredients added'**
+  String get noIngredients;
+
+  /// No description provided for @newTable.
+  ///
+  /// In en, this message translates to:
+  /// **'New Table'**
+  String get newTable;
+
+  /// No description provided for @newProduction.
+  ///
+  /// In en, this message translates to:
+  /// **'New Production'**
+  String get newProduction;
+
+  /// No description provided for @newHomeProduction.
+  ///
+  /// In en, this message translates to:
+  /// **'New Homemade Production'**
+  String get newHomeProduction;
+
+  /// No description provided for @newRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'New Recipe'**
+  String get newRecipe;
+
+  /// No description provided for @newSupplier.
+  ///
+  /// In en, this message translates to:
+  /// **'New Supplier'**
+  String get newSupplier;
+
+  /// No description provided for @newProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'New Product'**
+  String get newProduct;
+
+  /// No description provided for @periodLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Period:'**
+  String get periodLabel;
+
+  /// No description provided for @unitPriceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit price:'**
+  String get unitPriceLabel;
+
+  /// No description provided for @quantityProducedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity Produced:'**
+  String get quantityProducedLabel;
+
+  /// No description provided for @quantityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity:'**
+  String get quantityLabel;
+
+  /// No description provided for @remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  /// No description provided for @selectLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Language'**
+  String get selectLanguage;
+
+  /// No description provided for @systemTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'System Theme'**
+  String get systemTheme;
+
+  /// No description provided for @aboutApp.
+  ///
+  /// In en, this message translates to:
+  /// **'About the App'**
+  String get aboutApp;
+
+  /// No description provided for @logoutSystemQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to log out of the system?'**
+  String get logoutSystemQuestion;
+
+  /// No description provided for @viewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View Details'**
+  String get viewDetails;
+
+  /// No description provided for @viewAllOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'View all orders'**
+  String get viewAllOrders;
+
+  /// No description provided for @statusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status:'**
+  String get statusLabel;
+
+  /// No description provided for @observationsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Observations:'**
+  String get observationsLabel;
 }
 
 class _AppLocalizationsDelegate

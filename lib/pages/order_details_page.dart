@@ -600,7 +600,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Quantidade:'),
+                    Text(context.l10n.quantityLabel),
                     QuantitySelector(
                       quantity: quantity,
                       onChanged: (value) {
@@ -626,7 +626,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Preço unitário:'),
+                    Text(context.l10n.unitPriceLabel),
                     Text(
                       formatCurrency(product.price),
                       style: const TextStyle(fontWeight: FontWeight.bold),
@@ -789,13 +789,13 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Atenção'),
-          content: const Text('Existem itens que ainda não foram entregues. Deseja marcar todos como entregues e fechar a mesa?'),
+          title: Text(context.l10n.attention),
+          content: Text(context.l10n.confirmCloseWithPendingItems),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
-                'Cancelar',
+                context.l10n.cancel,
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
             ),
@@ -825,7 +825,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       builder: (context) => StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            title: const Text('Fechar Mesa'),
+            title: Text(context.l10n.closeTable),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -838,7 +838,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                const Text('Forma de Pagamento:'),
+                Text(context.l10n.paymentMethodLabel),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<PaymentMethod>(
                   value: selectedMethod,

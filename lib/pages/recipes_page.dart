@@ -72,7 +72,7 @@ class _RecipesPageState extends State<RecipesPage> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         icon: const Icon(Icons.add),
-        label: const Text('Nova Receita'),
+        label: Text(context.l10n.newRecipe),
       ).animate().scale(delay: const Duration(milliseconds: 300)),
     );
   }
@@ -200,7 +200,7 @@ class _RecipesPageState extends State<RecipesPage> {
                   TextButton.icon(
                     onPressed: () => _showAddIngredientDialog(recipe),
                     icon: const Icon(Icons.add_circle_outline, size: 18),
-                    label: const Text('Ingredientes'),
+                    label: Text(context.l10n.ingredients),
                     style: TextButton.styleFrom(
                       foregroundColor: Theme.of(context).colorScheme.primary,
                     ),
@@ -209,7 +209,7 @@ class _RecipesPageState extends State<RecipesPage> {
                   TextButton.icon(
                     onPressed: () => _showEditRecipeDialog(recipe),
                     icon: const Icon(Icons.edit, size: 18),
-                    label: const Text('Editar'),
+                    label: Text(context.l10n.edit),
                     style: TextButton.styleFrom(
                       foregroundColor: Theme.of(context).colorScheme.primary,
                     ),
@@ -239,7 +239,7 @@ class _RecipesPageState extends State<RecipesPage> {
       builder: (context) => StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            title: const Text('Adicionar Nova Receita'),
+            title: Text(context.l10n.addNewRecipe),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -402,7 +402,7 @@ class _RecipesPageState extends State<RecipesPage> {
       builder: (context) => StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            title: const Text('Editar Receita'),
+            title: Text(context.l10n.editRecipe),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -587,7 +587,7 @@ class _RecipesPageState extends State<RecipesPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Quantidade:'),
+                    Text(context.l10n.quantityLabel),
                     QuantitySelector(
                       quantity: quantity,
                       onChanged: (value) {
@@ -762,13 +762,13 @@ class _RecipesPageState extends State<RecipesPage> {
               Text(recipe.instructions),
               const SizedBox(height: 16),
             ],
-            const Text(
-              'Ingredientes:',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            Text(
+              context.l10n.ingredients,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             if (recipe.ingredients.isEmpty)
-              const Text('Nenhum ingrediente adicionado')
+              Text(context.l10n.noIngredients)
             else
               Column(
                 children: recipe.ingredients.map((ingredient) => Padding(
@@ -790,7 +790,7 @@ class _RecipesPageState extends State<RecipesPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Fechar'),
+            child: Text(context.l10n.close),
           ),
         ],
       ),

@@ -72,7 +72,7 @@ class _ProductsPageState extends State<ProductsPage> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         icon: const Icon(Icons.add),
-        label: const Text('Novo Produto'),
+        label: Text(context.l10n.newProduct),
       ).animate().scale(delay: const Duration(milliseconds: 300)),
     );
   }
@@ -284,7 +284,7 @@ class _ProductsPageState extends State<ProductsPage> {
                 TextButton.icon(
                   onPressed: () => _showStockAdjustmentDialog(product),
                   icon: const Icon(Icons.add_shopping_cart, size: 18),
-                  label: const Text('Ajustar Estoque'),
+                  label: Text(context.l10n.adjustStock),
                   style: TextButton.styleFrom(
                     foregroundColor: Theme.of(context).colorScheme.primary,
                   ),
@@ -293,7 +293,7 @@ class _ProductsPageState extends State<ProductsPage> {
                 TextButton.icon(
                   onPressed: () => _showEditProductDialog(product),
                   icon: const Icon(Icons.edit, size: 18),
-                  label: const Text('Editar'),
+                  label: Text(context.l10n.edit),
                   style: TextButton.styleFrom(
                     foregroundColor: Theme.of(context).colorScheme.primary,
                   ),
@@ -346,7 +346,7 @@ class _ProductsPageState extends State<ProductsPage> {
       builder: (context) => StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            title: const Text('Adicionar Novo Produto'),
+            title: Text(context.l10n.addNewProduct),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -568,7 +568,7 @@ class _ProductsPageState extends State<ProductsPage> {
       builder: (context) => StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            title: const Text('Editar Produto'),
+            title: Text(context.l10n.editProduct),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -774,7 +774,7 @@ class _ProductsPageState extends State<ProductsPage> {
                   children: [
                     Expanded(
                       child: RadioListTile<bool>(
-                        title: const Text('Adicionar'),
+                        title: Text(context.l10n.add),
                         value: true,
                         groupValue: isAddition,
                         onChanged: (value) {
@@ -789,7 +789,7 @@ class _ProductsPageState extends State<ProductsPage> {
                     ),
                     Expanded(
                       child: RadioListTile<bool>(
-                        title: const Text('Remover'),
+                        title: Text(context.l10n.remove),
                         value: false,
                         groupValue: isAddition,
                         onChanged: (value) {

@@ -273,7 +273,7 @@ class _OrdersPageState extends State<OrdersPage> with SingleTickerProviderStateM
                         ),
                       ).then((_) => _reloadStream()),
                       icon: const Icon(Icons.visibility, size: 18, color: botecoWine),
-                      label: const Text('Ver Detalhes', style: TextStyle(color: botecoWine)),
+                      label: Text(context.l10n.viewDetails, style: const TextStyle(color: botecoWine)),
                     ),
                   ],
                 ),
