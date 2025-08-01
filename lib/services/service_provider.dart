@@ -858,10 +858,8 @@ class ServiceProvider with ChangeNotifier {
       );
     }
 
-    if (pv != null) {
-      await _supabaseService.updateProduto(produtos[index], pv);
+    await _supabaseService.updateProduto(produtos[index], pv);
     }
-  }
 
   Future<void> updateProductStock(String productId, int newQuantity) async {
     final produtoId = int.tryParse(productId);
