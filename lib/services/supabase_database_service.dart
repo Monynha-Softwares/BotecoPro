@@ -6,13 +6,30 @@ import '../models/data_models.dart';
 class SupabaseDatabaseService {
   static final SupabaseDatabaseService _instance =
       SupabaseDatabaseService._internal();
-  factory SupabaseDatabaseService() => _instance;
+
+  factory SupabaseDatabaseService({
+    supabase.SupabaseClient? client,
+    String? userId,
+  }) {
+    if (client != null) {
+      _instance._client = client;
+    }
+    if (userId != null) {
+      _instance._overrideUserId = userId;
+    }
+    return _instance;
+  }
+
   SupabaseDatabaseService._internal();
 
-  final supabase.SupabaseClient _supabase = supabase.Supabase.instance.client;
+  supabase.SupabaseClient? _client;
+  String? _overrideUserId;
+
+  supabase.SupabaseClient get _supabase =>
+      _client ??= supabase.Supabase.instance.client;
 
   // Current user ID for row-level security
-  String? get _userId => _supabase.auth.currentUser?.id;
+  String? get _userId => _overrideUserId ?? _supabase.auth.currentUser?.id;
 
   // Initialize data. Sample data can optionally be created for empty accounts
   Future<void> initializeData({bool createSampleData = false}) async {

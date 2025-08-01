@@ -7,14 +7,15 @@ import '../l10n/app_localizations.dart';
 enum AuthStatus { initial, authenticated, unauthenticated }
 
 class AuthProvider with ChangeNotifier {
-  final SupabaseAuthService _authService = SupabaseAuthService();
+  final SupabaseAuthService _authService;
   AuthStatus _status = AuthStatus.initial;
   AuthUser? _user;
   String? _error;
   bool _isLoading = false;
 
   // Constructor
-  AuthProvider() {
+  AuthProvider({SupabaseAuthService? authService})
+      : _authService = authService ?? SupabaseAuthService() {
     _initializeAuth();
   }
 
