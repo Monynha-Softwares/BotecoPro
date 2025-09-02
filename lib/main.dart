@@ -2,94 +2,45 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'l10n/app_localizations.dart';
-import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'theme.dart';
+import 'package:intl/intl.dart';
+
 import 'pages/home_page.dart';
-import 'pages/tables_page.dart';
+import 'pages/production_page.dart';
 import 'pages/products_page.dart';
-import 'pages/orders_page.dart';
-import 'settings_page.dart';
+import 'pages/recipes_page.dart';
+import 'pages/tables_page.dart';
+import 'theme.dart';
 import 'widgets/bottom_navigation.dart';
-import 'widgets/app_drawer.dart';
-import 'services/service_provider.dart';
-import 'services/theme_provider.dart';
-import 'services/user_provider.dart';
-import 'services/sound_provider.dart';
-import 'providers/auth_provider.dart';
-import 'services/supabase_database_service.dart';
-import 'auth_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load();
+
+// Inicializa a localização para português brasileiro
   await initializeDateFormatting('pt_BR', null);
+  Intl.defaultLocale = 'pt_BR';
 
-  final initFuture = () async {
-    await supabase.Supabase.initialize(
-      url: dotenv.env['SUPABASE_URL']!,
-      anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
-    );
-
-    final databaseService = SupabaseDatabaseService();
-    final shouldSeed = dotenv.env['CREATE_SAMPLE_DATA'] == 'true';
-    await databaseService.initializeData(createSampleData: shouldSeed);
-  }();
-
-  SystemChrome.setPreferredOrientations([
+// Define a orientação da tela para retrato
+  await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
 
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => AuthProvider()),
-        ChangeNotifierProvider(create: (context) => ThemeProvider()),
-        ChangeNotifierProvider(create: (context) => UserProvider()),
-        ChangeNotifierProvider(create: (context) => ServiceProvider()),
-        ChangeNotifierProvider(create: (context) => SoundProvider()),
-      ],
-      child: MyApp(init: initFuture),
-    ),
-  );
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final Future<void> init;
-  const MyApp({super.key, required this.init});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final userProvider = Provider.of<UserProvider>(context);
-    Locale locale;
-    switch (userProvider.language) {
-      case 'English (US)':
-        locale = const Locale('en');
-        break;
-      case 'Español':
-        locale = const Locale('es');
-        break;
-      case 'Français':
-        locale = const Locale('fr');
-        break;
-      default:
-        locale = const Locale('pt');
-    }
-    const home = MainNavigationScreen();
     return MaterialApp(
-        title: 'Boteco PRO',
-        theme: lightTheme,
-        darkTheme: darkTheme,
-        themeMode: themeProvider.themeMode,
-        debugShowCheckedModeBanner: false,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: locale,
-        home: AuthWrapper(init: init, child: home));
+      title: 'Boteco PRO',
+      debugShowCheckedModeBanner: false,
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: ThemeMode.system,
+      home: const SplashScreen(),
+    );
   }
 }
 
@@ -157,35 +108,10 @@ class _SplashScreenState extends State<SplashScreen> {
                 delay: const Duration(milliseconds: 400),
                 duration: const Duration(milliseconds: 800)),
             const SizedBox(height: 48),
-            SizedBox(
-              width: 60,
-              height: 60,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Animated circle
-                  CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                        Theme.of(context).colorScheme.onPrimary),
-                    strokeWidth: 3,
-                  ),
-                  // Custom design inside the circle
-                  Container(
-                    width: 30,
-                    height: 30,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onPrimary
-                          .withOpacity(0.3),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ],
-              ),
-            )
-                .animate(onPlay: (controller) => controller.repeat())
-                .rotate(duration: const Duration(seconds: 2)),
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(
+                  Theme.of(context).colorScheme.onPrimary),
+            ),
           ],
         ),
       ),
@@ -207,8 +133,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     NavigationTab.home: const HomePage(),
     NavigationTab.tables: const TablesPage(),
     NavigationTab.products: const ProductsPage(),
-    NavigationTab.reports: const OrdersPage(),
-    NavigationTab.settings: const SettingsPage(),
+    NavigationTab.recipes: const RecipesPage(),
+    NavigationTab.production: const ProductionPage(),
   };
 
   void _selectTab(NavigationTab tab) {
@@ -220,8 +146,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const AppDrawer(),
-      body: _screens[_currentTab] ?? const HomePage(),
+      body: _screens[_currentTab],
       bottomNavigationBar: BottomNavigation(
         currentTab: _currentTab,
         onTabSelected: _selectTab,

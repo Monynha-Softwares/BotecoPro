@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:provider/provider.dart';
-import '../services/service_provider.dart';
-import '../services/sound_provider.dart';
+import '../services/database_service.dart';
 import '../widgets/shared_widgets.dart';
 import '../models/data_models.dart';
 
@@ -14,6 +12,7 @@ class ProductsPage extends StatefulWidget {
 }
 
 class _ProductsPageState extends State<ProductsPage> {
+  final DatabaseService _databaseService = DatabaseService();
   List<Product> _products = [];
   List<Product> _filteredProducts = [];
   List<Supplier> _suppliers = [];
@@ -31,9 +30,8 @@ class _ProductsPageState extends State<ProductsPage> {
       _isLoading = true;
     });
 
-    final service = Provider.of<ServiceProvider>(context, listen: false);
-    final products = await service.getProducts();
-    final suppliers = await service.getSuppliers();
+    final products = await _databaseService.getProducts();
+    final suppliers = await _databaseService.getSuppliers();
 
     if (mounted) {
       setState(() {
@@ -57,7 +55,7 @@ class _ProductsPageState extends State<ProductsPage> {
     return Scaffold(
       appBar: const CustomAppBar(title: 'Produtos'),
       body: _isLoading
-          ? const Center(child: BotecoLoader(message: "Carregando produtos..."))
+          ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: _loadData,
               child: Column(
@@ -521,22 +519,10 @@ class _ProductsPageState extends State<ProductsPage> {
                     unit: unit.isEmpty ? 'unidade' : unit,
                   );
                   
-                  final service = Provider.of<ServiceProvider>(context, listen: false);
-                  final soundProvider = Provider.of<SoundProvider>(context, listen: false);
-                  soundProvider.playProdutoAdicionado();
-                  
-                  await service.addProduct(product);
+                  await _databaseService.addProduct(product);
                   if (mounted) {
                     Navigator.pop(context);
                     _loadData();
-                    
-                    // Show success message with sound
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Produto ${product.name} adicionado com sucesso!'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
                   }
                 },
                 style: ElevatedButton.styleFrom(
@@ -718,8 +704,7 @@ class _ProductsPageState extends State<ProductsPage> {
                     unit: unit.isEmpty ? 'unidade' : unit,
                   );
                   
-                  final service = Provider.of<ServiceProvider>(context, listen: false);
-                  await service.updateProduct(updatedProduct);
+                  await _databaseService.updateProduct(updatedProduct);
                   if (mounted) {
                     Navigator.pop(context);
                     _loadData();
@@ -741,6 +726,7 @@ class _ProductsPageState extends State<ProductsPage> {
   }
 
   void _showStockAdjustmentDialog(Product product) {
+    final TextEditingController stockController = TextEditingController(text: product.stockQuantity.toString());
     final int currentStock = product.stockQuantity;
     int adjustment = 0;
     bool isAddition = true;
@@ -872,8 +858,7 @@ class _ProductsPageState extends State<ProductsPage> {
                     return;
                   }
                   
-                  final service = Provider.of<ServiceProvider>(context, listen: false);
-                  await service.updateProductStock(product.id, newQuantity);
+                  await _databaseService.updateProductStock(product.id, newQuantity);
                   if (mounted) {
                     Navigator.pop(context);
                     _loadData();

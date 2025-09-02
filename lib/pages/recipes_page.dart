@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:provider/provider.dart';
-import '../services/service_provider.dart';
+import '../services/database_service.dart';
 import '../widgets/shared_widgets.dart';
 import '../models/data_models.dart';
 
@@ -13,6 +12,7 @@ class RecipesPage extends StatefulWidget {
 }
 
 class _RecipesPageState extends State<RecipesPage> {
+  final DatabaseService _databaseService = DatabaseService();
   bool _isLoading = true;
   List<Recipe> _recipes = [];
   List<Product> _products = [];
@@ -28,9 +28,8 @@ class _RecipesPageState extends State<RecipesPage> {
       _isLoading = true;
     });
 
-    final service = Provider.of<ServiceProvider>(context, listen: false);
-    final products = await service.getProducts();
-    final recipes = await service.getRecipes();
+    final products = await _databaseService.getProducts();
+    final recipes = await _databaseService.getRecipes();
 
     if (mounted) {
       setState(() {
@@ -46,7 +45,7 @@ class _RecipesPageState extends State<RecipesPage> {
     return Scaffold(
       appBar: const CustomAppBar(title: 'Receitas'),
       body: _isLoading
-          ? const Center(child: BotecoLoader(message: "Carregando receitas..."))
+          ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: _loadData,
               child: _recipes.isEmpty
@@ -230,7 +229,6 @@ class _RecipesPageState extends State<RecipesPage> {
     final TextEditingController nameController = TextEditingController();
     final TextEditingController priceController = TextEditingController();
     final TextEditingController instructionsController = TextEditingController();
-    final TextEditingController prepTimeController = TextEditingController();
     
     RecipeType selectedType = RecipeType.food;
 
@@ -258,11 +256,11 @@ class _RecipesPageState extends State<RecipesPage> {
                     decoration: const InputDecoration(
                       labelText: 'Tipo*',
                     ),
-                    items: const [
+                    items: [
                       DropdownMenuItem(
                         value: RecipeType.food,
                         child: Row(
-                          children: [
+                          children: const [
                             Icon(Icons.restaurant, size: 20),
                             SizedBox(width: 8),
                             Text('Comida'),
@@ -272,7 +270,7 @@ class _RecipesPageState extends State<RecipesPage> {
                       DropdownMenuItem(
                         value: RecipeType.drink,
                         child: Row(
-                          children: [
+                          children: const [
                             Icon(Icons.local_bar, size: 20),
                             SizedBox(width: 8),
                             Text('Bebida'),
@@ -299,14 +297,6 @@ class _RecipesPageState extends State<RecipesPage> {
                   ),
                   const SizedBox(height: 16),
                   TextField(
-                    controller: prepTimeController,
-                    decoration: const InputDecoration(
-                      labelText: 'Tempo de Preparo (min)',
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
                     controller: instructionsController,
                     decoration: const InputDecoration(
                       labelText: 'Modo de Preparo',
@@ -330,8 +320,6 @@ class _RecipesPageState extends State<RecipesPage> {
                   final name = nameController.text.trim();
                   final priceText = priceController.text.trim();
                   final instructions = instructionsController.text.trim();
-                  final prepText = prepTimeController.text.trim();
-                  final prepTime = int.tryParse(prepText);
                   
                   if (name.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -359,12 +347,10 @@ class _RecipesPageState extends State<RecipesPage> {
                     name: name,
                     type: selectedType,
                     price: price,
-                    preparationMinutes: prepTime,
                     instructions: instructions,
                   );
                   
-                  final service = Provider.of<ServiceProvider>(context, listen: false);
-                  await service.addRecipe(recipe);
+                  await _databaseService.addRecipe(recipe);
                   if (mounted) {
                     Navigator.pop(context);
                     _loadData();
@@ -392,8 +378,6 @@ class _RecipesPageState extends State<RecipesPage> {
     final TextEditingController nameController = TextEditingController(text: recipe.name);
     final TextEditingController priceController = TextEditingController(text: recipe.price.toString());
     final TextEditingController instructionsController = TextEditingController(text: recipe.instructions);
-    final TextEditingController prepTimeController =
-        TextEditingController(text: recipe.preparationMinutes?.toString() ?? '');
     
     var selectedType = recipe.type;
 
@@ -420,11 +404,11 @@ class _RecipesPageState extends State<RecipesPage> {
                     decoration: const InputDecoration(
                       labelText: 'Tipo*',
                     ),
-                    items: const [
+                    items: [
                       DropdownMenuItem(
                         value: RecipeType.food,
                         child: Row(
-                          children: [
+                          children: const [
                             Icon(Icons.restaurant, size: 20),
                             SizedBox(width: 8),
                             Text('Comida'),
@@ -434,7 +418,7 @@ class _RecipesPageState extends State<RecipesPage> {
                       DropdownMenuItem(
                         value: RecipeType.drink,
                         child: Row(
-                          children: [
+                          children: const [
                             Icon(Icons.local_bar, size: 20),
                             SizedBox(width: 8),
                             Text('Bebida'),
@@ -460,14 +444,6 @@ class _RecipesPageState extends State<RecipesPage> {
                   ),
                   const SizedBox(height: 16),
                   TextField(
-                    controller: prepTimeController,
-                    decoration: const InputDecoration(
-                      labelText: 'Tempo de Preparo (min)',
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
                     controller: instructionsController,
                     decoration: const InputDecoration(
                       labelText: 'Modo de Preparo',
@@ -490,8 +466,6 @@ class _RecipesPageState extends State<RecipesPage> {
                   final name = nameController.text.trim();
                   final priceText = priceController.text.trim();
                   final instructions = instructionsController.text.trim();
-                  final prepText = prepTimeController.text.trim();
-                  final prepTime = int.tryParse(prepText);
                   
                   if (name.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -519,12 +493,10 @@ class _RecipesPageState extends State<RecipesPage> {
                     name: name,
                     type: selectedType,
                     price: price,
-                    preparationMinutes: prepTime,
                     instructions: instructions,
                   );
                   
-                  final service = Provider.of<ServiceProvider>(context, listen: false);
-                  await service.updateRecipe(updatedRecipe);
+                  await _databaseService.updateRecipe(updatedRecipe);
                   if (mounted) {
                     Navigator.pop(context);
                     _loadData();
@@ -700,8 +672,7 @@ class _RecipesPageState extends State<RecipesPage> {
                     unit: selectedProduct.unit,
                   );
                   
-                  final service = Provider.of<ServiceProvider>(context, listen: false);
-                  await service.addRecipeIngredient(recipe.id, recipeIngredient);
+                  await _databaseService.addRecipeIngredient(recipe.id, recipeIngredient);
                   if (mounted) {
                     Navigator.pop(context);
                     _loadData();

@@ -1,2 +1,0 @@
-CREATE OR REPLACE VIEW vw_vendas AS
-SELECT * FROM vendas;

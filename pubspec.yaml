@@ -1,5 +1,5 @@
-name: boteco_pro
-description: "Sistema completo de gestão para bares e restaurantes"
+name: botecoPro
+description: "Gestão completa para seu bar"
 publish_to: 'none'
 version: 1.0.0
 
@@ -7,41 +7,30 @@ environment:
   sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
-  audioplayers: ^6.0.0
-  image_picker: ^1.0.0
-  flutter_animate: ^4.2.0
-  flutter_launcher_icons: ^0.14.3
+  flutter_animate: ^4.0.0
+  flutter_launcher_icons: 0.14.3
   table_calendar: ^3.0.0
   flutter_slidable: ^3.0.0
   flutter_svg: ^2.0.0
-  intl: ^0.20.2
-  flutter_localizations:
-    sdk: flutter
+  intl: ^0.18.0
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.0
   fl_chart: 0.68.0
   google_fonts: 6.1.0
   shared_preferences: 2.3.2
+  path_provider: 2.1.4
   provider: 6.1.2
+  http: '>=1.0.0'
   uuid: '>=3.0.0'
-  supabase_flutter: '>=1.10.0'
-  google_sign_in: ^6.1.5
-  flutter_local_notifications: ^16.1.0
-  firebase_messaging: ^16.0.0
-  flutter_dotenv: ^5.1.0
 
+  dio: any
+  flutter_secure_storage: any
+  google_sign_in: any
+  jwt_decode: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
 
-  mocktail: ^1.0.0
-
-  supabase: any
 flutter:
   uses-material-design: true
-  generate: true
-
-  assets:
-    - assets/sounds/

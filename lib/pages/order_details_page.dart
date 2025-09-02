@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:provider/provider.dart';
-import '../services/service_provider.dart';
-import '../services/sound_provider.dart';
+import '../services/database_service.dart';
 import '../widgets/shared_widgets.dart';
 import '../models/data_models.dart';
 
@@ -17,6 +15,7 @@ class OrderDetailsPage extends StatefulWidget {
 }
 
 class _OrderDetailsPageState extends State<OrderDetailsPage> {
+  final DatabaseService _databaseService = DatabaseService();
   late Order _order;
   List<Product> _products = [];
   bool _isLoading = true;
@@ -34,8 +33,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       _isLoading = true;
     });
 
-    final service = Provider.of<ServiceProvider>(context, listen: false);
-    final products = await service.getProducts();
+    final products = await _databaseService.getProducts();
     final freshOrder = await _getUpdatedOrder();
 
     if (mounted) {
@@ -50,8 +48,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
   }
 
   Future<Order?> _getUpdatedOrder() async {
-    final service = Provider.of<ServiceProvider>(context, listen: false);
-    final orders = await service.getOrders();
+    final orders = await _databaseService.getOrders();
     try {
       return orders.firstWhere((o) => o.id == _order.id);
     } catch (e) {
@@ -75,7 +72,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: BotecoLoader(message: "Carregando detalhes..."))
+          ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
                 _buildOrderHeader(),
@@ -384,8 +381,6 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
   }
 
   Future<void> _updateItemStatus(OrderItem item, OrderStatus newStatus) async {
-    final service = Provider.of<ServiceProvider>(context, listen: false);
-    final soundProvider = Provider.of<SoundProvider>(context, listen: false);
     final List<OrderItem> updatedItems = _order.items.map((i) {
       if (i.id == item.id) {
         return i.copyWith(status: newStatus);
@@ -394,19 +389,12 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     }).toList();
 
     final updatedOrder = _order.copyWith(items: updatedItems);
-    await service.updateOrder(updatedOrder);
-
-    // Play appropriate sound effect based on the new status
-    if (newStatus == OrderStatus.delivered) {
-      soundProvider.playPedidoEntregue();
-    } else if (newStatus == OrderStatus.ready) {
-      soundProvider.playNotificacao();
-    }
+    await _databaseService.updateOrder(updatedOrder);
 
     // Atualizar o status geral do pedido baseado nos itens
     OrderStatus orderStatus = _determineOrderStatus(updatedItems);
     final finalOrder = updatedOrder.copyWith(status: orderStatus);
-    await service.updateOrder(finalOrder);
+    await _databaseService.updateOrder(finalOrder);
 
     setState(() {
       _order = finalOrder;
@@ -430,16 +418,15 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
   }
 
   Future<void> _removeItem(OrderItem item) async {
-    final service = Provider.of<ServiceProvider>(context, listen: false);
     // Remover o item da lista
     final List<OrderItem> updatedItems = _order.items.where((i) => i.id != item.id).toList();
     final updatedOrder = _order.copyWith(items: updatedItems);
-    await service.updateOrder(updatedOrder);
+    await _databaseService.updateOrder(updatedOrder);
 
     // Se não sobrou nenhum item, atualizar o status do pedido
     OrderStatus orderStatus = updatedItems.isEmpty ? OrderStatus.pending : _determineOrderStatus(updatedItems);
     final finalOrder = updatedOrder.copyWith(status: orderStatus);
-    await service.updateOrder(finalOrder);
+    await _databaseService.updateOrder(finalOrder);
 
     setState(() {
       _order = finalOrder;
@@ -626,7 +613,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Preço unitário:'),
+                    Text('Preço unitário:'),
                     Text(
                       formatCurrency(product.price),
                       style: const TextStyle(fontWeight: FontWeight.bold),
@@ -686,12 +673,6 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
   }
 
   Future<void> _addItemToOrder(Product product, int quantity, String note) async {
-    final service = Provider.of<ServiceProvider>(context, listen: false);
-    final soundProvider = Provider.of<SoundProvider>(context, listen: false);
-    
-    // Play sound effect when adding an item
-    soundProvider.playPedidoAdicionado();
-    
     final orderItem = OrderItem(
       productId: product.id,
       productName: product.name,
@@ -706,7 +687,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       status: OrderStatus.pending,
     );
 
-    await service.updateOrder(updatedOrder);
+    await _databaseService.updateOrder(updatedOrder);
     setState(() {
       _order = updatedOrder;
     });
@@ -769,8 +750,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         confirmText: 'Sim, Cancelar',
         cancelText: 'Não',
         onConfirm: () async {
-          final service = Provider.of<ServiceProvider>(context, listen: false);
-          await service.closeOrder(_order.id);
+          await _databaseService.closeOrder(_order.id);
           if (mounted) {
             Navigator.pop(context);
           }
@@ -845,11 +825,11 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                   ),
-                  items: const [
+                  items: [
                     DropdownMenuItem(
                       value: PaymentMethod.cash,
                       child: Row(
-                        children: [
+                        children: const [
                           Icon(Icons.money),
                           SizedBox(width: 8),
                           Text('Dinheiro'),
@@ -859,27 +839,27 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                     DropdownMenuItem(
                       value: PaymentMethod.credit,
                       child: Row(
-                        children: [
+                        children: const [
                           Icon(Icons.credit_card),
                           SizedBox(width: 8),
-                          Text('Cartão de Crédito'),
+                          Text('Cartão de Cru00e9dito'),
                         ],
                       ),
                     ),
                     DropdownMenuItem(
                       value: PaymentMethod.debit,
                       child: Row(
-                        children: [
+                        children: const [
                           Icon(Icons.credit_card),
                           SizedBox(width: 8),
-                          Text('Cartão de Débito'),
+                          Text('Cartão de Du00e9bito'),
                         ],
                       ),
                     ),
                     DropdownMenuItem(
                       value: PaymentMethod.pix,
                       child: Row(
-                        children: [
+                        children: const [
                           Icon(Icons.qr_code),
                           SizedBox(width: 8),
                           Text('PIX'),
@@ -926,7 +906,6 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
   }
 
   Future<void> _markAllItemsAsDelivered() async {
-    final service = Provider.of<ServiceProvider>(context, listen: false);
     final List<OrderItem> updatedItems = _order.items.map((item) {
       if (item.status != OrderStatus.canceled && item.status != OrderStatus.delivered) {
         return item.copyWith(status: OrderStatus.delivered);
@@ -939,7 +918,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       status: OrderStatus.delivered,
     );
 
-    await service.updateOrder(updatedOrder);
+    await _databaseService.updateOrder(updatedOrder);
     setState(() {
       _order = updatedOrder;
     });
@@ -948,13 +927,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
   }
 
   Future<void> _closeOrder() async {
-    final service = Provider.of<ServiceProvider>(context, listen: false);
-    final soundProvider = Provider.of<SoundProvider>(context, listen: false);
-    
-    // Play sound effect for closing the table
-    soundProvider.playVendaFechada();
-    
-    await service.closeOrder(_order.id);
+    await _databaseService.closeOrder(_order.id);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

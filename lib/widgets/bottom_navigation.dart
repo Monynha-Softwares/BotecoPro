@@ -4,8 +4,8 @@ enum NavigationTab {
   home,
   tables,
   products,
-  reports,  // This is the 'Pedidos' tab
-  settings  // This is the 'Config' tab
+  recipes,
+  production
 }
 
 class BottomNavigation extends StatelessWidget {
@@ -40,7 +40,7 @@ class BottomNavigation extends StatelessWidget {
         BottomNavigationBarItem(
           icon: Icon(Icons.home_outlined),
           activeIcon: Icon(Icons.home),
-          label: 'Início',
+          label: 'Inu00edcio',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.table_bar_outlined),
@@ -53,14 +53,14 @@ class BottomNavigation extends StatelessWidget {
           label: 'Produtos',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.receipt_outlined),
-          activeIcon: Icon(Icons.receipt),
-          label: 'Pedidos',
+          icon: Icon(Icons.menu_book_outlined),
+          activeIcon: Icon(Icons.menu_book),
+          label: 'Receitas',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.settings_outlined),
-          activeIcon: Icon(Icons.settings),
-          label: 'Config',
+          icon: Icon(Icons.production_quantity_limits_outlined),
+          activeIcon: Icon(Icons.production_quantity_limits),
+          label: 'Produção',
         ),
       ],
     );

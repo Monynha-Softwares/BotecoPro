@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../models/data_models.dart';
-import '../theme.dart';
 import 'package:intl/intl.dart';
 
 // Formata valor como moeda brasileira
@@ -200,69 +199,6 @@ class StatusCard extends StatelessWidget {
   }
 }
 
-// Indicador de carregamento personalizado estilizado
-class BotecoLoader extends StatelessWidget {
-  final String? message;
-  final double size;
-
-  const BotecoLoader({
-    Key? key,
-    this.message,
-    this.size = 80,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            color: botecoWine.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(size / 2),
-          ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // Animated circle
-              SizedBox(
-                width: size * 0.75,
-                height: size * 0.75,
-                child: const CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(botecoWine),
-                  strokeWidth: 5,
-                ),
-              ),
-              // Icon in the center
-              Icon(
-                Icons.sports_bar,
-                size: size * 0.375,
-                color: botecoWine,
-              ),
-            ],
-          ),
-        )
-        .animate(onPlay: (controller) => controller.repeat())
-        .rotate(duration: const Duration(seconds: 2), begin: 0, end: 0.1)
-        .then()
-        .rotate(duration: const Duration(seconds: 2), begin: 0.1, end: 0),
-        if (message != null) ...[  
-          const SizedBox(height: 16),
-          Text(
-            message!,
-            style: const TextStyle(
-              color: botecoWine,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-}
-
 // Badge de status para pedidos
 class StatusBadge extends StatelessWidget {
   final OrderStatus status;
@@ -416,11 +352,11 @@ class CategoryFilter extends StatelessWidget {
       child: Row(
         children: [
           FilterChip(
-            label: const Row(
+            label: Row(
               children: [
-                Icon(Icons.filter_alt_off, size: 16),
-                SizedBox(width: 4),
-                Text('Todos'),
+                const Icon(Icons.filter_alt_off, size: 16),
+                const SizedBox(width: 4),
+                const Text('Todos'),
               ],
             ),
             selected: selectedCategory == null,
@@ -438,11 +374,11 @@ class CategoryFilter extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           FilterChip(
-            label: const Row(
+            label: Row(
               children: [
-                Icon(Icons.local_bar, size: 16),
-                SizedBox(width: 4),
-                Text('Bebidas'),
+                const Icon(Icons.local_bar, size: 16),
+                const SizedBox(width: 4),
+                const Text('Bebidas'),
               ],
             ),
             selected: selectedCategory == ProductCategory.drink,
@@ -461,11 +397,11 @@ class CategoryFilter extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           FilterChip(
-            label: const Row(
+            label: Row(
               children: [
-                Icon(Icons.restaurant, size: 16),
-                SizedBox(width: 4),
-                Text('Comidas'),
+                const Icon(Icons.restaurant, size: 16),
+                const SizedBox(width: 4),
+                const Text('Comidas'),
               ],
             ),
             selected: selectedCategory == ProductCategory.food,
@@ -484,11 +420,11 @@ class CategoryFilter extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           FilterChip(
-            label: const Row(
+            label: Row(
               children: [
-                Icon(Icons.category, size: 16),
-                SizedBox(width: 4),
-                Text('Outros'),
+                const Icon(Icons.category, size: 16),
+                const SizedBox(width: 4),
+                const Text('Outros'),
               ],
             ),
             selected: selectedCategory == ProductCategory.other,

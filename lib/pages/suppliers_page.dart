@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:provider/provider.dart';
-import '../services/service_provider.dart';
+import '../services/database_service.dart';
 import '../widgets/shared_widgets.dart';
 import '../models/data_models.dart';
 
@@ -13,6 +12,7 @@ class SuppliersPage extends StatefulWidget {
 }
 
 class _SuppliersPageState extends State<SuppliersPage> {
+  final DatabaseService _databaseService = DatabaseService();
   List<Supplier> _suppliers = [];
   bool _isLoading = true;
 
@@ -27,8 +27,7 @@ class _SuppliersPageState extends State<SuppliersPage> {
       _isLoading = true;
     });
 
-    final service = Provider.of<ServiceProvider>(context, listen: false);
-    final suppliers = await service.getSuppliers();
+    final suppliers = await _databaseService.getSuppliers();
 
     if (mounted) {
       setState(() {
@@ -43,7 +42,7 @@ class _SuppliersPageState extends State<SuppliersPage> {
     return Scaffold(
       appBar: const CustomAppBar(title: 'Fornecedores'),
       body: _isLoading
-          ? const Center(child: BotecoLoader(message: "Carregando fornecedores..."))
+          ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: _loadSuppliers,
               child: _suppliers.isEmpty
@@ -307,8 +306,7 @@ class _SuppliersPageState extends State<SuppliersPage> {
                 notes: notes,
               );
 
-              final service = Provider.of<ServiceProvider>(context, listen: false);
-              await service.addSupplier(supplier);
+              await _databaseService.addSupplier(supplier);
               if (mounted) {
                 Navigator.pop(context);
                 _loadSuppliers();
@@ -416,8 +414,7 @@ class _SuppliersPageState extends State<SuppliersPage> {
                 notes: notes,
               );
 
-              final service = Provider.of<ServiceProvider>(context, listen: false);
-              await service.updateSupplier(updatedSupplier);
+              await _databaseService.updateSupplier(updatedSupplier);
               if (mounted) {
                 Navigator.pop(context);
                 _loadSuppliers();
@@ -452,8 +449,7 @@ class _SuppliersPageState extends State<SuppliersPage> {
         confirmText: 'Sim, Excluir',
         cancelText: 'Cancelar',
         onConfirm: () async {
-          final service = Provider.of<ServiceProvider>(context, listen: false);
-          await service.deleteSupplier(supplier.id);
+          await _databaseService.deleteSupplier(supplier.id);
           if (mounted) {
             _loadSuppliers();
             ScaffoldMessenger.of(context).showSnackBar(

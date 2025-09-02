@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:provider/provider.dart';
-import '../services/service_provider.dart';
-import '../services/sound_provider.dart';
+import '../services/database_service.dart';
 import '../widgets/shared_widgets.dart';
 import '../models/data_models.dart';
 import 'order_details_page.dart';
@@ -15,6 +13,7 @@ class TablesPage extends StatefulWidget {
 }
 
 class _TablesPageState extends State<TablesPage> {
+  final DatabaseService _databaseService = DatabaseService();
   List<TableModel> _tables = [];
   bool _isLoading = true;
 
@@ -29,8 +28,7 @@ class _TablesPageState extends State<TablesPage> {
       _isLoading = true;
     });
 
-    final service = Provider.of<ServiceProvider>(context, listen: false);
-    final tables = await service.getTables();
+    final tables = await _databaseService.getTables();
     tables.sort((a, b) => a.number.compareTo(b.number));
 
     if (mounted) {
@@ -46,7 +44,7 @@ class _TablesPageState extends State<TablesPage> {
     return Scaffold(
       appBar: const CustomAppBar(title: 'Gerenciar Mesas'),
       body: _isLoading
-          ? const Center(child: BotecoLoader(message: "Carregando mesas..."))
+          ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: _loadTables,
               child: Column(
@@ -300,13 +298,9 @@ class _TablesPageState extends State<TablesPage> {
   }
 
   void _handleTableTap(TableModel table) async {
-    final service = Provider.of<ServiceProvider>(context, listen: false);
-    final soundProvider = Provider.of<SoundProvider>(context, listen: false);
-    
     if (table.status == TableStatus.occupied) {
       // A mesa está ocupada, vamos para os detalhes do pedido
-      soundProvider.playNavegacao(); // Som de navegação
-      final order = await service.getActiveOrderForTable(table.id);
+      final order = await _databaseService.getActiveOrderForTable(table.id);
       if (order != null && mounted) {
         Navigator.push(
           context,
@@ -317,7 +311,6 @@ class _TablesPageState extends State<TablesPage> {
       }
     } else {
       // A mesa está livre, vamos criar um novo pedido
-      soundProvider.playMesaAberta(); // Som de mesa sendo aberta
       _showNewOrderDialog(table);
     }
   }
@@ -340,19 +333,13 @@ class _TablesPageState extends State<TablesPage> {
             onPressed: () async {
               Navigator.pop(context);
               
-              final service = Provider.of<ServiceProvider>(context, listen: false);
-              final soundProvider = Provider.of<SoundProvider>(context, listen: false);
-              
-              // Tocar som de confirmação
-              soundProvider.playSucesso();
-              
               // Criar um novo pedido
               final order = Order(
                 tableId: table.id,
                 tableNumber: table.number,
               );
               
-              await service.addOrder(order);
+              await _databaseService.addOrder(order);
               
               if (mounted) {
                 Navigator.push(
@@ -452,9 +439,8 @@ class _TablesPageState extends State<TablesPage> {
                 capacity: capacity,
               );
 
-              final service = Provider.of<ServiceProvider>(context, listen: false);
               _tables.add(newTable);
-              await service.saveTables(_tables);
+              await _databaseService.saveTables(_tables);
               Navigator.pop(context);
               _loadTables();
             },

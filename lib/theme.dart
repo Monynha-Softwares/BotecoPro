@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-// Paleta de cores estilo boteco
+// Paleta de cores
 const Color botecoWine = Color(0xFF8B1E3F);
 const Color botecoMustard = Color(0xFFB3701A);
 const Color botecoBeige = Color(0xFFF1DDAD);
@@ -9,18 +9,18 @@ const Color botecoBrown = Color(0xFF4F3222);
 
 ThemeData get lightTheme => ThemeData(
       useMaterial3: true,
-      colorScheme: const ColorScheme.light(
+      colorScheme: ColorScheme.light(
         primary: botecoWine,
         secondary: botecoMustard,
         tertiary: botecoBrown,
-        surface: Color(0xFFF5F5F5),
-        error: Color(0xFFD32F2F),
+        surface: const Color(0xFFF5F5F5),
+        error: const Color(0xFFD32F2F),
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onTertiary: Colors.white,
-        onSurface: Color(0xFF1E1E1E),
+        onSurface: const Color(0xFF1E1E1E),
         onError: Colors.white,
-        outline: Color(0xFFBDBDBD),
+        outline: const Color(0xFFBDBDBD),
       ),
       brightness: Brightness.light,
       scaffoldBackgroundColor: botecoBeige.withOpacity(0.15),
@@ -41,10 +41,11 @@ ThemeData get lightTheme => ThemeData(
           foregroundColor: Colors.white,
           elevation: 2,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
-      cardTheme: CardThemeData(
+      cardTheme: CardTheme(
         elevation: 3,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         clipBehavior: Clip.antiAlias,
@@ -130,7 +131,8 @@ ThemeData get lightTheme => ThemeData(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Colors.red, width: 1),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
     );
 
@@ -168,10 +170,11 @@ ThemeData get darkTheme => ThemeData(
           foregroundColor: Colors.white,
           elevation: 2,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
-      cardTheme: CardThemeData(
+      cardTheme: CardTheme(
         elevation: 3,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         clipBehavior: Clip.antiAlias,
@@ -272,6 +275,7 @@ ThemeData get darkTheme => ThemeData(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Colors.red, width: 1),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
     );

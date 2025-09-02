@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:provider/provider.dart';
-import '../services/service_provider.dart';
+import '../services/database_service.dart';
 import '../widgets/shared_widgets.dart';
 import '../models/data_models.dart';
 
@@ -13,6 +12,7 @@ class ProductionPage extends StatefulWidget {
 }
 
 class _ProductionPageState extends State<ProductionPage> {
+  final DatabaseService _databaseService = DatabaseService();
   bool _isLoading = true;
   List<InternalProduction> _productions = [];
   List<Product> _products = [];
@@ -29,10 +29,9 @@ class _ProductionPageState extends State<ProductionPage> {
       _isLoading = true;
     });
 
-    final service = Provider.of<ServiceProvider>(context, listen: false);
-    final products = await service.getProducts();
-    final recipes = await service.getRecipes();
-    final productions = await service.getInternalProductions();
+    final products = await _databaseService.getProducts();
+    final recipes = await _databaseService.getRecipes();
+    final productions = await _databaseService.getInternalProductions();
 
     if (mounted) {
       setState(() {
@@ -49,7 +48,7 @@ class _ProductionPageState extends State<ProductionPage> {
     return Scaffold(
       appBar: const CustomAppBar(title: 'Produção Caseira'),
       body: _isLoading
-          ? const Center(child: BotecoLoader(message: "Carregando produções..."))
+          ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: _loadData,
               child: _productions.isEmpty
@@ -427,15 +426,14 @@ class _ProductionPageState extends State<ProductionPage> {
                     notes: notes,
                   );
                   
-                  final service = Provider.of<ServiceProvider>(context, listen: false);
-                  await service.addInternalProduction(production);
+                  await _databaseService.addInternalProduction(production);
                   if (mounted) {
                     Navigator.pop(context);
                     _loadData();
                     
                     // Mostrar dialog para adicionar ingredientes
-                    final freshProductions = await service.getInternalProductions();
-                    final addedProduction = freshProductions.firstWhere((p) => p.name == name, orElse: () => freshProductions.first);
+                    final freshProductions = await _databaseService.getInternalProductions();
+                    final addedProduction = freshProductions.firstWhere((p) => p.name == name);
                     _showAddIngredientDialog(addedProduction);
                   }
                 },
@@ -589,8 +587,7 @@ class _ProductionPageState extends State<ProductionPage> {
                     notes: notes,
                   );
                   
-                  final service = Provider.of<ServiceProvider>(context, listen: false);
-                  await service.updateInternalProduction(updatedProduction);
+                  await _databaseService.updateInternalProduction(updatedProduction);
                   if (mounted) {
                     Navigator.pop(context);
                     _loadData();
@@ -773,10 +770,9 @@ class _ProductionPageState extends State<ProductionPage> {
                     unit: selectedProduct.unit,
                   );
                   
-                  final service = Provider.of<ServiceProvider>(context, listen: false);
-                  await service.addProductionIngredient(production.id, productionIngredient);
+                  await _databaseService.addProductionIngredient(production.id, productionIngredient);
                   // Atualizar o estoque do produto
-                  await service.updateProductStock(
+                  await _databaseService.updateProductStock(
                     selectedProductId!,
                     selectedProduct.stockQuantity - quantity,
                   );
@@ -818,14 +814,13 @@ class _ProductionPageState extends State<ProductionPage> {
         confirmText: 'Finalizar',
         cancelText: 'Cancelar',
         onConfirm: () async {
-          final service = Provider.of<ServiceProvider>(context, listen: false);
           // Atualizar o status da produção
           final updatedProduction = production.copyWith(
             status: ProductionStatus.finalized,
             finalizedAt: DateTime.now(),
           );
           
-          await service.updateInternalProduction(updatedProduction);
+          await _databaseService.updateInternalProduction(updatedProduction);
           
           // Adicionar ao estoque ou atualizar produto existente
           final existingProductIndex = _products.indexWhere((p) => p.name == production.name);
@@ -833,7 +828,7 @@ class _ProductionPageState extends State<ProductionPage> {
           if (existingProductIndex != -1) {
             // Produto já existe, atualizar estoque
             final existingProduct = _products[existingProductIndex];
-            await service.updateProductStock(
+            await _databaseService.updateProductStock(
               existingProduct.id,
               existingProduct.stockQuantity + production.quantity,
             );
@@ -848,7 +843,7 @@ class _ProductionPageState extends State<ProductionPage> {
               description: 'Produto de produção caseira',
             );
             
-            await service.addProduct(newProduct);
+            await _databaseService.addProduct(newProduct);
           }
           
           if (mounted) {
