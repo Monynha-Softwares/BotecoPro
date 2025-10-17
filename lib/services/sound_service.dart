@@ -13,24 +13,28 @@ class SoundService {
   bool _soundEnabled = true;
   
   // Audio cache to preload sounds
-  final cache = AudioCache(prefix: 'assets/sounds/');
+  final AudioCache _cache = AudioCache(prefix: 'assets/sounds/');
+
+  static const List<String> _soundEffectNames = [
+    'mesa_aberta',
+    'mesa_fechada',
+    'pedido_adicionado',
+    'pedido_entregue',
+    'venda_fechada',
+    'produto_adicionado',
+    'sucesso',
+    'erro',
+    'notificacao',
+    'navegacao',
+  ];
   
   // Initialize sound service
   Future<void> init() async {
     await _loadSoundPreference();
     // Preload all sounds
-    await Future.wait([
-      cache.loadAsset('mesa_aberta.mp3'),
-      cache.loadAsset('mesa_fechada.mp3'),
-      cache.loadAsset('pedido_adicionado.mp3'),
-      cache.loadAsset('pedido_entregue.mp3'),
-      cache.loadAsset('venda_fechada.mp3'),
-      cache.loadAsset('produto_adicionado.mp3'),
-      cache.loadAsset('sucesso.mp3'),
-      cache.loadAsset('erro.mp3'),
-      cache.loadAsset('notificacao.mp3'),
-      cache.loadAsset('navegacao.mp3'),
-    ]);
+    await _cache.loadAll(
+      _soundEffectNames.map((name) => '$name.mp3').toList(),
+    );
   }
   
   Future<void> _loadSoundPreference() async {

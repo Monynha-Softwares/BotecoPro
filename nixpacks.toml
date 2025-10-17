@@ -1,0 +1,33 @@
+providers = ["nix"]
+
+[phases.setup]
+nixPkgs = [
+  "bash",
+  "coreutils",
+  "curl",
+  "flutter",
+  "git",
+  "pkg-config",
+  "python3",
+  "unzip",
+  "which"
+]
+
+[phases.install]
+commands = [
+  "flutter config --enable-web",
+  "flutter pub get"
+]
+
+[phases.build]
+dependsOn = ["install"]
+commands = [
+  "flutter build web --release"
+]
+artifactPaths = ["build/web"]
+
+[start]
+cmd = "python3 -m http.server ${PORT:-8080} --directory build/web"
+
+[variables]
+PORT = "8080"
