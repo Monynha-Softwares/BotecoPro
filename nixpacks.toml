@@ -1,46 +1,47 @@
 [project]
 name = "boteco-pro"
-providers = ["flutter"]
+providers = []
 
 [phases.setup]
-nixPkgs = [
-  "flutter",
-  "bash",
-  "coreutils",
-  "git",
+aptPkgs = [
+  "ca-certificates",
   "curl",
   "unzip",
-  "pkg-config",
+  "xz-utils",
+  "git",
+  "clang",
   "cmake",
+  "ninja-build",
   "python3",
-  "alsaLib",
-  "gtk3",
-  "pango",
-  "cairo",
-  "mesa",
-  "libGLU",
-  "xorg.libX11",
-  "xorg.libXcursor",
-  "xorg.libXi",
-  "xorg.libXinerama",
-  "xorg.libXrandr"
+  "libgtk-3-0",
+  "libglu1-mesa",
+  "libstdc++6"
+]
+commands = [
+  "mkdir -p /opt",
+  "curl -fsSL https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.24.3-stable.tar.xz -o /tmp/flutter.tar.xz",
+  "tar -xJf /tmp/flutter.tar.xz -C /opt",
+  "rm /tmp/flutter.tar.xz",
+  "ln -sf /opt/flutter/bin/flutter /usr/local/bin/flutter",
+  "ln -sf /opt/flutter/bin/dart /usr/local/bin/dart"
 ]
 
 [phases.install]
 commands = [
-  "flutter config --no-analytics",
+  "flutter config --no-analytics --enable-web",
   "flutter precache --web",
-  "flutter pub get",
-  "dart pub global activate dhttpd"
+  "flutter pub get"
 ]
 
 [phases.build]
 commands = [
-  "flutter build web --release --web-renderer canvaskit"
+  "flutter build web --release"
 ]
 
 [environment]
+FLUTTER_HOME = "/opt/flutter"
+PUB_CACHE = "/app/.pub-cache"
 FLUTTER_WEB_ENVIRONMENT = "production"
 
 [start]
-command = "~/.pub-cache/bin/dhttpd --host 0.0.0.0 --port ${PORT:-8080} --path build/web"
+command = "python3 -m http.server --directory build/web ${PORT:-8080}"

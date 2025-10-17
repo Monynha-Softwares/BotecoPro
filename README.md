@@ -68,20 +68,23 @@ It helps owners keep tables, orders, stock, recipes and in-house production unde
 
 ## 🧱 Deploy com Nixpacks
 
-O repositório inclui um arquivo `nixpacks.toml` com todas as dependências
-de sistema necessárias para **compilar e servir a versão web do Boteco PRO**
-utilizando o [Railway Nixpacks](https://nixpacks.com/).
+O repositório inclui um arquivo `nixpacks.toml` que baixa o SDK oficial do
+Flutter e instala as bibliotecas de sistema necessárias para **compilar e
+servir a versão web do Boteco PRO** utilizando o
+[Railway Nixpacks](https://nixpacks.com/).
 
 1. Garanta que o arquivo `.env` esteja preenchido com as chaves do Supabase
    antes da compilação (as variáveis são empacotadas no build web).
 2. Gere o plano com `nixpacks plan .` para inspecionar as fases.
 3. Crie a imagem com `nixpacks build . --name boteco-pro-web`.
-4. Publique a imagem ou execute-a localmente com o `PORT` desejado; o
-   comando de inicialização usa `dhttpd` para servir o diretório `build/web`.
+4. Publique a imagem ou execute-a localmente com o `PORT` desejado; o comando
+   de inicialização usa `python3 -m http.server` para servir o diretório
+   `build/web`.
 
-O processo executa `flutter build web --release --web-renderer canvaskit`
-e habilita o cache de dependências do Flutter para reduzir o tempo de build
-em execuções subsequentes.
+O processo faz o download do tarball oficial do Flutter, habilita o suporte
+ao alvo web, roda `flutter precache --web` e, por fim, executa
+`flutter build web --release`. Nenhum pacote do Nix é instalado, o que evita
+estouros de disco em ambientes com armazenamento limitado.
 
 ## 🧪 Testes
 
