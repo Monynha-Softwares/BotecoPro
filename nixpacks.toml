@@ -1,0 +1,28 @@
+[phases.setup]
+nixPkgs = [
+  "bash",
+  "cacert",
+  "flutter",
+  "git",
+  "python3",
+  "unzip",
+  "which"
+]
+
+[phases.setup.env]
+CI = "true"
+FLUTTER_WEB = "true"
+
+[phases.install]
+cmds = [
+  "flutter config --no-analytics --enable-web",
+  "flutter pub get"
+]
+
+[phases.build]
+cmds = [
+  "flutter build web --release"
+]
+
+[start]
+cmd = "python3 -m http.server --directory build/web $PORT"

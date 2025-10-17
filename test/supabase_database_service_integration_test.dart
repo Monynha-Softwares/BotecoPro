@@ -23,19 +23,27 @@ class _MemoryAsyncStorage extends GotrueAsyncStorage {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  final supabaseUrl = Platform.environment['SUPABASE_URL'];
+  final supabaseAnonKey = Platform.environment['SUPABASE_ANON_KEY'];
+  final runSupabaseTests =
+      Platform.environment['RUN_SUPABASE_TESTS']?.toLowerCase() == 'true';
+  final hasSupabaseConfig = runSupabaseTests &&
+      supabaseUrl != null &&
+      supabaseAnonKey != null &&
+      supabaseUrl.isNotEmpty &&
+      supabaseAnonKey.isNotEmpty;
+
   late SupabaseAuthService authService;
   late SupabaseDatabaseService dbService;
 
   setUpAll(() async {
-    final url = Platform.environment['SUPABASE_URL'];
-    final anonKey = Platform.environment['SUPABASE_ANON_KEY'];
-    if (url == null || anonKey == null) {
-      throw Exception('Missing Supabase environment variables');
+    if (!hasSupabaseConfig) {
+      return;
     }
 
     await Supabase.initialize(
-      url: url,
-      anonKey: anonKey,
+      url: supabaseUrl!,
+      anonKey: supabaseAnonKey!,
       authOptions: FlutterAuthClientOptions(
         autoRefreshToken: false,
         localStorage: const EmptyLocalStorage(),
@@ -47,12 +55,18 @@ void main() {
     dbService = SupabaseDatabaseService();
   });
 
-  test('login, inserir produto e registrar venda', () async {
-    final email = 'test_${DateTime.now().millisecondsSinceEpoch}@example.com';
-    const password = 'pass1234';
+  test(
+    'login, inserir produto e registrar venda',
+    () async {
+      if (!hasSupabaseConfig) {
+        return;
+      }
 
-    final user = await authService.signUpWithEmail(email, password, 'Test');
-    expect(user, isNotNull);
+      final email = 'test_${DateTime.now().millisecondsSinceEpoch}@example.com';
+      const password = 'pass1234';
+
+      final user = await authService.signUpWithEmail(email, password, 'Test');
+      expect(user, isNotNull);
 
     final categorias = await dbService.getCategorias();
     if (categorias.isEmpty) {
@@ -76,7 +90,11 @@ void main() {
     final venda = Venda(id_mesa: mesa.id_mesa!, data_venda: DateTime.now());
     await dbService.addVenda(venda);
 
-    final vendas = await dbService.getVendas();
-    expect(vendas.isNotEmpty, isTrue);
-  });
+      final vendas = await dbService.getVendas();
+      expect(vendas.isNotEmpty, isTrue);
+    },
+    skip: hasSupabaseConfig
+        ? null
+        : 'SUPABASE_URL and SUPABASE_ANON_KEY must be provided to run integration tests.',
+  );
 }

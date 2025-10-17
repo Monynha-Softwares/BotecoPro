@@ -60,6 +60,18 @@ It helps owners keep tables, orders, stock, recipes and in-house production unde
    minimalistas), utilize `flutter run -d web-server` para iniciar um
    servidor local.
 
+### Usando Nix
+
+O repositório inclui configurações Nix para padronizar o ambiente de
+desenvolvimento e permitir que o [Nixpacks](https://nixpacks.com/) faça o
+build da versão web automaticamente.
+
+- Com flakes habilitados: `nix develop`
+- Sem flakes: `nix-shell`
+
+Ambos os comandos expõem o Flutter com o suporte a web ativado e incluem
+ferramentas auxiliares como `git`, `python3`, `unzip` e certificados TLS.
+
 ## 🧪 Testes
 
 Exemplos de testes:
@@ -78,6 +90,11 @@ executando `flutter analyze` e `flutter test` para garantir a qualidade do códi
 Os relatórios de cobertura são disponibilizados como artefato da execução.
 Um workflow separado realiza o *deploy* da versão web no GitHub Pages
 sempre que há alterações na branch `main`.
+
+> ℹ️ Para executar o teste de integração com Supabase defina a variável
+> `RUN_SUPABASE_TESTS=true` juntamente com `SUPABASE_URL` e
+> `SUPABASE_ANON_KEY` válidos. Caso contrário ele será automaticamente
+> ignorado.
 
 
 ## 🤝 Contributing & License
