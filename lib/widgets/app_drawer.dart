@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
+import '../l10n/l10n.dart';
 import '../services/service_provider.dart';
 import '../services/theme_provider.dart';
 import '../services/user_provider.dart';
@@ -102,7 +103,7 @@ decoration: BoxDecoration(
 gradient: LinearGradient(
 colors: [
 botecoWine,
-botecoWine.withOpacity(0.8),
+botecoWine.withValues(alpha: 0.8),
 ],
 begin: Alignment.topLeft,
 end: Alignment.bottomRight,
@@ -140,7 +141,7 @@ const SizedBox(height: 4),
 Text(
 'Gestão completa para seu bar',
 style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-color: Colors.white.withOpacity(0.9),
+color: Colors.white.withValues(alpha: 0.9),
 ),
 ),
 ],
@@ -160,7 +161,7 @@ const SizedBox(height: 4),
 Text(
 user.email,
 style: Theme.of(context).textTheme.bodySmall!.copyWith(
-color: Colors.white.withOpacity(0.9),
+color: Colors.white.withValues(alpha: 0.9),
 ),
 ),
 ],
@@ -177,8 +178,8 @@ color: serviceProvider.isOnline ? Colors.green : Colors.grey,
   title: Text(context.l10n.sync),
 subtitle: Text(
 serviceProvider.isOnline
-? 'Modo Online'
-: 'Modo Offline',
+? context.l10n.connectedServer
+: context.l10n.offlineMode,
 style: TextStyle(
 color: serviceProvider.isOnline ? Colors.green : Colors.grey,
 fontWeight: FontWeight.bold,
@@ -234,9 +235,9 @@ Widget _buildVersionInfo(BuildContext context) {
 return Container(
 padding: const EdgeInsets.symmetric(vertical: 16),
 child: Text(
-'Versão 1.0.0',
+  '${context.l10n.appVersion} ${context.l10n.appVersionNumber}',
 style: Theme.of(context).textTheme.bodySmall!.copyWith(
-color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
 ),
 textAlign: TextAlign.center,
 ),
@@ -250,14 +251,14 @@ final user = userProvider.userProfile;
 showDialog(
 context: context,
 builder: (context) => AlertDialog(
-  title: Text(context.l10n.userProfile),
+  title: Text(context.l10n.profile),
 content: SizedBox(
 width: double.maxFinite,
 child: Column(
 mainAxisSize: MainAxisSize.min,
 children: [
 CircleAvatar(
-backgroundColor: botecoWine.withOpacity(0.2),
+backgroundColor: botecoWine.withValues(alpha: 0.2),
 radius: 50,
 child: const Icon(
 Icons.person,
@@ -300,7 +301,7 @@ style: ElevatedButton.styleFrom(
 backgroundColor: Theme.of(context).colorScheme.primary,
 ),
 child: Text(
-'Editar Perfil',
+  context.l10n.editProfile,
 style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
 ),
 ),
@@ -327,7 +328,7 @@ child: Column(
 mainAxisSize: MainAxisSize.min,
 children: [
 CircleAvatar(
-backgroundColor: botecoWine.withOpacity(0.2),
+backgroundColor: botecoWine.withValues(alpha: 0.2),
 radius: 50,
 child: Stack(
 children: [
@@ -594,7 +595,7 @@ content: Column(
 mainAxisSize: MainAxisSize.min,
 children: [
 CircleAvatar(
-backgroundColor: botecoWine.withOpacity(0.2),
+backgroundColor: botecoWine.withValues(alpha: 0.2),
 radius: 50,
 child: const Icon(
 Icons.sports_bar,

@@ -1,0 +1,46 @@
+[project]
+name = "boteco-pro"
+providers = ["flutter"]
+
+[phases.setup]
+nixPkgs = [
+  "flutter",
+  "bash",
+  "coreutils",
+  "git",
+  "curl",
+  "unzip",
+  "pkg-config",
+  "cmake",
+  "python3",
+  "alsaLib",
+  "gtk3",
+  "pango",
+  "cairo",
+  "mesa",
+  "libGLU",
+  "xorg.libX11",
+  "xorg.libXcursor",
+  "xorg.libXi",
+  "xorg.libXinerama",
+  "xorg.libXrandr"
+]
+
+[phases.install]
+commands = [
+  "flutter config --no-analytics",
+  "flutter precache --web",
+  "flutter pub get",
+  "dart pub global activate dhttpd"
+]
+
+[phases.build]
+commands = [
+  "flutter build web --release --web-renderer canvaskit"
+]
+
+[environment]
+FLUTTER_WEB_ENVIRONMENT = "production"
+
+[start]
+command = "~/.pub-cache/bin/dhttpd --host 0.0.0.0 --port ${PORT:-8080} --path build/web"

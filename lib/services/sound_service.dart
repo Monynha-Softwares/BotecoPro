@@ -20,16 +20,16 @@ class SoundService {
     await _loadSoundPreference();
     // Preload all sounds
     await Future.wait([
-      cache.loadAsset('mesa_aberta.mp3'),
-      cache.loadAsset('mesa_fechada.mp3'),
-      cache.loadAsset('pedido_adicionado.mp3'),
-      cache.loadAsset('pedido_entregue.mp3'),
-      cache.loadAsset('venda_fechada.mp3'),
-      cache.loadAsset('produto_adicionado.mp3'),
-      cache.loadAsset('sucesso.mp3'),
-      cache.loadAsset('erro.mp3'),
-      cache.loadAsset('notificacao.mp3'),
-      cache.loadAsset('navegacao.mp3'),
+      cache.load('mesa_aberta.mp3'),
+      cache.load('mesa_fechada.mp3'),
+      cache.load('pedido_adicionado.mp3'),
+      cache.load('pedido_entregue.mp3'),
+      cache.load('venda_fechada.mp3'),
+      cache.load('produto_adicionado.mp3'),
+      cache.load('sucesso.mp3'),
+      cache.load('erro.mp3'),
+      cache.load('notificacao.mp3'),
+      cache.load('navegacao.mp3'),
     ]);
   }
   
