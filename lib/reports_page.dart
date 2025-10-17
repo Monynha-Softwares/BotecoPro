@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'services/service_provider.dart';
+import 'l10n/l10n.dart';
 import 'widgets/shared_widgets.dart';
 import 'models/data_models.dart';
 import 'pages/orders_page.dart';

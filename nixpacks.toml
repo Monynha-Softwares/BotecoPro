@@ -1,0 +1,35 @@
+[project]
+name = "boteco-pro"
+providers = []
+
+[phases.setup]
+aptPkgs = [
+  "ca-certificates",
+  "curl",
+  "xz-utils",
+  "unzip",
+  "python3"
+]
+
+[phases.install]
+commands = [
+  "export FLUTTER_URL=https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.24.3-stable.tar.xz",
+  "mkdir -p /opt && curl -fsSL $FLUTTER_URL -o /tmp/flutter.tar.xz",
+  "tar -xf /tmp/flutter.tar.xz -C /opt && rm /tmp/flutter.tar.xz",
+  "/opt/flutter/bin/flutter config --no-analytics --enable-web",
+  "/opt/flutter/bin/flutter precache --web",
+  "PUB_CACHE=/app/.pub-cache /opt/flutter/bin/flutter pub get"
+]
+
+[phases.build]
+commands = [
+  "PUB_CACHE=/app/.pub-cache /opt/flutter/bin/flutter build web --release --web-renderer canvaskit",
+  "rm -rf /opt/flutter"
+]
+
+[environment]
+FLUTTER_WEB_ENVIRONMENT = "production"
+PUB_CACHE = "/app/.pub-cache"
+
+[start]
+command = "python3 -m http.server --directory build/web ${PORT:-8080}"

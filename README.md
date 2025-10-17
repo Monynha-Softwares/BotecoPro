@@ -66,6 +66,25 @@ It helps owners keep tables, orders, stock, recipes and in-house production unde
    minimalistas), utilize `flutter run -d web-server` para iniciar um
    servidor local.
 
+## 🧱 Deploy com Nixpacks
+
+O repositório inclui um arquivo `nixpacks.toml` com todas as dependências
+de sistema necessárias para **compilar e servir a versão web do Boteco PRO**
+utilizando o [Railway Nixpacks](https://nixpacks.com/).
+
+1. Garanta que o arquivo `.env` esteja preenchido com as chaves do Supabase
+   antes da compilação (as variáveis são empacotadas no build web).
+2. Gere o plano com `nixpacks plan .` para inspecionar as fases.
+3. Crie a imagem com `nixpacks build . --name boteco-pro-web`.
+4. Publique a imagem ou execute-a localmente com o `PORT` desejado. A
+   aplicação final é estática e é servida pelo `python3 -m http.server`
+   apontando para `build/web`.
+
+O processo faz o download da distribuição oficial do Flutter 3.24, executa
+`flutter build web --release --web-renderer canvaskit` e reaproveita o cache
+de pacotes (`PUB_CACHE=/app/.pub-cache`) entre execuções para acelerar builds
+subsequentes.
+
 ## 🧪 Testes
 
 Exemplos de testes:
