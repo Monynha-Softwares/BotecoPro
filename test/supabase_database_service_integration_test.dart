@@ -68,27 +68,34 @@ void main() {
       final user = await authService.signUpWithEmail(email, password, 'Test');
       expect(user, isNotNull);
 
-    final categorias = await dbService.getCategorias();
-    if (categorias.isEmpty) {
-      await dbService.initializeData(createSampleData: true);
-    }
-    final categoriaId = (await dbService.getCategorias()).first.id_categoria!;
+      final categorias = await dbService.getCategorias();
+      if (categorias.isEmpty) {
+        await dbService.initializeData(createSampleData: true);
+      }
+      final categoriaId = (await dbService.getCategorias()).first.id_categoria!;
 
-    final produto = Produto(
-      nome: 'Produto Teste',
-      unidade_base: 'unidade',
-      tipo_produto: 'compra',
-      controla_estoque: true,
-      id_categoria: categoriaId,
-    );
-    await dbService.addProduto(produto);
+      final produto = Produto(
+        nome: 'Produto Teste',
+        unidade_base: 'unidade',
+        tipo_produto: 'compra',
+        controla_estoque: true,
+        id_categoria: categoriaId,
+      );
+      await dbService.addProduto(produto);
 
-    final produtos = await dbService.getProdutos();
-    expect(produtos.any((p) => p.nome == 'Produto Teste'), isTrue);
+      final produtos = await dbService.getProdutos();
+      expect(produtos.any((p) => p.nome == 'Produto Teste'), isTrue);
 
-    final mesa = (await dbService.getMesas()).first;
-    final venda = Venda(id_mesa: mesa.id_mesa!, data_venda: DateTime.now());
-    await dbService.addVenda(venda);
+      var mesas = await dbService.getMesas();
+      if (mesas.isEmpty) {
+        await dbService.initializeData(createSampleData: true);
+        mesas = await dbService.getMesas();
+      }
+      expect(mesas, isNotEmpty);
+
+      final mesa = mesas.first;
+      final venda = Venda(id_mesa: mesa.id_mesa!, data_venda: DateTime.now());
+      await dbService.addVenda(venda);
 
       final vendas = await dbService.getVendas();
       expect(vendas.isNotEmpty, isTrue);

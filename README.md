@@ -72,6 +72,11 @@ build da versão web automaticamente.
 Ambos os comandos expõem o Flutter com o suporte a web ativado e incluem
 ferramentas auxiliares como `git`, `python3`, `unzip` e certificados TLS.
 
+> ℹ️ O `nixpacks.toml` baixa automaticamente o artefato oficial do Flutter
+> (versão estável 3.35.6 por padrão) e o reutiliza entre builds. Ajuste a
+> variável `FLUTTER_VERSION` conforme necessário para acompanhar novos
+> releases.
+
 ## 🧪 Testes
 
 Exemplos de testes:

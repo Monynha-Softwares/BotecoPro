@@ -1,27 +1,36 @@
+[variables]
+FLUTTER_VERSION = "3.35.6"
+FLUTTER_HOME = "/opt/flutter"
+FLUTTER_BIN_PATH = "/opt/flutter/bin:/opt/flutter/bin/cache/dart-sdk/bin"
+
 [phases.setup]
 nixPkgs = [
   "bash",
   "cacert",
-  "flutter",
   "git",
   "python3",
   "unzip",
   "which"
 ]
-
-[phases.setup.env]
-CI = "true"
-FLUTTER_WEB = "true"
+aptPkgs = [
+  "curl",
+  "xz-utils"
+]
+cmds = [
+  "mkdir -p $FLUTTER_HOME",
+  "if [ ! -x $FLUTTER_HOME/bin/flutter ]; then tmp_dir=$(mktemp -d) && cd $tmp_dir && curl -fsSL https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz -o flutter.tar.xz && tar -xf flutter.tar.xz && rm -rf $FLUTTER_HOME && mv flutter $FLUTTER_HOME && rm -rf $tmp_dir; fi",
+  "chmod -R a+w $FLUTTER_HOME"
+]
 
 [phases.install]
 cmds = [
-  "flutter config --no-analytics --enable-web",
-  "flutter pub get"
+  "export PATH=$FLUTTER_BIN_PATH:$PATH; flutter config --no-analytics --enable-web",
+  "export PATH=$FLUTTER_BIN_PATH:$PATH; flutter pub get"
 ]
 
 [phases.build]
 cmds = [
-  "flutter build web --release"
+  "export PATH=$FLUTTER_BIN_PATH:$PATH; flutter build web --release"
 ]
 
 [start]
