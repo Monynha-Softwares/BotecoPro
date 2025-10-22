@@ -199,9 +199,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   Widget build(BuildContext context) {
     final isWebLarge = MediaQuery.of(context).size.width > 800;
     
-    // Wrap with WillPopScope to handle back button properly
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    // Wrap with PopScope to handle back button properly
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (bool didPop) async {
+        if (didPop) return;
+        final shouldPop = await _onWillPop();
+        if (shouldPop && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
       child: isWebLarge ? _buildDesktopLayout() : _buildMobileLayout(),
     );
   }
