@@ -122,13 +122,19 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   NavigationTab _currentTab = NavigationTab.home;
 
-  final Map<NavigationTab, Widget> _screens = {
-    NavigationTab.home: const HomePage(),
-    NavigationTab.tables: const TablesPage(),
-    NavigationTab.products: const ProductsPage(),
-    NavigationTab.recipes: const RecipesPage(),
-    NavigationTab.production: const ProductionPage(),
-  };
+  late final Map<NavigationTab, Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    _screens = {
+      NavigationTab.home: HomePage(onTabSelected: _selectTab),
+      NavigationTab.tables: const TablesPage(),
+      NavigationTab.products: const ProductsPage(),
+      NavigationTab.recipes: const RecipesPage(),
+      NavigationTab.production: const ProductionPage(),
+    };
+  }
 
   void _selectTab(NavigationTab tab) {
     setState(() {
@@ -188,7 +194,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             ),
             // Conteúdo principal
             Expanded(
-              child: _screens[_currentTab]!,
+              child: IndexedStack(
+                index: _currentTab.index,
+                children: _screens.values.toList(),
+              ),
             ),
           ],
         ),
@@ -197,7 +206,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     
     // Layout mobile avec bottom navigation
     return Scaffold(
-      body: _screens[_currentTab],
+      body: IndexedStack(
+        index: _currentTab.index,
+        children: _screens.values.toList(),
+      ),
       bottomNavigationBar: BottomNavigation(
         currentTab: _currentTab,
         onTabSelected: _selectTab,

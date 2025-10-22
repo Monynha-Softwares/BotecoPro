@@ -3,15 +3,15 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../services/database_service.dart';
 import '../widgets/shared_widgets.dart';
 import '../models/data_models.dart';
-import 'tables_page.dart';
-import 'products_page.dart';
+import '../widgets/bottom_navigation.dart';
 import 'suppliers_page.dart';
-import 'recipes_page.dart';
-import 'production_page.dart';
+import 'order_details_page.dart';
 import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  final Function(NavigationTab) onTabSelected;
+
+  const HomePage({Key? key, required this.onTabSelected}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -260,27 +260,13 @@ class _HomePageState extends State<HomePage> {
               MenuCard(
                 title: 'Mesas',
                 icon: Icons.table_restaurant,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const TablesPage(),
-                    ),
-                  ).then((_) => _loadData());
-                },
+                onTap: () => widget.onTabSelected(NavigationTab.tables),
                 backgroundColor: const Color(0xFF6F61EF),
               ),
               MenuCard(
                 title: 'Produtos',
                 icon: Icons.inventory_2,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ProductsPage(),
-                    ),
-                  ).then((_) => _loadData());
-                },
+                onTap: () => widget.onTabSelected(NavigationTab.products),
                 backgroundColor: const Color(0xFF39D2C0),
               ),
               MenuCard(
@@ -329,27 +315,13 @@ class _HomePageState extends State<HomePage> {
               MenuCard(
                 title: 'Receitas',
                 icon: Icons.menu_book,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const RecipesPage(),
-                    ),
-                  ).then((_) => _loadData());
-                },
+                onTap: () => widget.onTabSelected(NavigationTab.recipes),
                 backgroundColor: const Color(0xFF5D8A66),
               ),
               MenuCard(
                 title: 'Produções Caseiras',
                 icon: Icons.production_quantity_limits,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ProductionPage(),
-                    ),
-                  ).then((_) => _loadData());
-                },
+                onTap: () => widget.onTabSelected(NavigationTab.production),
                 backgroundColor: const Color(0xFFAD6A6C),
               ),
             ],
@@ -420,7 +392,7 @@ class _HomePageState extends State<HomePage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const TablesPage(),
+                        builder: (context) => OrderDetailsPage(order: order),
                       ),
                     ).then((_) => _loadData());
                   },
@@ -436,14 +408,7 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Center(
                 child: TextButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const TablesPage(),
-                      ),
-                    ).then((_) => _loadData());
-                  },
+                  onPressed: () => widget.onTabSelected(NavigationTab.tables),
                   icon: Icon(
                     Icons.visibility,
                     color: Theme.of(context).colorScheme.primary,
