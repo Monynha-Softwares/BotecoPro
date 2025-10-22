@@ -821,7 +821,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                 const Text('Forma de Pagamento:'),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<PaymentMethod>(
-                  value: selectedMethod,
+                  initialValue: selectedMethod,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                   ),

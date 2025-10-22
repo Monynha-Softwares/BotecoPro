@@ -359,7 +359,7 @@ class _ProductsPageState extends State<ProductsPage> {
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<ProductCategory>(
-                    value: selectedCategory,
+                    initialValue: selectedCategory,
                     decoration: const InputDecoration(
                       labelText: 'Categoria*',
                     ),
@@ -446,7 +446,7 @@ class _ProductsPageState extends State<ProductsPage> {
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String?>(
-                    value: selectedSupplierId,
+                    initialValue: selectedSupplierId,
                     decoration: const InputDecoration(
                       labelText: 'Fornecedor (opcional)',
                     ),
@@ -568,7 +568,7 @@ class _ProductsPageState extends State<ProductsPage> {
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<ProductCategory>(
-                    value: selectedCategory,
+                    initialValue: selectedCategory,
                     decoration: const InputDecoration(
                       labelText: 'Categoria*',
                     ),
@@ -635,7 +635,7 @@ class _ProductsPageState extends State<ProductsPage> {
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String?>(
-                    value: selectedSupplierId,
+                    initialValue: selectedSupplierId,
                     decoration: const InputDecoration(
                       labelText: 'Fornecedor (opcional)',
                     ),

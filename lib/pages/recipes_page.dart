@@ -252,7 +252,7 @@ class _RecipesPageState extends State<RecipesPage> {
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<RecipeType>(
-                    value: selectedType,
+                    initialValue: selectedType,
                     decoration: const InputDecoration(
                       labelText: 'Tipo*',
                     ),
@@ -400,7 +400,7 @@ class _RecipesPageState extends State<RecipesPage> {
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<RecipeType>(
-                    value: selectedType,
+                    initialValue: selectedType,
                     decoration: const InputDecoration(
                       labelText: 'Tipo*',
                     ),
@@ -535,7 +535,7 @@ class _RecipesPageState extends State<RecipesPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 DropdownButtonFormField<String?>(
-                  value: selectedProductId,
+                  initialValue: selectedProductId,
                   decoration: const InputDecoration(
                     labelText: 'Produto*',
                   ),
