@@ -10,8 +10,11 @@ import 'pages/production_page.dart';
 import 'pages/products_page.dart';
 import 'pages/recipes_page.dart';
 import 'pages/tables_page.dart';
+import 'pages/login_page.dart';
+import 'pages/profile_page.dart';
 import 'theme.dart';
 import 'widgets/bottom_navigation.dart';
+import 'services/supabase_auth_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -58,6 +61,8 @@ class MyApp extends StatelessWidget {
       darkTheme: darkTheme,
       themeMode: ThemeMode.system,
       home: const SplashScreen(),
+      // Disable browser back button default behavior for better web experience
+      navigatorObservers: [],
     );
   }
 }
@@ -70,15 +75,29 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  final _authService = SupabaseAuthService();
+
   @override
   void initState() {
     super.initState();
-    _navigateToHome();
+    _navigateToNextScreen();
   }
 
-  Future<void> _navigateToHome() async {
+  Future<void> _navigateToNextScreen() async {
     await Future.delayed(const Duration(seconds: 2));
+    if (!mounted) return;
+
+    // Check if Supabase is configured and user is authenticated
+    bool isSupabaseConfigured = false;
+    try {
+      isSupabaseConfigured = _authService.client.auth.currentUser != null;
+    } catch (e) {
+      // Supabase not configured, proceed without auth
+      isSupabaseConfigured = false;
+    }
+
     if (mounted) {
+      // Always go to main navigation, auth is optional
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
       );
@@ -158,6 +177,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       NavigationTab.products: const ProductsPage(),
       NavigationTab.recipes: const RecipesPage(),
       NavigationTab.production: const ProductionPage(),
+      NavigationTab.profile: const ProfilePage(),
     };
   }
 
@@ -171,6 +191,23 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   Widget build(BuildContext context) {
     final isWebLarge = MediaQuery.of(context).size.width > 800;
     
+    // Handle browser back button - prevent blank page
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (bool didPop) async {
+        if (didPop) return;
+        
+        // If not on home tab, go to home instead of popping
+        if (_currentTab != NavigationTab.home) {
+          _selectTab(NavigationTab.home);
+        }
+        // If on home tab, do nothing (stay in app)
+      },
+      child: _buildMainLayout(isWebLarge),
+    );
+  }
+
+  Widget _buildMainLayout(bool isWebLarge) {
     if (isWebLarge) {
       // Layout desktop/web avec sidebar
       return Scaffold(
@@ -214,6 +251,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   icon: const Icon(Icons.production_quantity_limits_outlined),
                   selectedIcon: const Icon(Icons.production_quantity_limits),
                   label: const Text('Produção'),
+                ),
+                NavigationRailDestination(
+                  icon: const Icon(Icons.person_outline),
+                  selectedIcon: const Icon(Icons.person),
+                  label: const Text('Perfil'),
                 ),
               ],
             ),

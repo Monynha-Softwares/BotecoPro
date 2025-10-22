@@ -52,7 +52,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 Icons.arrow_back_ios_rounded,
                 color: Theme.of(context).colorScheme.onPrimary,
               ),
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () {
+                // Safe navigation - check if can pop before popping
+                if (Navigator.of(context).canPop()) {
+                  Navigator.of(context).pop();
+                }
+              },
             )
           : null,
       actions: actions,

@@ -5,7 +5,8 @@ enum NavigationTab {
   tables,
   products,
   recipes,
-  production
+  production,
+  profile
 }
 
 class BottomNavigation extends StatelessWidget {
@@ -61,6 +62,11 @@ class BottomNavigation extends StatelessWidget {
           icon: Icon(Icons.production_quantity_limits_outlined),
           activeIcon: Icon(Icons.production_quantity_limits),
           label: 'Produção',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person_outline),
+          activeIcon: Icon(Icons.person),
+          label: 'Perfil',
         ),
       ],
     );
