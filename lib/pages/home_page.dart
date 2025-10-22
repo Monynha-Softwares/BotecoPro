@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../services/database_service.dart';
+import '../services/auth_service.dart';
 import '../widgets/shared_widgets.dart';
 import '../models/data_models.dart';
 import '../widgets/bottom_navigation.dart';
@@ -19,16 +20,61 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final DatabaseService _databaseService = DatabaseService();
+  final AuthService _authService = AuthService();
   int _activeTablesCount = 0;
   double _todaySales = 0;
   int _lowStockProductsCount = 0;
   List<TableModel> _tables = [];
   List<Order> _activeOrders = [];
+  String _userName = 'Usuário';
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    final name = await _authService.getUserName();
+    if (mounted) {
+      setState(() {
+        _userName = name ?? 'Usuário';
+      });
+    }
+  }
+
+  Future<void> _handleLogout() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sair'),
+        content: const Text('Deseja realmente sair do sistema?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Sair'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      await _authService.logout();
+      if (mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/login',
+          (route) => false,
+        );
+      }
+    }
   }
 
   Future<void> _loadData() async {
@@ -77,6 +123,16 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         centerTitle: true,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.logout,
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
+            tooltip: 'Sair',
+            onPressed: _handleLogout,
+          ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: _loadData,
@@ -101,11 +157,11 @@ class _HomePageState extends State<HomePage> {
     final now = DateTime.now();
     String greeting;
     if (now.hour < 12) {
-      greeting = 'Bom dia';
+      greeting = 'Bom dia, $_userName';
     } else if (now.hour < 18) {
-      greeting = 'Boa tarde';
+      greeting = 'Boa tarde, $_userName';
     } else {
-      greeting = 'Boa noite';
+      greeting = 'Boa noite, $_userName';
     }
     // pattern corrigido: o 'de' entre aspas simples é literal
     final fmt = DateFormat("EEEE, d 'de' MMMM", 'pt_BR');

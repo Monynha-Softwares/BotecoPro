@@ -4,10 +4,12 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
 import 'pages/home_page.dart';
+import 'pages/login_page.dart';
 import 'pages/production_page.dart';
 import 'pages/products_page.dart';
 import 'pages/recipes_page.dart';
 import 'pages/tables_page.dart';
+import 'services/auth_service.dart';
 import 'theme.dart';
 import 'widgets/bottom_navigation.dart';
 
@@ -32,7 +34,18 @@ class MyApp extends StatelessWidget {
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: ThemeMode.system,
-      home: const SplashScreen(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const SplashScreen(),
+        '/login': (context) => const LoginPage(),
+        '/home': (context) => const MainNavigationScreen(),
+      },
+      onGenerateRoute: (settings) {
+        // Handle unknown routes
+        return MaterialPageRoute(
+          builder: (context) => const SplashScreen(),
+        );
+      },
     );
   }
 }
@@ -45,18 +58,28 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  final AuthService _authService = AuthService();
+
   @override
   void initState() {
     super.initState();
-    _navigateToHome();
+    _checkAuthAndNavigate();
   }
 
-  Future<void> _navigateToHome() async {
+  Future<void> _checkAuthAndNavigate() async {
     await Future.delayed(const Duration(seconds: 2));
-    if (mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
-      );
+    
+    if (!mounted) return;
+
+    // Check if user is logged in
+    final isLoggedIn = await _authService.isLoggedIn();
+    
+    if (!mounted) return;
+
+    if (isLoggedIn) {
+      Navigator.of(context).pushReplacementNamed('/home');
+    } else {
+      Navigator.of(context).pushReplacementNamed('/login');
     }
   }
 
@@ -142,69 +165,105 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     });
   }
 
+  Future<bool> _onWillPop() async {
+    // If not on home tab, go back to home instead of exiting
+    if (_currentTab != NavigationTab.home) {
+      _selectTab(NavigationTab.home);
+      return false;
+    }
+    // If on home tab, ask for confirmation to exit
+    final shouldExit = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sair do aplicativo?'),
+        content: const Text('Deseja realmente sair do Boteco PRO?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Sair'),
+          ),
+        ],
+      ),
+    );
+    return shouldExit ?? false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isWebLarge = MediaQuery.of(context).size.width > 800;
     
-    if (isWebLarge) {
-      // Layout desktop/web avec sidebar
-      return Scaffold(
-        body: Row(
-          children: [
-            // Navigation latérale
-            NavigationRail(
-              selectedIndex: _currentTab.index,
-              onDestinationSelected: (index) => _selectTab(NavigationTab.values[index]),
-              backgroundColor: Theme.of(context).colorScheme.surface,
-              leading: Container(
-                padding: const EdgeInsets.all(16),
-                child: Icon(
-                  Icons.sports_bar,
-                  size: 32,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              destinations: [
-                NavigationRailDestination(
-                  icon: const Icon(Icons.home_outlined),
-                  selectedIcon: const Icon(Icons.home),
-                  label: const Text('Início'),
-                ),
-                NavigationRailDestination(
-                  icon: const Icon(Icons.table_bar_outlined),
-                  selectedIcon: const Icon(Icons.table_bar),
-                  label: const Text('Mesas'),
-                ),
-                NavigationRailDestination(
-                  icon: const Icon(Icons.inventory_2_outlined),
-                  selectedIcon: const Icon(Icons.inventory_2),
-                  label: const Text('Produtos'),
-                ),
-                NavigationRailDestination(
-                  icon: const Icon(Icons.menu_book_outlined),
-                  selectedIcon: const Icon(Icons.menu_book),
-                  label: const Text('Receitas'),
-                ),
-                NavigationRailDestination(
-                  icon: const Icon(Icons.production_quantity_limits_outlined),
-                  selectedIcon: const Icon(Icons.production_quantity_limits),
-                  label: const Text('Produção'),
-                ),
-              ],
-            ),
-            // Conteúdo principal
-            Expanded(
-              child: IndexedStack(
-                index: _currentTab.index,
-                children: _screens.values.toList(),
+    // Wrap with WillPopScope to handle back button properly
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: isWebLarge ? _buildDesktopLayout() : _buildMobileLayout(),
+    );
+  }
+
+  Widget _buildDesktopLayout() {
+    return Scaffold(
+      body: Row(
+        children: [
+          // Navigation latérale
+          NavigationRail(
+            selectedIndex: _currentTab.index,
+            onDestinationSelected: (index) => _selectTab(NavigationTab.values[index]),
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            leading: Container(
+              padding: const EdgeInsets.all(16),
+              child: Icon(
+                Icons.sports_bar,
+                size: 32,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
-          ],
-        ),
-      );
-    }
-    
-    // Layout mobile avec bottom navigation
+            destinations: [
+              NavigationRailDestination(
+                icon: const Icon(Icons.home_outlined),
+                selectedIcon: const Icon(Icons.home),
+                label: const Text('Início'),
+              ),
+              NavigationRailDestination(
+                icon: const Icon(Icons.table_bar_outlined),
+                selectedIcon: const Icon(Icons.table_bar),
+                label: const Text('Mesas'),
+              ),
+              NavigationRailDestination(
+                icon: const Icon(Icons.inventory_2_outlined),
+                selectedIcon: const Icon(Icons.inventory_2),
+                label: const Text('Produtos'),
+              ),
+              NavigationRailDestination(
+                icon: const Icon(Icons.menu_book_outlined),
+                selectedIcon: const Icon(Icons.menu_book),
+                label: const Text('Receitas'),
+              ),
+              NavigationRailDestination(
+                icon: const Icon(Icons.production_quantity_limits_outlined),
+                selectedIcon: const Icon(Icons.production_quantity_limits),
+                label: const Text('Produção'),
+              ),
+            ],
+          ),
+          // Conteúdo principal
+          Expanded(
+            child: IndexedStack(
+              index: _currentTab.index,
+              children: _screens.values.toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMobileLayout() {
     return Scaffold(
       body: IndexedStack(
         index: _currentTab.index,
