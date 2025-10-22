@@ -42,6 +42,8 @@ Start here → [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) (20 min read)
 | **[WEB_AUDIT_AND_DEPLOYMENT.md](./WEB_AUDIT_AND_DEPLOYMENT.md)** | 🔍 Detailed technical audit | 30 min | Developers |
 | **[FIREBASE_DEPLOYMENT_GUIDE.md](./FIREBASE_DEPLOYMENT_GUIDE.md)** | 🚀 Deployment step-by-step | 15 min | DevOps |
 | **[WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md)** | 🏗️ System architecture & design | 20 min | Architects |
+| **[SUPABASE_SETUP_GUIDE.md](./SUPABASE_SETUP_GUIDE.md)** | 🔐 Supabase authentication setup | 20 min | Developers |
+| **[SUPABASE_QUICKSTART.md](./SUPABASE_QUICKSTART.md)** | ⚡ Quick Supabase configuration | 5 min | Developers |
 | **[COMMANDS.md](./COMMANDS.md)** | ⚡ Command reference & quick tips | 5 min | Developers |
 | **[CHANGELOG.md](./CHANGELOG.md)** | 📝 Version history & changes | 15 min | All |
 | **[AUDIT_REPORT.txt](./AUDIT_REPORT.txt)** | 🎯 ASCII audit summary | 3 min | All |
@@ -221,6 +223,10 @@ Start here → [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) (20 min read)
 **Deployment?**
 → [FIREBASE_DEPLOYMENT_GUIDE.md](./FIREBASE_DEPLOYMENT_GUIDE.md) (How to deploy)
 → [COMMANDS.md](./COMMANDS.md) (Deployment commands)
+
+**Authentication & User Management?**
+→ [SUPABASE_QUICKSTART.md](./SUPABASE_QUICKSTART.md) (Quick setup - 5 min)
+→ [SUPABASE_SETUP_GUIDE.md](./SUPABASE_SETUP_GUIDE.md) (Complete guide)
 
 **Architecture?**
 → [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) (System design)
