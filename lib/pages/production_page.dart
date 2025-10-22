@@ -305,7 +305,7 @@ class _ProductionPageState extends State<ProductionPage> {
                     controller: nameController,
                     decoration: const InputDecoration(
                       labelText: 'Nome do Produto*',
-                      hintText: 'Ex: Cachau00e7a de Abacaxi, Bolinho Caseiro...',
+                      hintText: 'Ex: Cachaça de Abacaxi, Bolinho Caseiro...',
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -367,7 +367,7 @@ class _ProductionPageState extends State<ProductionPage> {
                   TextField(
                     controller: notesController,
                     decoration: const InputDecoration(
-                      labelText: 'Observaçu00f5es',
+                      labelText: 'Observações',
                     ),
                     maxLines: 3,
                   ),
@@ -528,7 +528,7 @@ class _ProductionPageState extends State<ProductionPage> {
                   TextField(
                     controller: notesController,
                     decoration: const InputDecoration(
-                      labelText: 'Observaçu00f5es',
+                      labelText: 'Observações',
                     ),
                     maxLines: 3,
                   ),
@@ -940,7 +940,7 @@ class _ProductionPageState extends State<ProductionPage> {
             if (production.notes.isNotEmpty) ...[  
               const SizedBox(height: 16),
               const Text(
-                'Observaçu00f5es:',
+                'Observações:',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
