@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'pages/home_page.dart';
 import 'pages/production_page.dart';
@@ -13,6 +15,29 @@ import 'widgets/bottom_navigation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables (if .env file exists)
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    // .env file not found - continue without Supabase
+    print('Warning: .env file not found. Supabase features will be disabled.');
+  }
+
+  // Initialize Supabase (only if credentials are available)
+  final supabaseUrl = dotenv.env['SUPABASE_URL'] ?? '';
+  final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'] ?? '';
+  
+  if (supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty) {
+    try {
+      await Supabase.initialize(
+        url: supabaseUrl,
+        anonKey: supabaseAnonKey,
+      );
+    } catch (e) {
+      print('Warning: Failed to initialize Supabase: $e');
+    }
+  }
 
   // Inicializa a localização para português brasileiro
   await initializeDateFormatting('pt_BR', null);

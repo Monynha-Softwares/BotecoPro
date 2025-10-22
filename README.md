@@ -287,6 +287,7 @@ firebase deploy
 | [WEB_AUDIT_AND_DEPLOYMENT.md](./WEB_AUDIT_AND_DEPLOYMENT.md) | Audit completo, problemas & soluções |
 | [FIREBASE_DEPLOYMENT_GUIDE.md](./FIREBASE_DEPLOYMENT_GUIDE.md) | Deploy passo-a-passo Firebase |
 | [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) | Arquitetura técnica detalhada |
+| [SUPABASE_SETUP_GUIDE.md](./SUPABASE_SETUP_GUIDE.md) | Configuração e uso do Supabase para autenticação |
 
 ---
 
@@ -377,7 +378,7 @@ flutter test integration_test/
 - ✅ **Sem HTTPS Obrigatório** - Firebase auto-HTTPS
 
 ### Upgrades Futuros
-- 🚧 Autenticação (Firebase Auth, OAuth)
+- 🚧 Autenticação (Firebase Auth, OAuth) → **✅ Supabase Auth configurado! Veja [SUPABASE_SETUP_GUIDE.md](./SUPABASE_SETUP_GUIDE.md)**
 - 🚧 Backend API (NodeJS, Python, Go)
 - 🚧 Multi-tenant database
 - 🚧 Encriptação data (client-side)
