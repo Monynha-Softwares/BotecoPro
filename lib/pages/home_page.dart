@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../services/database_service.dart';
+import '../services/supabase_auth_service.dart';
 import '../widgets/shared_widgets.dart';
 import '../models/data_models.dart';
 import '../widgets/bottom_navigation.dart';
@@ -19,6 +20,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final DatabaseService _databaseService = DatabaseService();
+  final SupabaseAuthService _authService = SupabaseAuthService();
   int _activeTablesCount = 0;
   double _todaySales = 0;
   int _lowStockProductsCount = 0;
@@ -55,6 +57,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isAuthenticated = _authService.isAuthenticated;
+    
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -77,6 +81,14 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         centerTitle: true,
         elevation: 0,
+        actions: [
+          if (!isAuthenticated)
+            IconButton(
+              icon: const Icon(Icons.login),
+              tooltip: 'Fazer Login',
+              onPressed: () => widget.onTabSelected(NavigationTab.profile),
+            ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: _loadData,

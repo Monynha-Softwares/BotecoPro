@@ -165,6 +165,7 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   NavigationTab _currentTab = NavigationTab.home;
+  final _authService = SupabaseAuthService();
 
   late final Map<NavigationTab, Widget> _screens;
 
@@ -179,6 +180,25 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       NavigationTab.production: const ProductionPage(),
       NavigationTab.profile: const ProfilePage(),
     };
+    
+    // Listen to auth state changes
+    _setupAuthListener();
+  }
+
+  void _setupAuthListener() {
+    try {
+      _authService.authStateChanges.listen((event) {
+        // Handle auth state changes if needed
+        // For now, just log the state
+        if (mounted) {
+          setState(() {
+            // Rebuild to reflect auth state in UI
+          });
+        }
+      });
+    } catch (e) {
+      // Supabase not configured, skip auth listener
+    }
   }
 
   void _selectTab(NavigationTab tab) {
