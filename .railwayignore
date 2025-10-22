@@ -1,0 +1,47 @@
+# Railway/Nixpacks ignore file
+# Excludes files from deployment to reduce build size and time
+
+# Git
+.git
+.gitignore
+.github
+
+# Documentation (not needed at runtime)
+*.md
+!README.md
+AUDIT_REPORT.txt
+COMMANDS.md
+DOCUMENTATION_INDEX.md
+
+# Flutter development files
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Build artifacts (will be generated during deployment)
+# Note: build/ directory is created during nixpacks build phase
+
+# OS
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# Android/iOS specific (not needed for web)
+android/app/debug
+android/app/profile
+android/app/release
+ios/Flutter/.last_build_id

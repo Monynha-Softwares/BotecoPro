@@ -1,0 +1,23 @@
+# Nixpacks configuration for BotecoPro Flutter Web Application
+# This configuration is used by Railway.app and other platforms that support nixpacks
+
+[variables]
+FLUTTER_VERSION = "3.24.5"
+
+[phases.setup]
+nixPkgs = ["wget", "git", "bash", "curl", "xz", "python3"]
+
+[phases.install]
+cmds = [
+    "chmod +x nixpacks-setup.sh",
+    "./nixpacks-setup.sh install"
+]
+
+[phases.build]
+cmds = [
+    "chmod +x nixpacks-setup.sh",
+    "./nixpacks-setup.sh build"
+]
+
+[start]
+cmd = "./nixpacks-setup.sh start"

@@ -24,6 +24,12 @@ Start here → [FIREBASE_DEPLOYMENT_GUIDE.md](./FIREBASE_DEPLOYMENT_GUIDE.md) (1
 - Configuration
 - Troubleshooting
 
+Or → [NIXPACKS_DEPLOYMENT_GUIDE.md](./NIXPACKS_DEPLOYMENT_GUIDE.md) (15 min read)
+- Railway.app automatic deployment
+- Nixpacks configuration
+- Build process
+- Troubleshooting
+
 ### 🏗️ For Architects/Tech Leads
 Start here → [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) (20 min read)
 - System design
@@ -41,6 +47,7 @@ Start here → [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) (20 min read)
 | **[QUICK_SUMMARY.md](./QUICK_SUMMARY.md)** | 📋 Audit results & recommendations | 5 min | Managers |
 | **[WEB_AUDIT_AND_DEPLOYMENT.md](./WEB_AUDIT_AND_DEPLOYMENT.md)** | 🔍 Detailed technical audit | 30 min | Developers |
 | **[FIREBASE_DEPLOYMENT_GUIDE.md](./FIREBASE_DEPLOYMENT_GUIDE.md)** | 🚀 Deployment step-by-step | 15 min | DevOps |
+| **[NIXPACKS_DEPLOYMENT_GUIDE.md](./NIXPACKS_DEPLOYMENT_GUIDE.md)** | 🚂 Railway/Nixpacks deployment | 15 min | DevOps |
 | **[WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md)** | 🏗️ System architecture & design | 20 min | Architects |
 | **[COMMANDS.md](./COMMANDS.md)** | ⚡ Command reference & quick tips | 5 min | Developers |
 | **[CHANGELOG.md](./CHANGELOG.md)** | 📝 Version history & changes | 15 min | All |
@@ -219,7 +226,8 @@ Start here → [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) (20 min read)
 ### Want to know about...
 
 **Deployment?**
-→ [FIREBASE_DEPLOYMENT_GUIDE.md](./FIREBASE_DEPLOYMENT_GUIDE.md) (How to deploy)
+→ [FIREBASE_DEPLOYMENT_GUIDE.md](./FIREBASE_DEPLOYMENT_GUIDE.md) (How to deploy to Firebase)
+→ [NIXPACKS_DEPLOYMENT_GUIDE.md](./NIXPACKS_DEPLOYMENT_GUIDE.md) (How to deploy to Railway)
 → [COMMANDS.md](./COMMANDS.md) (Deployment commands)
 
 **Architecture?**

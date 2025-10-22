@@ -273,6 +273,8 @@ firebase deploy
 
 ### Outras Opções
 
+- **Railway.app (Nixpacks)**: Deploy automático com Git push
+  - 📖 **Guia Completo**: [NIXPACKS_DEPLOYMENT_GUIDE.md](./NIXPACKS_DEPLOYMENT_GUIDE.md)
 - **Netlify**: `netlify deploy --prod --dir=build/web`
 - **GitHub Pages**: Commit `build/web/` para `gh-pages` branch
 - **AWS S3**: `aws s3 sync build/web s3://bucket-name/`
@@ -286,6 +288,7 @@ firebase deploy
 |-----------|-----------|
 | [WEB_AUDIT_AND_DEPLOYMENT.md](./WEB_AUDIT_AND_DEPLOYMENT.md) | Audit completo, problemas & soluções |
 | [FIREBASE_DEPLOYMENT_GUIDE.md](./FIREBASE_DEPLOYMENT_GUIDE.md) | Deploy passo-a-passo Firebase |
+| [NIXPACKS_DEPLOYMENT_GUIDE.md](./NIXPACKS_DEPLOYMENT_GUIDE.md) | Deploy Railway/Nixpacks |
 | [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) | Arquitetura técnica detalhada |
 
 ---
