@@ -17,17 +17,10 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.0
   fl_chart: 0.68.0
-  google_fonts: 6.1.0
   shared_preferences: 2.3.2
-  path_provider: 2.1.4
   provider: 6.1.2
   http: '>=1.0.0'
   uuid: '>=3.0.0'
-
-  dio: any
-  flutter_secure_storage: any
-  google_sign_in: any
-  jwt_decode: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

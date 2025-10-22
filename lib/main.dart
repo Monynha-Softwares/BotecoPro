@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
@@ -15,15 +14,9 @@ import 'widgets/bottom_navigation.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-// Inicializa a localização para português brasileiro
+  // Inicializa a localização para português brasileiro
   await initializeDateFormatting('pt_BR', null);
   Intl.defaultLocale = 'pt_BR';
-
-// Define a orientação da tela para retrato
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
 
   runApp(const MyApp());
 }
@@ -145,6 +138,64 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isWebLarge = MediaQuery.of(context).size.width > 800;
+    
+    if (isWebLarge) {
+      // Layout desktop/web avec sidebar
+      return Scaffold(
+        body: Row(
+          children: [
+            // Navigation latérale
+            NavigationRail(
+              selectedIndex: _currentTab.index,
+              onDestinationSelected: (index) => _selectTab(NavigationTab.values[index]),
+              backgroundColor: Theme.of(context).colorScheme.surface,
+              leading: Container(
+                padding: const EdgeInsets.all(16),
+                child: Icon(
+                  Icons.sports_bar,
+                  size: 32,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              destinations: [
+                NavigationRailDestination(
+                  icon: const Icon(Icons.home_outlined),
+                  selectedIcon: const Icon(Icons.home),
+                  label: const Text('Início'),
+                ),
+                NavigationRailDestination(
+                  icon: const Icon(Icons.table_bar_outlined),
+                  selectedIcon: const Icon(Icons.table_bar),
+                  label: const Text('Mesas'),
+                ),
+                NavigationRailDestination(
+                  icon: const Icon(Icons.inventory_2_outlined),
+                  selectedIcon: const Icon(Icons.inventory_2),
+                  label: const Text('Produtos'),
+                ),
+                NavigationRailDestination(
+                  icon: const Icon(Icons.menu_book_outlined),
+                  selectedIcon: const Icon(Icons.menu_book),
+                  label: const Text('Receitas'),
+                ),
+                NavigationRailDestination(
+                  icon: const Icon(Icons.production_quantity_limits_outlined),
+                  selectedIcon: const Icon(Icons.production_quantity_limits),
+                  label: const Text('Produção'),
+                ),
+              ],
+            ),
+            // Conteúdo principal
+            Expanded(
+              child: _screens[_currentTab]!,
+            ),
+          ],
+        ),
+      );
+    }
+    
+    // Layout mobile avec bottom navigation
     return Scaffold(
       body: _screens[_currentTab],
       bottomNavigationBar: BottomNavigation(
