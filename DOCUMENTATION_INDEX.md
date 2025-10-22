@@ -44,6 +44,9 @@ Start here → [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) (20 min read)
 | **[WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md)** | 🏗️ System architecture & design | 20 min | Architects |
 | **[SUPABASE_SETUP_GUIDE.md](./SUPABASE_SETUP_GUIDE.md)** | 🔐 Supabase authentication setup | 20 min | Developers |
 | **[SUPABASE_QUICKSTART.md](./SUPABASE_QUICKSTART.md)** | ⚡ Quick Supabase configuration | 5 min | Developers |
+| **[AGENT_TASK_LOGIN_LOGOUT.md](./AGENT_TASK_LOGIN_LOGOUT.md)** | 🎯 **[NOVO]** Tarefa completa: implementar login/logout | 30 min | Developers/Agents |
+| **[QUICK_TASK_CHECKLIST.md](./QUICK_TASK_CHECKLIST.md)** | ✅ Checklist rápido para autenticação | 5 min | Developers |
+| **[AUTH_FLOW_DIAGRAM.md](./AUTH_FLOW_DIAGRAM.md)** | 📊 Diagramas visuais de autenticação | 10 min | Developers/Architects |
 | **[COMMANDS.md](./COMMANDS.md)** | ⚡ Command reference & quick tips | 5 min | Developers |
 | **[CHANGELOG.md](./CHANGELOG.md)** | 📝 Version history & changes | 15 min | All |
 | **[AUDIT_REPORT.txt](./AUDIT_REPORT.txt)** | 🎯 ASCII audit summary | 3 min | All |
@@ -227,6 +230,9 @@ Start here → [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) (20 min read)
 **Authentication & User Management?**
 → [SUPABASE_QUICKSTART.md](./SUPABASE_QUICKSTART.md) (Quick setup - 5 min)
 → [SUPABASE_SETUP_GUIDE.md](./SUPABASE_SETUP_GUIDE.md) (Complete guide)
+→ [AGENT_TASK_LOGIN_LOGOUT.md](./AGENT_TASK_LOGIN_LOGOUT.md) **[NOVO]** (Task: implementar UI completa)
+→ [QUICK_TASK_CHECKLIST.md](./QUICK_TASK_CHECKLIST.md) (Quick checklist)
+→ [AUTH_FLOW_DIAGRAM.md](./AUTH_FLOW_DIAGRAM.md) (Visual flow diagrams)
 
 **Architecture?**
 → [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) (System design)

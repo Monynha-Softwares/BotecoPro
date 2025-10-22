@@ -288,6 +288,9 @@ firebase deploy
 | [FIREBASE_DEPLOYMENT_GUIDE.md](./FIREBASE_DEPLOYMENT_GUIDE.md) | Deploy passo-a-passo Firebase |
 | [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) | Arquitetura técnica detalhada |
 | [SUPABASE_SETUP_GUIDE.md](./SUPABASE_SETUP_GUIDE.md) | Configuração e uso do Supabase para autenticação |
+| [AGENT_TASK_LOGIN_LOGOUT.md](./AGENT_TASK_LOGIN_LOGOUT.md) | **[NOVO]** Tarefa completa para implementar login/logout com Supabase |
+| [QUICK_TASK_CHECKLIST.md](./QUICK_TASK_CHECKLIST.md) | Checklist rápido para implementação de autenticação |
+| [AUTH_FLOW_DIAGRAM.md](./AUTH_FLOW_DIAGRAM.md) | Diagramas visuais do fluxo de autenticação |
 
 ---
 
