@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../services/database_service.dart';
+import '../services/supabase_auth_service.dart';
 import '../widgets/shared_widgets.dart';
 import '../models/data_models.dart';
 import '../widgets/bottom_navigation.dart';
 import 'suppliers_page.dart';
 import 'order_details_page.dart';
+import 'login_page.dart';
 import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
@@ -19,6 +21,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final DatabaseService _databaseService = DatabaseService();
+  final SupabaseAuthService _authService = SupabaseAuthService();
   int _activeTablesCount = 0;
   double _todaySales = 0;
   int _lowStockProductsCount = 0;
@@ -77,6 +80,64 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         centerTitle: true,
         elevation: 0,
+        actions: [
+          PopupMenuButton<String>(
+            icon: Icon(
+              Icons.account_circle,
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
+            onSelected: (value) async {
+              if (value == 'login') {
+                _navigateToLogin();
+              } else if (value == 'logout') {
+                _handleLogout();
+              }
+            },
+            itemBuilder: (BuildContext context) {
+              final isAuthenticated = _authService.isAuthenticated;
+              final user = _authService.currentUser;
+              
+              return [
+                if (isAuthenticated && user != null)
+                  PopupMenuItem<String>(
+                    enabled: false,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          user.email ?? 'Usuário',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const Divider(),
+                      ],
+                    ),
+                  ),
+                if (!isAuthenticated)
+                  const PopupMenuItem<String>(
+                    value: 'login',
+                    child: Row(
+                      children: [
+                        Icon(Icons.login),
+                        SizedBox(width: 8),
+                        Text('Fazer Login'),
+                      ],
+                    ),
+                  ),
+                if (isAuthenticated)
+                  const PopupMenuItem<String>(
+                    value: 'logout',
+                    child: Row(
+                      children: [
+                        Icon(Icons.logout),
+                        SizedBox(width: 8),
+                        Text('Sair'),
+                      ],
+                    ),
+                  ),
+              ];
+            },
+          ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: _loadData,
@@ -95,6 +156,48 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+
+  void _navigateToLogin() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+    );
+    
+    if (result == true && mounted) {
+      // User logged in successfully
+      setState(() {});
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Login realizado com sucesso!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+  }
+
+  void _handleLogout() async {
+    try {
+      await _authService.signOut();
+      if (mounted) {
+        setState(() {});
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Logout realizado com sucesso!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao fazer logout: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildWelcomeHeader() {

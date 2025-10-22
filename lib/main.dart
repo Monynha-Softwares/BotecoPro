@@ -6,10 +6,12 @@ import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'pages/home_page.dart';
+import 'pages/login_page.dart';
 import 'pages/production_page.dart';
 import 'pages/products_page.dart';
 import 'pages/recipes_page.dart';
 import 'pages/tables_page.dart';
+import 'services/supabase_auth_service.dart';
 import 'theme.dart';
 import 'widgets/bottom_navigation.dart';
 
@@ -58,6 +60,10 @@ class MyApp extends StatelessWidget {
       darkTheme: darkTheme,
       themeMode: ThemeMode.system,
       home: const SplashScreen(),
+      routes: {
+        '/main': (context) => const MainNavigationScreen(),
+        '/login': (context) => const LoginPage(),
+      },
     );
   }
 }
@@ -73,16 +79,24 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _navigateToHome();
+    _navigateToNextScreen();
   }
 
-  Future<void> _navigateToHome() async {
+  Future<void> _navigateToNextScreen() async {
     await Future.delayed(const Duration(seconds: 2));
-    if (mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
-      );
-    }
+    
+    if (!mounted) return;
+
+    // Check if Supabase is configured
+    final authService = SupabaseAuthService();
+    final isSupabaseConfigured = authService.currentUser != null || 
+                                  Supabase.instance.client.auth.currentSession != null;
+    
+    // Navigate to main screen using pushNamedAndRemoveUntil to prevent back to splash
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      '/main',
+      (route) => false,
+    );
   }
 
   @override
@@ -167,10 +181,49 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     });
   }
 
+  Future<bool> _onWillPop() async {
+    // Prevent navigation back from main screen to avoid blank page
+    // Instead, show a dialog to confirm exit
+    final shouldExit = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sair do aplicativo?'),
+        content: const Text('Tem certeza que deseja sair do Boteco PRO?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Sair'),
+          ),
+        ],
+      ),
+    );
+    
+    return shouldExit ?? false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isWebLarge = MediaQuery.of(context).size.width > 800;
     
+    // Wrap with PopScope (Flutter 3.12+) or WillPopScope for older versions
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (bool didPop) async {
+        if (didPop) return;
+        final shouldPop = await _onWillPop();
+        if (shouldPop && mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: _buildContent(isWebLarge),
+    );
+  }
+
+  Widget _buildContent(bool isWebLarge) {
     if (isWebLarge) {
       // Layout desktop/web avec sidebar
       return Scaffold(
