@@ -1,0 +1,35 @@
+providers = ["shell"]
+
+[variables]
+FLUTTER_HOME = "/opt/flutter"
+FLUTTER_CHANNEL = "stable"
+PORT = "8080"
+
+[phases.setup]
+aptPkgs = [
+  "curl",
+  "git",
+  "unzip",
+  "xz-utils",
+  "ca-certificates",
+  "python3"
+]
+cmds = [
+  "rm -rf ${FLUTTER_HOME}",
+  "git clone --depth 1 --branch ${FLUTTER_CHANNEL} https://github.com/flutter/flutter.git ${FLUTTER_HOME}",
+  "export PATH=\"$PATH:${FLUTTER_HOME}/bin\" && flutter config --no-analytics --enable-web",
+  "export PATH=\"$PATH:${FLUTTER_HOME}/bin\" && flutter precache --web"
+]
+
+[phases.build]
+dependsOn = ["setup"]
+cmds = [
+  "export PATH=\"$PATH:${FLUTTER_HOME}/bin\" && flutter pub get",
+  "export PATH=\"$PATH:${FLUTTER_HOME}/bin\" && flutter build web --release"
+]
+
+[phases.build.env]
+CI = "true"
+
+[start]
+cmd = "python3 -m http.server ${PORT:-8080} --directory build/web"
