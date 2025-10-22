@@ -209,16 +209,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   Widget build(BuildContext context) {
     final isWebLarge = MediaQuery.of(context).size.width > 800;
     
-    // Wrap with PopScope (Flutter 3.12+) or WillPopScope for older versions
-    return PopScope(
-      canPop: false,
-      onPopInvoked: (bool didPop) async {
-        if (didPop) return;
-        final shouldPop = await _onWillPop();
-        if (shouldPop && mounted) {
-          Navigator.of(context).pop();
-        }
-      },
+    // Wrap with WillPopScope to handle back button
+    return WillPopScope(
+      onWillPop: _onWillPop,
       child: _buildContent(isWebLarge),
     );
   }
