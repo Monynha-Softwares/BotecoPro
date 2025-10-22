@@ -86,11 +86,6 @@ class _SplashScreenState extends State<SplashScreen> {
     await Future.delayed(const Duration(seconds: 2));
     
     if (!mounted) return;
-
-    // Check if Supabase is configured
-    final authService = SupabaseAuthService();
-    final isSupabaseConfigured = authService.currentUser != null || 
-                                  Supabase.instance.client.auth.currentSession != null;
     
     // Navigate to main screen using pushNamedAndRemoveUntil to prevent back to splash
     Navigator.of(context).pushNamedAndRemoveUntil(

@@ -15,16 +15,40 @@ class SupabaseAuthService {
   SupabaseAuthService._internal();
 
   /// Get the Supabase client instance
-  SupabaseClient get client => Supabase.instance.client;
+  SupabaseClient get client {
+    try {
+      return Supabase.instance.client;
+    } catch (e) {
+      throw Exception('Supabase not initialized. Please configure .env file with SUPABASE_URL and SUPABASE_ANON_KEY');
+    }
+  }
 
-  /// Get the current user
-  User? get currentUser => client.auth.currentUser;
+  /// Get the current user (returns null if Supabase not initialized)
+  User? get currentUser {
+    try {
+      return client.auth.currentUser;
+    } catch (e) {
+      return null;
+    }
+  }
 
-  /// Get the current session
-  Session? get currentSession => client.auth.currentSession;
+  /// Get the current session (returns null if Supabase not initialized)
+  Session? get currentSession {
+    try {
+      return client.auth.currentSession;
+    } catch (e) {
+      return null;
+    }
+  }
 
-  /// Check if user is authenticated
-  bool get isAuthenticated => currentUser != null;
+  /// Check if user is authenticated (returns false if Supabase not initialized)
+  bool get isAuthenticated {
+    try {
+      return currentUser != null;
+    } catch (e) {
+      return false;
+    }
+  }
 
   /// Sign in with email and password
   Future<AuthResponse> signInWithEmail({
