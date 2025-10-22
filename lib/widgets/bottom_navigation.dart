@@ -40,7 +40,7 @@ class BottomNavigation extends StatelessWidget {
         BottomNavigationBarItem(
           icon: Icon(Icons.home_outlined),
           activeIcon: Icon(Icons.home),
-          label: 'Inu00edcio',
+          label: 'Início',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.table_bar_outlined),

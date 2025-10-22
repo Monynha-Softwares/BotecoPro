@@ -842,7 +842,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                         children: const [
                           Icon(Icons.credit_card),
                           SizedBox(width: 8),
-                          Text('Cartão de Cru00e9dito'),
+                          Text('Cartão de Crédito'),
                         ],
                       ),
                     ),
@@ -852,7 +852,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                         children: const [
                           Icon(Icons.credit_card),
                           SizedBox(width: 8),
-                          Text('Cartão de Du00e9bito'),
+                          Text('Cartão de Débito'),
                         ],
                       ),
                     ),

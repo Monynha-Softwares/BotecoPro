@@ -1,4 +1,4 @@
-name: botecoPro
+name: boteco_pro
 description: "Gestão completa para seu bar"
 publish_to: 'none'
 version: 1.0.0
@@ -8,7 +8,7 @@ environment:
 
 dependencies:
   flutter_animate: ^4.0.0
-  flutter_launcher_icons: 0.14.3
+  flutter_launcher_icons: ^0.14.3
   table_calendar: ^3.0.0
   flutter_slidable: ^3.0.0
   flutter_svg: ^2.0.0
@@ -16,11 +16,11 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.0
-  fl_chart: 0.68.0
-  shared_preferences: 2.3.2
-  provider: 6.1.2
-  http: '>=1.0.0'
-  uuid: '>=3.0.0'
+  fl_chart: ^0.68.0
+  shared_preferences: ^2.3.2
+  provider: ^6.1.2
+  http: ^1.0.0
+  uuid: ^3.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

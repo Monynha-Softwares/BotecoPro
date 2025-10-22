@@ -262,7 +262,7 @@ class _SuppliersPageState extends State<SuppliersPage> {
               TextField(
                 controller: notesController,
                 decoration: const InputDecoration(
-                  labelText: 'Observaçu00f5es',
+                  labelText: 'Observações',
                   hintText: 'Ex: Entrega às segundas',
                 ),
                 maxLines: 3,
@@ -371,7 +371,7 @@ class _SuppliersPageState extends State<SuppliersPage> {
               TextField(
                 controller: notesController,
                 decoration: const InputDecoration(
-                  labelText: 'Observaçu00f5es',
+                  labelText: 'Observações',
                 ),
                 maxLines: 3,
               ),
@@ -454,7 +454,7 @@ class _SuppliersPageState extends State<SuppliersPage> {
             _loadSuppliers();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Fornecedor ${supplier.name} excluu00eddo'),
+                content: Text('Fornecedor ${supplier.name} excluído'),
                 backgroundColor: Colors.red,
               ),
             );
