@@ -5,7 +5,7 @@
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Flutter](https://img.shields.io/badge/Flutter-3.24+-blue?logo=flutter)
 
-> **MVP Demo Web - Sem necessidade de login ou backend!**
+> **MVP Demo Web - Agora com sistema de autenticação!**
 
 Aplicação completa em Flutter para gerenciar operações de bar: mesas, pedidos, produtos, receitas e produção interna. Todas as dados são armazenadas **client-side** com persistência automática.
 
@@ -15,6 +15,7 @@ Aplicação completa em Flutter para gerenciar operações de bar: mesas, pedido
 
 ### ✅ Funcionalidades Implementadas
 
+- **🔐 Autenticação** - Sistema de login/logout com sessão persistente
 - **📊 Dashboard** - KPIs em tempo real (mesas ativas, vendas, estoque baixo)
 - **🪑 Gerenciamento de Mesas** - Criar, editar, gerenciar status
 - **📦 Catálogo de Produtos** - Inventário com preço, estoque, categoria
@@ -24,6 +25,7 @@ Aplicação completa em Flutter para gerenciar operações de bar: mesas, pedido
 - **👥 Fornecedores** - Manter contatos de fornecedores
 - **💾 Persistência** - localStorage - dados persistem entre sessões
 - **📱 Responsive** - Funciona desktop, tablet e mobile
+- **⬅️ Navegação Aprimorada** - Botão voltar inteligente, sem páginas em branco
 
 ---
 
@@ -33,7 +35,10 @@ Aplicação completa em Flutter para gerenciar operações de bar: mesas, pedido
 
 **🎉 [Acesse o MVP agora (Firebase Hosting)](https://botecoproXXXX.web.app)**
 
-_Sem instalação, sem login, pronto para usar!_
+**Login Demo:**
+- Use qualquer email válido (deve conter @)
+- Senha: mínimo 4 caracteres
+- Exemplo: `admin@boteco.com` / `1234`
 
 ### Rodar Localmente
 
@@ -64,6 +69,11 @@ flutter build web --release
 # Serve build/web em http://localhost:8080
 cd build/web && python3 -m http.server 8080
 ```
+
+**Primeiro Acesso:**
+1. Abra o navegador em `http://localhost:8080`
+2. Faça login com qualquer email/senha válida
+3. Explore o dashboard e funcionalidades!
 
 ---
 
@@ -284,6 +294,7 @@ firebase deploy
 
 | Documento | Descrição |
 |-----------|-----------|
+| [AUTHENTICATION_GUIDE.md](./AUTHENTICATION_GUIDE.md) | 🔐 Guia completo de autenticação e navegação |
 | [WEB_AUDIT_AND_DEPLOYMENT.md](./WEB_AUDIT_AND_DEPLOYMENT.md) | Audit completo, problemas & soluções |
 | [FIREBASE_DEPLOYMENT_GUIDE.md](./FIREBASE_DEPLOYMENT_GUIDE.md) | Deploy passo-a-passo Firebase |
 | [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) | Arquitetura técnica detalhada |
