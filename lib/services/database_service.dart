@@ -366,7 +366,7 @@ class DatabaseService {
     await saveSales(sales);
   }
 
-  // Métodos para consultas especu00edficas
+  // Métodos para consultas específicas
   Future<Order?> getActiveOrderForTable(String tableId) async {
     final orders = await getOrders();
     try {
@@ -446,7 +446,7 @@ class DatabaseService {
     }
   }
 
-  // Métodos para Produçu00f5es Caseiras
+  // Métodos para Produções Caseiras
   Future<List<InternalProduction>> getInternalProductions() async {
     final prefs = await SharedPreferences.getInstance();
     final productionsJson = prefs.getStringList(_productionsKey) ?? [];
