@@ -157,7 +157,7 @@ class _LoginPageState extends State<LoginPage> {
                       'Gestão completa para seu bar',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                            color: Theme.of(context).colorScheme.onSurface.withAlpha(179),
                           ),
                     )
                         .animate()
