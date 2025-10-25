@@ -172,7 +172,7 @@ flutter pub deps --style=compact
 
 ```bash
 # 1. Modifier code
-nano lib/pages/home_page.dart
+nano lib/presentation/pages/home_page.dart
 
 # 2. Rebuild local
 flutter run -d web

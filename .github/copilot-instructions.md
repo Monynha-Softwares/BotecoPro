@@ -22,7 +22,8 @@ BotecoPro is a Flutter bar management application for complete operations includ
 - Each page is a StatefulWidget that loads data via `DatabaseService` in `initState()`
 - Standard pattern: `Future<void> _loadData() async` → `setState()` with mounted check
 - Bottom navigation controls main pages via enum: home, tables, products, recipes, production
-- See: `lib/pages/`, `lib/core/widgets/bottom_navigation.dart`
+- Authentication pages: login and signup for user management
+- See: `lib/presentation/pages/`, `lib/presentation/widgets/bottom_navigation.dart`
 
 ### Theme & Localization
 - **Colors**: Boteco-themed palette (wine `#8B1E3F`, mustard, beige, brown) defined in `theme.dart`
@@ -34,7 +35,7 @@ BotecoPro is a Flutter bar management application for complete operations includ
 - `CustomAppBar`: Consistent top navigation with optional back button and actions
 - `MenuCard`: Reusable card widget for homepage sections
 - Formatting helpers: `formatCurrency()`, `formatDateTime()`, `formatDate()`
-- See: `lib/core/widgets/shared_widgets.dart`
+- See: `lib/presentation/widgets/shared_widgets.dart`
 
 ## Key Dependencies
 - **flutter_animate**: 4.0.0 - Page transitions and animations
@@ -113,7 +114,7 @@ Always use theme colors for consistency:
 1. Add enum/model class to `lib/core/models/data_models.dart`
 2. Add `toJson()`/`fromJson()` and `copyWith()` methods
 3. Add storage key and CRUD methods to `DatabaseService`
-4. Create corresponding page in `lib/pages/*_page.dart`
+4. Create corresponding page in `lib/presentation/pages/*_page.dart`
 5. Add navigation tab and bottom_navigation item if user-facing
 
 ### Modifying Order Flow
@@ -134,21 +135,31 @@ lib/
 ├── main.dart
 ├── theme.dart
 ├── core/
+│   ├── device/
+│   │   ├── app.db
+│   │   └── configs.json
 │   ├── models/
 │   │   └── data_models.dart
-│   ├── services/
-│   │   └── database_service.dart
-│   └── widgets/
-│       ├── bottom_navigation.dart
-│       └── shared_widgets.dart
-└── pages/
-    ├── home_page.dart
-    ├── order_details_page.dart
-    ├── production_page.dart
-    ├── products_page.dart
-    ├── recipes_page.dart
-    ├── suppliers_page.dart
-    └── tables_page.dart
+│   ├── providers/
+│   │   ├── auth_provider.dart
+│   │   └── database_provider.dart
+│   └── services/
+│       ├── auth_service.dart
+│       └── database_service.dart
+└── presentation/
+    ├── pages/
+    │   ├── home_page.dart
+    │   ├── login_page.dart
+    │   ├── signup_page.dart
+    │   ├── order_details_page.dart
+    │   ├── production_page.dart
+    │   ├── products_page.dart
+    │   ├── recipes_page.dart
+    │   ├── suppliers_page.dart
+    │   └── tables_page.dart
+    └── widgets/
+        ├── bottom_navigation.dart
+        └── shared_widgets.dart
 ```
 
 ## Notes for Future Development

@@ -99,21 +99,31 @@ lib/
 ├── main.dart
 ├── theme.dart
 ├── core/
+│   ├── device/
+│   │   ├── app.db
+│   │   └── configs.json
 │   ├── models/
 │   │   └── data_models.dart
-│   ├── services/
-│   │   └── database_service.dart
-│   └── widgets/
-│       ├── bottom_navigation.dart
-│       └── shared_widgets.dart
-└── pages/
-    ├── home_page.dart
-    ├── order_details_page.dart
-    ├── production_page.dart
-    ├── products_page.dart
-    ├── recipes_page.dart
-    ├── suppliers_page.dart
-    └── tables_page.dart
+│   ├── providers/
+│   │   ├── auth_provider.dart
+│   │   └── database_provider.dart
+│   └── services/
+│       ├── auth_service.dart
+│       └── database_service.dart
+└── presentation/
+    ├── pages/
+    │   ├── home_page.dart
+    │   ├── login_page.dart
+    │   ├── signup_page.dart
+    │   ├── order_details_page.dart
+    │   ├── production_page.dart
+    │   ├── products_page.dart
+    │   ├── recipes_page.dart
+    │   ├── suppliers_page.dart
+    │   └── tables_page.dart
+    └── widgets/
+        ├── bottom_navigation.dart
+        └── shared_widgets.dart
 
 web/
 ├── index.html                   # Página raiz (SPA)
