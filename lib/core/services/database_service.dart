@@ -1,8 +1,67 @@
+// lib/core/services/database_service.dart
+//
+/// DatabaseService - Serviço de Persistência de Dados
+///
+/// IMPLEMENTAÇÃO ATUAL:
+/// - Usa SharedPreferences para armazenar dados localmente
+/// - Serializa/deserializa objetos como JSON
+/// - Singleton pattern para acesso global
+/// - Métodos CRUD para todas as entidades
+///
+/// ENTIDADES GERENCIADAS:
+/// - Suppliers (Fornecedores)
+/// - Products (Produtos)
+/// - Tables (Mesas)
+/// - Orders (Pedidos)
+/// - Recipes (Receitas)
+/// - InternalProductions (Produções Caseiras)
+/// - Sales (Vendas - histórico)
+///
+/// PADRÃO DE USO:
+/// ```dart
+/// final dbService = DatabaseService();
+/// 
+/// // Criar
+/// await dbService.addProduct(product);
+/// 
+/// // Ler
+/// final products = await dbService.getProducts();
+/// 
+/// // Atualizar
+/// await dbService.updateProduct(updatedProduct);
+/// 
+/// // Deletar
+/// await dbService.deleteProduct(productId);
+/// ```
+///
+/// LIMITAÇÕES DO SharedPreferences:
+/// - ❌ Não recomendado para grandes volumes de dados (>10MB)
+/// - ❌ Sem suporte a queries complexas
+/// - ❌ Performance degrada com muitos registros
+/// - ❌ Sem relacionamentos entre entidades
+///
+/// QUANDO MIGRAR PARA DatabaseProvider (SQLite):
+/// - Quando tiver >1000 produtos/pedidos
+/// - Quando precisar de relatórios complexos
+/// - Quando precisar de melhor performance
+/// - Ver: lib/core/providers/database_provider.dart
+///
+/// MÉTODOS PRINCIPAIS:
+/// - initializeData(): Cria dados de exemplo na primeira execução
+/// - get*(): Retorna lista de entidades
+/// - add*(): Adiciona nova entidade
+/// - update*(): Atualiza entidade existente
+/// - delete*(): Remove entidade por ID
+/// - save*(): Salva lista completa de entidades
+///
+
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/data_models.dart';
 
+/// DatabaseService - Gerenciador de persistência local com SharedPreferences
 class DatabaseService {
+  // Chaves para armazenamento no SharedPreferences
   static const String _suppliersKey = 'suppliers';
   static const String _productsKey = 'products';
   static const String _tablesKey = 'tables';

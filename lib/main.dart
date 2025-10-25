@@ -1,15 +1,72 @@
+// lib/main.dart
+//
+/// BotecoPro - Aplicativo de Gestão para Bares
+///
+/// ARQUITETURA DO PROJETO:
+///
+/// ```
+/// lib/
+/// ├── main.dart                    # Entry point e navegação principal
+/// ├── theme.dart                   # Tema e cores do app
+/// ├── core/                        # Lógica de negócio e dados
+/// │   ├── models/                  # Modelos de dados
+/// │   │   └── data_models.dart     # Todas as entidades (Product, Order, etc)
+/// │   ├── services/                # Serviços de lógica de negócio
+/// │   │   ├── database_service.dart    # Persistência com SharedPreferences
+/// │   │   └── auth_service.dart        # Autenticação (placeholder)
+/// │   └── providers/               # Gerenciamento de estado
+/// │       ├── auth_provider.dart       # Estado de autenticação
+/// │       └── database_provider.dart   # SQLite (implementação futura)
+/// └── presentation/                # Interface do usuário
+///     ├── pages/                   # Telas do app
+///     │   ├── home_page.dart
+///     │   ├── login_page.dart      # (placeholder)
+///     │   ├── signup_page.dart     # (placeholder)
+///     │   ├── tables_page.dart
+///     │   ├── products_page.dart
+///     │   ├── recipes_page.dart
+///     │   ├── production_page.dart
+///     │   └── suppliers_page.dart
+///     └── widgets/                 # Componentes reutilizáveis
+///         ├── shared_widgets.dart
+///         └── bottom_navigation.dart
+/// ```
+///
+/// PADRÕES UTILIZADOS:
+/// - Clean Architecture (separação core/presentation)
+/// - Singleton (DatabaseService, Providers)
+/// - StatefulWidget para gerenciamento de estado local
+/// - ChangeNotifier para estado global (preparado)
+///
+/// FLUXO DE DADOS:
+/// 1. UI (Pages) → DatabaseService → SharedPreferences
+/// 2. Modelos implementam toJson/fromJson para serialização
+/// 3. Cada entidade tem chave única no SharedPreferences
+///
+/// PREPARAÇÃO PARA FUTURO:
+/// - AuthProvider pronto para Firebase Authentication
+/// - DatabaseProvider pronto para migração SQLite
+/// - LoginPage/SignupPage prontas para integração
+///
+/// DEPENDÊNCIAS PRINCIPAIS:
+/// - flutter_animate: Animações
+/// - shared_preferences: Persistência local
+/// - provider: Gerenciamento de estado (preparado)
+/// - intl: Formatação de datas e moeda (pt_BR)
+///
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
-import 'pages/home_page.dart';
-import 'pages/production_page.dart';
-import 'pages/products_page.dart';
-import 'pages/recipes_page.dart';
-import 'pages/tables_page.dart';
+import 'presentation/pages/home_page.dart';
+import 'presentation/pages/production_page.dart';
+import 'presentation/pages/products_page.dart';
+import 'presentation/pages/recipes_page.dart';
+import 'presentation/pages/tables_page.dart';
 import 'theme.dart';
-import 'core/widgets/bottom_navigation.dart';
+import 'presentation/widgets/bottom_navigation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
