@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../services/database_service.dart';
-import '../widgets/shared_widgets.dart';
-import '../models/data_models.dart';
+import '../core/services/database_service.dart';
+import '../core/widgets/shared_widgets.dart';
+import '../core/models/data_models.dart';
 
 class RecipesPage extends StatefulWidget {
   const RecipesPage({Key? key}) : super(key: key);
@@ -96,7 +96,7 @@ class _RecipesPageState extends State<RecipesPage> {
                     width: 60,
                     height: 60,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+                      color: Theme.of(context).colorScheme.secondary.withAlpha(51),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
@@ -122,13 +122,13 @@ class _RecipesPageState extends State<RecipesPage> {
                             Icon(
                               Icons.category,
                               size: 16,
-                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                              color: Theme.of(context).colorScheme.onSurface.withAlpha(153),
                             ),
                             const SizedBox(width: 4),
                             Text(
                               recipe.type == RecipeType.food ? 'Comida' : 'Bebida',
                               style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                                    color: Theme.of(context).colorScheme.onSurface.withAlpha(204),
                                   ),
                             ),
                           ],
@@ -150,7 +150,7 @@ class _RecipesPageState extends State<RecipesPage> {
                       Text(
                         '${recipe.ingredients.length} ingredientes',
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                          color: Theme.of(context).colorScheme.onSurface.withAlpha(179),
                           fontSize: 12,
                         ),
                       ),
@@ -166,7 +166,7 @@ class _RecipesPageState extends State<RecipesPage> {
                     color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+                      color: Theme.of(context).colorScheme.outline.withAlpha(128),
                     ),
                   ),
                   child: Row(
@@ -175,14 +175,14 @@ class _RecipesPageState extends State<RecipesPage> {
                       Icon(
                         Icons.description,
                         size: 16,
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                        color: Theme.of(context).colorScheme.onSurface.withAlpha(153),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           recipe.instructions,
                           style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                                color: Theme.of(context).colorScheme.onSurface.withAlpha(204),
                               ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -579,7 +579,7 @@ class _RecipesPageState extends State<RecipesPage> {
                       color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+                        color: Theme.of(context).colorScheme.outline.withAlpha(128),
                       ),
                     ),
                     child: Column(
@@ -591,7 +591,7 @@ class _RecipesPageState extends State<RecipesPage> {
                             Text(
                               'Produto:',
                               style: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                color: Theme.of(context).colorScheme.onSurface.withAlpha(179),
                               ),
                             ),
                             Text(
@@ -607,7 +607,7 @@ class _RecipesPageState extends State<RecipesPage> {
                             Text(
                               'Unidade:',
                               style: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                color: Theme.of(context).colorScheme.onSurface.withAlpha(179),
                               ),
                             ),
                             Text(selectedProduct.unit),
@@ -620,7 +620,7 @@ class _RecipesPageState extends State<RecipesPage> {
                             Text(
                               'Estoque:',
                               style: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                color: Theme.of(context).colorScheme.onSurface.withAlpha(179),
                               ),
                             ),
                             Text(

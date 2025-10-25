@@ -9,7 +9,7 @@ import 'pages/products_page.dart';
 import 'pages/recipes_page.dart';
 import 'pages/tables_page.dart';
 import 'theme.dart';
-import 'widgets/bottom_navigation.dart';
+import 'core/widgets/bottom_navigation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

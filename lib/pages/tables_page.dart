@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../services/database_service.dart';
-import '../widgets/shared_widgets.dart';
-import '../models/data_models.dart';
+import '../core/services/database_service.dart';
+import '../core/widgets/shared_widgets.dart';
+import '../core/models/data_models.dart';
 import 'order_details_page.dart';
 
 class TablesPage extends StatefulWidget {
