@@ -3,7 +3,7 @@
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
 ![Platform](https://img.shields.io/badge/Platform-Web%20%7C%20Mobile%20%7C%20Desktop-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Flutter](https://img.shields.io/badge/Flutter-3.24+-blue?logo=flutter)
+![Flutter](https://img.shields.io/badge/Flutter-3.x-blue?logo=flutter)
 
 > **MVP Demo Web - Sem necessidade de login ou backend!**
 
@@ -39,7 +39,7 @@ _Sem instalação, sem login, pronto para usar!_
 
 #### Pré-requisitos
 ```bash
-# Flutter SDK 3.24+
+# Flutter SDK 3.x
 flutter --version
 
 # Ou instale:
@@ -96,23 +96,24 @@ flutter run -d macos                # macOS
 
 ```
 lib/
-├── main.dart                    # Entry point, splash, configuração
-├── theme.dart                   # Material Design 3 theming
-├── models/
-│   └── data_models.dart         # Todos os models (Supplier, Product, Order, etc.)
-├── services/
-│   └── database_service.dart    # CRUD + persistência localStorage
-├── pages/
-│   ├── home_page.dart           # Dashboard
-│   ├── tables_page.dart         # Gerenciamento de mesas
-│   ├── products_page.dart       # Produtos & estoque
-│   ├── orders_page.dart         # Pedidos
-│   ├── recipes_page.dart        # Receitas
-│   ├── production_page.dart     # Produção interna
-│   └── suppliers_page.dart      # Fornecedores
-└── widgets/
-    ├── bottom_navigation.dart   # Navbar móvel
-    └── shared_widgets.dart      # Componentes reutilizáveis
+├── main.dart
+├── theme.dart
+├── core/
+│   ├── models/
+│   │   └── data_models.dart
+│   ├── services/
+│   │   └── database_service.dart
+│   └── widgets/
+│       ├── bottom_navigation.dart
+│       └── shared_widgets.dart
+└── pages/
+    ├── home_page.dart
+    ├── order_details_page.dart
+    ├── production_page.dart
+    ├── products_page.dart
+    ├── recipes_page.dart
+    ├── suppliers_page.dart
+    └── tables_page.dart
 
 web/
 ├── index.html                   # Página raiz (SPA)
@@ -434,13 +435,14 @@ MIT License - veja [LICENSE](LICENSE)
 
 ## 🎓 Stack Técnico
 
-- **Framework**: Flutter 3.24+
+- **Framework**: Flutter 3.x
 - **Linguagem**: Dart
 - **Platform**: Web (HTML5/WebAssembly)
 - **Persistência**: localStorage (IndexedDB)
 - **UI**: Material Design 3
 - **Localização**: Portuguese (Brazil)
 - **Deployment**: Firebase Hosting, Netlify, AWS S3, VPS
+- **Dependências**: flutter_animate, table_calendar, flutter_slidable, flutter_svg, intl, fl_chart, shared_preferences, provider, http, uuid
 
 ---
 

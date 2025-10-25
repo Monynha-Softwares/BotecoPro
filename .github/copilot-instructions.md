@@ -9,25 +9,24 @@ BotecoPro is a Flutter bar management application for complete operations includ
 - **Serialization**: All models implement `toJson()` and `fromJson()` for SharedPreferences storage
 - **Data Keys**: Each entity type has a static string key (`_suppliersKey`, `_productsKey`, etc.)
 - **Singleton Service**: `DatabaseService` uses singleton pattern for app-wide access
-- See: `lib/services/database_service.dart`
+- See: `lib/core/services/database_service.dart`
 
 ### Model Structure
-- All data models are in `lib/models/data_models.dart` (~643 lines)
+- All data models are in `lib/core/models/data_models.dart`
 - **Core Entities**: Supplier, Product, TableModel, Order, OrderItem, Recipe, InternalProduction
 - **Enums**: TableStatus, OrderStatus, PaymentMethod, ProductCategory, RecipeType, ProductionStatus
 - Each model uses `copyWith()` pattern for immutable updates with UUID generation for IDs
-- See: `lib/models/data_models.dart`
+- See: `lib/core/models/data_models.dart`
 
 ### Page Architecture
 - Each page is a StatefulWidget that loads data via `DatabaseService` in `initState()`
 - Standard pattern: `Future<void> _loadData() async` → `setState()` with mounted check
-- Bottom navigation controls 5 main pages via enum: home, tables, products, recipes, production
-- See: `lib/pages/`, `lib/widgets/bottom_navigation.dart`
+- Bottom navigation controls main pages via enum: home, tables, products, recipes, production
+- See: `lib/pages/`, `lib/core/widgets/bottom_navigation.dart`
 
 ### Theme & Localization
 - **Colors**: Boteco-themed palette (wine `#8B1E3F`, mustard, beige, brown) defined in `theme.dart`
 - **Locale**: Portuguese (Brazil) - `pt_BR` with `intl` package, set in `main.dart`
-- **Screen Orientation**: Portrait-only (both up/down directions)
 - **Material Design 3**: Enabled with custom ColorScheme and TextThemes
 - See: `lib/theme.dart`, `lib/main.dart`
 
@@ -35,17 +34,17 @@ BotecoPro is a Flutter bar management application for complete operations includ
 - `CustomAppBar`: Consistent top navigation with optional back button and actions
 - `MenuCard`: Reusable card widget for homepage sections
 - Formatting helpers: `formatCurrency()`, `formatDateTime()`, `formatDate()`
-- See: `lib/widgets/shared_widgets.dart`
+- See: `lib/core/widgets/shared_widgets.dart`
 
 ## Key Dependencies
 - **flutter_animate**: 4.0.0 - Page transitions and animations
-- **provider**: 6.1.2 - State management capability (declared but not heavily used currently)
+- **provider**: 6.1.2 - State management
 - **table_calendar**: 3.0.0 - Calendar widgets for date selection
 - **fl_chart**: 0.68.0 - Chart rendering for analytics
-- **google_fonts**: 6.1.0 - Custom fonts (Poppins for AppBar)
 - **shared_preferences**: 2.3.2 - Local data persistence
-- **uuid**: 3.0.0+ - ID generation
-- **jwt_decode**, **google_sign_in**: Declared but not yet integrated (future auth)
+- **uuid**: 3.0.0 - ID generation
+- **http**: 1.0.0 - HTTP requests
+- **flutter_slidable**: 3.0.0 - Slidable list items
 
 ## Developer Workflows
 
@@ -111,7 +110,7 @@ Always use theme colors for consistency:
 ## Common Tasks
 
 ### Adding a New Entity Type
-1. Add enum/model class to `lib/models/data_models.dart`
+1. Add enum/model class to `lib/core/models/data_models.dart`
 2. Add `toJson()`/`fromJson()` and `copyWith()` methods
 3. Add storage key and CRUD methods to `DatabaseService`
 4. Create corresponding page in `lib/pages/*_page.dart`
@@ -132,17 +131,27 @@ Always use theme colors for consistency:
 ## File Structure Summary
 ```
 lib/
-├── main.dart                 # App entry, splash screen, theming
-├── theme.dart               # Material3 theme definitions
-├── models/data_models.dart  # All entity models & enums (~643 lines)
-├── services/                # Only DatabaseService (SharedPreferences wrapper)
-├── pages/                   # 7 main navigation pages
-├── widgets/                 # Reusable UI (CustomAppBar, MenuCard, shared formatting)
-└── main.dart                # Localization setup (pt_BR)
+├── main.dart
+├── theme.dart
+├── core/
+│   ├── models/
+│   │   └── data_models.dart
+│   ├── services/
+│   │   └── database_service.dart
+│   └── widgets/
+│       ├── bottom_navigation.dart
+│       └── shared_widgets.dart
+└── pages/
+    ├── home_page.dart
+    ├── order_details_page.dart
+    ├── production_page.dart
+    ├── products_page.dart
+    ├── recipes_page.dart
+    ├── suppliers_page.dart
+    └── tables_page.dart
 ```
 
 ## Notes for Future Development
-- **State Management**: Provider package imported but not used - consider for complex flows
-- **Backend Integration**: JWT decode and google_sign_in ready for auth layer
+- **Backend Integration**: Consider a backend service for multi-user sync and data backup.
 - **Analytics**: No logging/analytics service yet (charts only for UI display)
 - **Testing**: No test files currently - consider unit tests for DatabaseService and models

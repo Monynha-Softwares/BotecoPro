@@ -1,6 +1,6 @@
 # 📋 Audit & Déploiement Web - BotecoPro MVP
 
-**Date**: 22 Octobre 2025  
+**Date**: 23 Octobre 2025  
 **Application**: BotecoPro - Gestão Completa para Seu Bar  
 **Statut**: ✅ **PRÊT POUR WEB** - MVP Déploiable  
 
@@ -58,6 +58,12 @@ flutter_svg: ^2.0.0           # SVG rendering
 intl: ^0.18.0                 # Localisation
 shared_preferences: 2.3.2     # ✨ Parfait pour web (localStorage)
 fl_chart: 0.68.0              # Graphiques
+flutter_launcher_icons: ^0.14.3 # App icons
+flutter_slidable: ^3.0.0      # Slidable list items
+cupertino_icons: ^1.0.0       # iOS icons
+provider: ^6.1.2              # State management
+http: ^1.0.0                  # HTTP requests
+uuid: ^3.0.0                  # Unique ID generation
 ```
 
 ### 2. **lib/main.dart** - Orientations & Navigation
@@ -511,6 +517,6 @@ flutter build web --release
 
 ---
 
-**Généré**: 22 Octobre 2025  
+**Généré**: 23 Octobre 2025  
 **Par**: Audit Automatisé BotecoPro  
 **Version**: 1.0.0-web-mvp
