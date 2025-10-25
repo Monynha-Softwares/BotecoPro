@@ -1,4 +1,4 @@
-# 🍺 BotecoPro - Gestão Completa para Seu Bar
+# [🍺 BotecoPro - Gestão Completa para Seu Bar](https://botecopro.monynha.com)
 
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
 ![Platform](https://img.shields.io/badge/Platform-Web%20%7C%20Mobile%20%7C%20Desktop-blue)
@@ -31,7 +31,9 @@ Aplicação completa em Flutter para gerenciar operações de bar: mesas, pedido
 
 ### Online Demo
 
-**🎉 [Acesse o MVP agora (Firebase Hosting)](https://botecoproXXXX.web.app)**
+**🎉 [Acesse o MVP agora](https://botecopro.monynha.com)**
+
+*Provided by **[Monynha Online](https://monynha.online)***
 
 _Sem instalação, sem login, pronto para usar!_
 
@@ -413,7 +415,7 @@ flutter test integration_test/
 
 ```bash
 # Fork & Clone
-git clone https://github.com/seu-usuario/BotecoPro.git
+git clone https://github.com/Monynha-Softwares/BotecoPro.git
 
 # Create branch
 git checkout -b feature/amazing-feature
@@ -433,13 +435,13 @@ git push origin feature/amazing-feature
 
 MIT License - veja [LICENSE](LICENSE)
 
----
+---    
 
 ## 💬 Suporte
 
-- **Issues**: [GitHub Issues](https://github.com/seu-usuario/BotecoPro/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/seu-usuario/BotecoPro/discussions)
-- **Email**: support@botecoproapp.com
+- **Issues**: [GitHub Issues](https://github.com/Monynha-Softwares/BotecoPro/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Monynha-Softwares/BotecoPro/discussions)
+- **Email**: hello@monynha.com
 
 ---
 
@@ -451,7 +453,7 @@ MIT License - veja [LICENSE](LICENSE)
 - **Persistência**: localStorage (IndexedDB)
 - **UI**: Material Design 3
 - **Localização**: Portuguese (Brazil)
-- **Deployment**: Firebase Hosting, Netlify, AWS S3, VPS
+- **Deployment**: Firebase Hosting, Coolify, AWS S3, VPS
 - **Dependências**: flutter_animate, table_calendar, flutter_slidable, flutter_svg, intl, fl_chart, shared_preferences, provider, http, uuid
 
 ---
@@ -491,19 +493,21 @@ MIT License - veja [LICENSE](LICENSE)
 │  │ 3 Mesas     │  │ R$ 245.50    │ │
 │  │ Ativas      │  │ Vendas Hoje  │ │
 │  └─────────────┘  └──────────────┘ │
-│                                     │
-│  📋 Operações                       │
+│                                    │
+│  📋 Operações                     |
 │  [Mesas] [Produtos] [Receitas]     │
 │  [Produção] [Fornecedores]         │
-│                                     │
-└─────────────────────────────────────┘
+│                                    │
+└────────────────────────────────────┘
 ```
 
 ---
 
 ## 🎉 Créditos
 
-Desenvolvido com ❤️ para gerentes de bar em todo Brasil.
+Desenvolvido com ❤️ por [![Monynha Softwares](https://img.shields.io/badge/Monynha%20Softwares-8A2BE2?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Monynha-Softwares)
+
+ para gerentes de bar em todo Brasil.
 
 ---
 
@@ -517,3 +521,4 @@ Desenvolvido com ❤️ para gerentes de bar em todo Brasil.
 ---
 
 **BotecoPro MVP - Porque gerenciar bar nunca foi tão fácil!** 🍻
+
