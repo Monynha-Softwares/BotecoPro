@@ -48,6 +48,14 @@ Start here → [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) (20 min read)
 
 ---
 
+### ⚠️ Estado atual da autenticação (MVP)
+
+- As telas de login e cadastro permanecem como placeholders sem integração real de autenticação nesta fase do MVP.
+- O serviço `lib/core/services/auth_service.dart` ainda está vazio e aguarda implementação futura.
+- Consulte os comentários `TODO(auth)` em `lib/presentation/pages/login_page.dart` e `lib/core/services/auth_service.dart` para direcionamento quando a autenticação entrar no roadmap ativo.
+
+---
+
 ## 🗺️ Reading Paths
 
 ### Path 1: "I just want to launch" (15 minutes)

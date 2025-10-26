@@ -3,7 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../main.dart';
-// TODO: Descomentar quando implementar autenticação
+// TODO(auth): Descomentar quando implementar autenticação.
+// Consulte docs/DOCUMENTATION_INDEX.md (Seção "⚠️ Estado atual da autenticação") para o roadmap de integração.
 // import '../../core/providers/auth_provider.dart';
 // import 'package:provider/provider.dart';
 import 'signup_page.dart';
@@ -16,7 +17,8 @@ import 'signup_page.dart';
 /// - Link para tela de cadastro
 /// - Design responsivo e animado
 ///
-/// TODO: IMPLEMENTAÇÕES FUTURAS
+/// TODO(auth): IMPLEMENTAÇÕES FUTURAS.
+/// Consulte docs/DOCUMENTATION_INDEX.md (Seção "⚠️ Estado atual da autenticação") para orientações detalhadas.
 /// 
 /// 1. Integrar com AuthProvider:
 ///    ```dart
@@ -53,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  // TODO: Implementar login real com AuthProvider
+  // TODO(auth): Implementar login real com AuthProvider (ver docs/DOCUMENTATION_INDEX.md, seção "⚠️ Estado atual da autenticação").
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -63,7 +65,7 @@ class _LoginPageState extends State<LoginPage> {
       _isLoading = true;
     });
 
-    // TODO: Substituir por lógica real de autenticação
+    // TODO(auth): Substituir por lógica real de autenticação (ver docs/DOCUMENTATION_INDEX.md, seção "⚠️ Estado atual da autenticação").
     // Exemplo:
     // try {
     //   final authProvider = context.read<AuthProvider>();
@@ -101,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  // TODO: Implementar login com Google
+  // TODO(auth): Implementar login com Google (ver docs/DOCUMENTATION_INDEX.md, seção "⚠️ Estado atual da autenticação").
   Future<void> _handleGoogleLogin() async {
     // Implementação futura
     ScaffoldMessenger.of(context).showSnackBar(

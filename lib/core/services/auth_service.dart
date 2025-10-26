@@ -4,6 +4,8 @@
 ///
 /// Este serviço será responsável pela autenticação de usuários no aplicativo.
 /// Atualmente está vazio e pronto para ser implementado quando necessário.
+/// Consulte docs/DOCUMENTATION_INDEX.md (Seção "⚠️ Estado atual da autenticação")
+/// para orientação completa sobre os próximos passos de desenvolvimento.
 ///
 /// IMPLEMENTAÇÕES FUTURAS PREVISTAS:
 /// 
@@ -55,12 +57,13 @@
 ///
 /// E implemente os métodos seguindo os exemplos no AuthProvider.
 class AuthService {
-  // TODO: Implementar singleton pattern se necessário
+  // TODO(auth): Implementar singleton pattern se necessário (ver docs/DOCUMENTATION_INDEX.md, seção "⚠️ Estado atual da autenticação").
   // static final AuthService _instance = AuthService._internal();
   // factory AuthService() => _instance;
   // AuthService._internal();
 
-  /// TODO: Implementar login com email e senha
+  /// TODO(auth): Implementar login com email e senha.
+  /// Consulte docs/DOCUMENTATION_INDEX.md (Seção "⚠️ Estado atual da autenticação") para requisitos detalhados.
   /// 
   /// Exemplo com Firebase:
   /// ```dart
@@ -87,7 +90,8 @@ class AuthService {
   /// }
   /// ```
 
-  /// TODO: Implementar cadastro de novo usuário
+  /// TODO(auth): Implementar cadastro de novo usuário.
+  /// Consulte docs/DOCUMENTATION_INDEX.md (Seção "⚠️ Estado atual da autenticação") para requisitos detalhados.
   /// 
   /// Exemplo com Firebase:
   /// ```dart
@@ -118,7 +122,8 @@ class AuthService {
   /// }
   /// ```
 
-  /// TODO: Implementar login com Google
+  /// TODO(auth): Implementar login com Google.
+  /// Consulte docs/DOCUMENTATION_INDEX.md (Seção "⚠️ Estado atual da autenticação") para requisitos detalhados.
   /// 
   /// Exemplo com Firebase:
   /// ```dart
@@ -153,7 +158,8 @@ class AuthService {
   /// }
   /// ```
 
-  /// TODO: Implementar logout
+  /// TODO(auth): Implementar logout.
+  /// Consulte docs/DOCUMENTATION_INDEX.md (Seção "⚠️ Estado atual da autenticação") para requisitos detalhados.
   /// 
   /// Exemplo com Firebase:
   /// ```dart
@@ -163,7 +169,8 @@ class AuthService {
   /// }
   /// ```
 
-  /// TODO: Implementar recuperação de senha
+  /// TODO(auth): Implementar recuperação de senha.
+  /// Consulte docs/DOCUMENTATION_INDEX.md (Seção "⚠️ Estado atual da autenticação") para requisitos detalhados.
   /// 
   /// Exemplo com Firebase:
   /// ```dart
@@ -176,7 +183,8 @@ class AuthService {
   /// }
   /// ```
 
-  /// TODO: Implementar verificação de usuário autenticado
+  /// TODO(auth): Implementar verificação de usuário autenticado.
+  /// Consulte docs/DOCUMENTATION_INDEX.md (Seção "⚠️ Estado atual da autenticação") para requisitos detalhados.
   /// 
   /// Exemplo com Firebase:
   /// ```dart
@@ -193,7 +201,8 @@ class AuthService {
   /// }
   /// ```
 
-  /// TODO: Implementar stream de mudanças de autenticação
+  /// TODO(auth): Implementar stream de mudanças de autenticação.
+  /// Consulte docs/DOCUMENTATION_INDEX.md (Seção "⚠️ Estado atual da autenticação") para requisitos detalhados.
   /// 
   /// Exemplo com Firebase:
   /// ```dart
