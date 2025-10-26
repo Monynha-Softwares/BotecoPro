@@ -436,12 +436,8 @@ class DatabaseService {
     final tables = await getTables();
     final tableIndex = tables.indexWhere((t) => t.id == orders[index].tableId);
     if (tableIndex != -1) {
-      final table = tables[tableIndex];
-      tables[tableIndex] = TableModel(
-        id: table.id,
-        number: table.number,
+      tables[tableIndex] = tables[tableIndex].copyWith(
         status: TableStatus.free,
-        capacity: table.capacity,
         currentOrderId: null,
       );
       await saveTables(tables);
