@@ -751,9 +751,8 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         cancelText: 'Não',
         onConfirm: () async {
           await _databaseService.cancelOrder(_order.id);
-          Navigator.pop(context);
           if (mounted) {
-            Navigator.pop(this.context);
+            Navigator.pop(context);
           }
         },
       ),
