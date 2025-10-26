@@ -51,7 +51,7 @@ flutter --version
 #### Setup
 ```bash
 # Clone repositório
-git clone https://github.com/Monynha-Softwares/tree/master/BotecoPro.git
+git clone https://github.com/Monynha-Softwares/BotecoPro.git
 cd BotecoPro
 
 # Baixe dependências
