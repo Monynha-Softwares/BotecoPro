@@ -20,16 +20,16 @@
 /// PADRÃO DE USO:
 /// ```dart
 /// final dbService = DatabaseService();
-/// 
+///
 /// // Criar
 /// await dbService.addProduct(product);
-/// 
+///
 /// // Ler
 /// final products = await dbService.getProducts();
-/// 
+///
 /// // Atualizar
 /// await dbService.updateProduct(updatedProduct);
-/// 
+///
 /// // Deletar
 /// await dbService.deleteProduct(productId);
 /// ```
@@ -79,7 +79,7 @@ class DatabaseService {
   // Carrega dados iniciais se necessário
   Future<void> initializeData() async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     // Verifica se já existem dados
     if (!prefs.containsKey(_tablesKey)) {
       // Cria algumas mesas de exemplo
@@ -155,7 +155,7 @@ class DatabaseService {
       ];
       await saveSuppliers(suppliers);
     }
-    
+
     // Cria receitas de exemplo
     if (!prefs.containsKey(_recipesKey)) {
       List<Recipe> recipes = [
@@ -163,7 +163,8 @@ class DatabaseService {
           name: 'Caipirinha Tradicional',
           type: RecipeType.drink,
           price: 18.0,
-          instructions: 'Corte o limão em pedaços, adicione açúcar, cachaça e gelo. Mexa bem.',
+          instructions:
+              'Corte o limão em pedaços, adicione açúcar, cachaça e gelo. Mexa bem.',
           ingredients: [
             RecipeIngredient(
               productId: '', // Será preenchido depois
@@ -183,7 +184,8 @@ class DatabaseService {
           name: 'Porção de Batata Frita',
           type: RecipeType.food,
           price: 25.0,
-          instructions: 'Fritar as batatas e adicionar sal. Opcionalmente, adicionar cheddar e bacon.',
+          instructions:
+              'Fritar as batatas e adicionar sal. Opcionalmente, adicionar cheddar e bacon.',
           ingredients: [
             RecipeIngredient(
               productId: '', // Será preenchido depois
@@ -196,7 +198,7 @@ class DatabaseService {
       ];
       await saveRecipes(recipes);
     }
-    
+
     // Cria produções caseiras de exemplo
     if (!prefs.containsKey(_productionsKey)) {
       List<InternalProduction> productions = [
@@ -229,15 +231,12 @@ class DatabaseService {
   Future<List<Supplier>> getSuppliers() async {
     final prefs = await SharedPreferences.getInstance();
     final suppliersJson = prefs.getStringList(_suppliersKey) ?? [];
-    return suppliersJson
-        .map((e) => Supplier.fromJson(jsonDecode(e)))
-        .toList();
+    return suppliersJson.map((e) => Supplier.fromJson(jsonDecode(e))).toList();
   }
 
   Future<void> saveSuppliers(List<Supplier> suppliers) async {
     final prefs = await SharedPreferences.getInstance();
-    final suppliersJson =
-        suppliers.map((e) => jsonEncode(e.toJson())).toList();
+    final suppliersJson = suppliers.map((e) => jsonEncode(e.toJson())).toList();
     await prefs.setStringList(_suppliersKey, suppliersJson);
   }
 
@@ -376,8 +375,7 @@ class DatabaseService {
       // Atualiza o estoque dos produtos
       final products = await getProducts();
       for (var item in orders[index].items) {
-        final productIndex =
-            products.indexWhere((p) => p.id == item.productId);
+        final productIndex = products.indexWhere((p) => p.id == item.productId);
         if (productIndex != -1) {
           final currentStock = products[productIndex].stockQuantity;
           final updatedStock = max(currentStock - item.quantity, 0);
@@ -438,7 +436,7 @@ class DatabaseService {
     if (tableIndex != -1) {
       tables[tableIndex] = tables[tableIndex].copyWith(
         status: TableStatus.free,
-        currentOrderId: null,
+        clearCurrentOrderId: true,
       );
       await saveTables(tables);
     }
@@ -496,9 +494,11 @@ class DatabaseService {
 
   Future<List<Product>> getLowStockProducts(int threshold) async {
     final products = await getProducts();
-    return products.where((product) => product.stockQuantity <= threshold).toList();
+    return products
+        .where((product) => product.stockQuantity <= threshold)
+        .toList();
   }
-  
+
   // Métodos para Receitas
   Future<List<Recipe>> getRecipes() async {
     final prefs = await SharedPreferences.getInstance();
@@ -533,7 +533,8 @@ class DatabaseService {
     await saveRecipes(recipes);
   }
 
-  Future<void> addRecipeIngredient(String recipeId, RecipeIngredient ingredient) async {
+  Future<void> addRecipeIngredient(
+      String recipeId, RecipeIngredient ingredient) async {
     final recipes = await getRecipes();
     final index = recipes.indexWhere((e) => e.id == recipeId);
     if (index != -1) {
@@ -547,12 +548,16 @@ class DatabaseService {
   Future<List<InternalProduction>> getInternalProductions() async {
     final prefs = await SharedPreferences.getInstance();
     final productionsJson = prefs.getStringList(_productionsKey) ?? [];
-    return productionsJson.map((e) => InternalProduction.fromJson(jsonDecode(e))).toList();
+    return productionsJson
+        .map((e) => InternalProduction.fromJson(jsonDecode(e)))
+        .toList();
   }
 
-  Future<void> saveInternalProductions(List<InternalProduction> productions) async {
+  Future<void> saveInternalProductions(
+      List<InternalProduction> productions) async {
     final prefs = await SharedPreferences.getInstance();
-    final productionsJson = productions.map((e) => jsonEncode(e.toJson())).toList();
+    final productionsJson =
+        productions.map((e) => jsonEncode(e.toJson())).toList();
     await prefs.setStringList(_productionsKey, productionsJson);
   }
 
@@ -577,12 +582,14 @@ class DatabaseService {
     await saveInternalProductions(productions);
   }
 
-  Future<void> addProductionIngredient(String productionId, ProductionIngredient ingredient) async {
+  Future<void> addProductionIngredient(
+      String productionId, ProductionIngredient ingredient) async {
     final productions = await getInternalProductions();
     final index = productions.indexWhere((e) => e.id == productionId);
     if (index != -1) {
       final ingredients = [...productions[index].ingredients, ingredient];
-      productions[index] = productions[index].copyWith(ingredients: ingredients);
+      productions[index] =
+          productions[index].copyWith(ingredients: ingredients);
       await saveInternalProductions(productions);
     }
   }

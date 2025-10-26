@@ -8,7 +8,7 @@
 /// para orientação completa sobre os próximos passos de desenvolvimento.
 ///
 /// IMPLEMENTAÇÕES FUTURAS PREVISTAS:
-/// 
+///
 /// 1. Autenticação com Firebase:
 ///    - Login com email e senha
 ///    - Cadastro de novos usuários
@@ -28,7 +28,7 @@
 /// EXEMPLO DE USO FUTURO:
 /// ```dart
 /// final authService = AuthService();
-/// 
+///
 /// // Login
 /// final user = await authService.signInWithEmailAndPassword(
 ///   email: 'user@example.com',
@@ -56,166 +56,232 @@
 /// ```
 ///
 /// E implemente os métodos seguindo os exemplos no AuthProvider.
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
+
+import '../models/auth_user.dart';
+
+class AuthException implements Exception {
+  AuthException(this.code, this.message);
+
+  final String code;
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
 class AuthService {
-  // TODO(auth): Implementar singleton pattern se necessário (ver docs/DOCUMENTATION_INDEX.md, seção "⚠️ Estado atual da autenticação").
+  // TODO(auth): Implementar singleton pattern se necessário (ver docs/DOCUMENTATION_INDEX.md, seção "⚠️ Estado atual da autentic
+  // ação").
   // static final AuthService _instance = AuthService._internal();
   // factory AuthService() => _instance;
   // AuthService._internal();
 
-  /// TODO(auth): Implementar login com email e senha.
-  /// Consulte docs/DOCUMENTATION_INDEX.md (Seção "⚠️ Estado atual da autenticação") para requisitos detalhados.
-  /// 
-  /// Exemplo com Firebase:
-  /// ```dart
-  /// Future<AuthUser?> signInWithEmailAndPassword({
-  ///   required String email,
-  ///   required String password,
-  /// }) async {
-  ///   try {
-  ///     final userCredential = await FirebaseAuth.instance
-  ///         .signInWithEmailAndPassword(email: email, password: password);
-  ///     
-  ///     final user = userCredential.user;
-  ///     if (user == null) return null;
-  ///     
-  ///     return AuthUser(
-  ///       id: user.uid,
-  ///       email: user.email,
-  ///       name: user.displayName,
-  ///       photoUrl: user.photoURL,
-  ///     );
-  ///   } catch (e) {
-  ///     throw Exception('Erro ao fazer login: $e');
-  ///   }
-  /// }
-  /// ```
+  AuthService({SharedPreferences? preferences}) : _preferences = preferences;
 
-  /// TODO(auth): Implementar cadastro de novo usuário.
-  /// Consulte docs/DOCUMENTATION_INDEX.md (Seção "⚠️ Estado atual da autenticação") para requisitos detalhados.
-  /// 
-  /// Exemplo com Firebase:
-  /// ```dart
-  /// Future<AuthUser?> registerWithEmailAndPassword({
-  ///   required String email,
-  ///   required String password,
-  ///   required String name,
-  /// }) async {
-  ///   try {
-  ///     final userCredential = await FirebaseAuth.instance
-  ///         .createUserWithEmailAndPassword(email: email, password: password);
-  ///     
-  ///     final user = userCredential.user;
-  ///     if (user == null) return null;
-  ///     
-  ///     // Atualizar nome do usuário
-  ///     await user.updateDisplayName(name);
-  ///     
-  ///     return AuthUser(
-  ///       id: user.uid,
-  ///       email: user.email,
-  ///       name: name,
-  ///       photoUrl: user.photoURL,
-  ///     );
-  ///   } catch (e) {
-  ///     throw Exception('Erro ao registrar usuário: $e');
-  ///   }
-  /// }
-  /// ```
+  static const String _usersKey = 'auth_registered_users';
 
-  /// TODO(auth): Implementar login com Google.
-  /// Consulte docs/DOCUMENTATION_INDEX.md (Seção "⚠️ Estado atual da autenticação") para requisitos detalhados.
-  /// 
-  /// Exemplo com Firebase:
-  /// ```dart
-  /// Future<AuthUser?> signInWithGoogle() async {
-  ///   try {
-  ///     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-  ///     if (googleUser == null) return null;
-  ///     
-  ///     final GoogleSignInAuthentication googleAuth = 
-  ///         await googleUser.authentication;
-  ///     
-  ///     final credential = GoogleAuthProvider.credential(
-  ///       accessToken: googleAuth.accessToken,
-  ///       idToken: googleAuth.idToken,
-  ///     );
-  ///     
-  ///     final userCredential = await FirebaseAuth.instance
-  ///         .signInWithCredential(credential);
-  ///     
-  ///     final user = userCredential.user;
-  ///     if (user == null) return null;
-  ///     
-  ///     return AuthUser(
-  ///       id: user.uid,
-  ///       email: user.email,
-  ///       name: user.displayName,
-  ///       photoUrl: user.photoURL,
-  ///     );
-  ///   } catch (e) {
-  ///     throw Exception('Erro ao fazer login com Google: $e');
-  ///   }
-  /// }
-  /// ```
+  final Uuid _uuid = const Uuid();
+  SharedPreferences? _preferences;
 
-  /// TODO(auth): Implementar logout.
-  /// Consulte docs/DOCUMENTATION_INDEX.md (Seção "⚠️ Estado atual da autenticação") para requisitos detalhados.
-  /// 
-  /// Exemplo com Firebase:
-  /// ```dart
-  /// Future<void> signOut() async {
-  ///   await FirebaseAuth.instance.signOut();
-  ///   await GoogleSignIn().signOut();
-  /// }
-  /// ```
+  Future<AuthUser> signInWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    final normalizedEmail = _normalizeEmail(email);
+    final users = await _loadUsers();
+    final storedUser = users.firstWhere(
+      (user) => user.normalizedEmail == normalizedEmail,
+      orElse: () => throw AuthException(
+        'invalid-credentials',
+        'Credenciais inválidas. Verifique seu email e senha.',
+      ),
+    );
 
-  /// TODO(auth): Implementar recuperação de senha.
-  /// Consulte docs/DOCUMENTATION_INDEX.md (Seção "⚠️ Estado atual da autenticação") para requisitos detalhados.
-  /// 
-  /// Exemplo com Firebase:
-  /// ```dart
-  /// Future<void> sendPasswordResetEmail(String email) async {
-  ///   try {
-  ///     await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-  ///   } catch (e) {
-  ///     throw Exception('Erro ao enviar email de recuperação: $e');
-  ///   }
-  /// }
-  /// ```
+    final hashedPassword = _hashPassword(password);
+    if (storedUser.passwordHash != hashedPassword) {
+      throw AuthException(
+        'invalid-credentials',
+        'Credenciais inválidas. Verifique seu email e senha.',
+      );
+    }
 
-  /// TODO(auth): Implementar verificação de usuário autenticado.
-  /// Consulte docs/DOCUMENTATION_INDEX.md (Seção "⚠️ Estado atual da autenticação") para requisitos detalhados.
-  /// 
-  /// Exemplo com Firebase:
-  /// ```dart
-  /// Future<AuthUser?> getCurrentUser() async {
-  ///   final user = FirebaseAuth.instance.currentUser;
-  ///   if (user == null) return null;
-  ///   
-  ///   return AuthUser(
-  ///     id: user.uid,
-  ///     email: user.email,
-  ///     name: user.displayName,
-  ///     photoUrl: user.photoURL,
-  ///   );
-  /// }
-  /// ```
+    return storedUser.toAuthUser();
+  }
 
-  /// TODO(auth): Implementar stream de mudanças de autenticação.
-  /// Consulte docs/DOCUMENTATION_INDEX.md (Seção "⚠️ Estado atual da autenticação") para requisitos detalhados.
-  /// 
-  /// Exemplo com Firebase:
-  /// ```dart
-  /// Stream<AuthUser?> get authStateChanges {
-  ///   return FirebaseAuth.instance.authStateChanges().map((user) {
-  ///     if (user == null) return null;
-  ///     return AuthUser(
-  ///       id: user.uid,
-  ///       email: user.email,
-  ///       name: user.displayName,
-  ///       photoUrl: user.photoURL,
-  ///     );
-  ///   });
-  /// }
-  /// ```
+  Future<AuthUser> signUpWithEmail({
+    required String email,
+    required String password,
+    String? name,
+  }) async {
+    final trimmedEmail = email.trim();
+    final normalizedEmail = _normalizeEmail(email);
+    final users = await _loadUsers();
+
+    final alreadyExists = users.any(
+      (user) => user.normalizedEmail == normalizedEmail,
+    );
+
+    if (alreadyExists) {
+      throw AuthException(
+        'email-already-in-use',
+        'Já existe uma conta cadastrada com esse email.',
+      );
+    }
+
+    final storedUser = _StoredUser(
+      id: _uuid.v4(),
+      email: trimmedEmail,
+      normalizedEmail: normalizedEmail,
+      passwordHash: _hashPassword(password),
+      name: _cleanOptional(name),
+      photoUrl: null,
+    );
+
+    final updatedUsers = <_StoredUser>[...users, storedUser];
+    await _saveUsers(updatedUsers);
+
+    return storedUser.toAuthUser();
+  }
+
+  Future<void> requestPasswordReset({required String email}) async {
+    final normalizedEmail = _normalizeEmail(email);
+    final users = await _loadUsers();
+    final exists = users.any((user) => user.normalizedEmail == normalizedEmail);
+
+    if (!exists) {
+      throw AuthException(
+        'user-not-found',
+        'Email não encontrado na base de usuários.',
+      );
+    }
+  }
+
+  Future<AuthUser?> getUserById(String id) async {
+    final users = await _loadUsers();
+    for (final user in users) {
+      if (user.id == id) {
+        return user.toAuthUser();
+      }
+    }
+    return null;
+  }
+
+  Future<List<_StoredUser>> _loadUsers() async {
+    final prefs = await _preferencesInstance;
+    final raw = prefs.getString(_usersKey);
+    if (raw == null || raw.isEmpty) {
+      return <_StoredUser>[];
+    }
+
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) {
+        return <_StoredUser>[];
+      }
+
+      return decoded
+          .map((dynamic item) {
+            if (item is Map<String, dynamic>) {
+              return _StoredUser.fromJson(item);
+            }
+            if (item is Map) {
+              return _StoredUser.fromJson(
+                item.map((key, value) => MapEntry(key.toString(), value)),
+              );
+            }
+            return null;
+          })
+          .whereType<_StoredUser>()
+          .toList(growable: false);
+    } catch (_) {
+      return <_StoredUser>[];
+    }
+  }
+
+  Future<void> _saveUsers(List<_StoredUser> users) async {
+    final prefs = await _preferencesInstance;
+    final serialized = jsonEncode(users.map((user) => user.toJson()).toList());
+    await prefs.setString(_usersKey, serialized);
+  }
+
+  Future<SharedPreferences> get _preferencesInstance async {
+    if (_preferences != null) {
+      return _preferences!;
+    }
+    _preferences = await SharedPreferences.getInstance();
+    return _preferences!;
+  }
+
+  String _normalizeEmail(String email) => email.trim().toLowerCase();
+
+  String _hashPassword(String password) {
+    final data = utf8.encode(password);
+    return sha256.convert(data).toString();
+  }
+
+  String? _cleanOptional(String? value) {
+    final cleaned = value?.trim();
+    if (cleaned == null || cleaned.isEmpty) {
+      return null;
+    }
+    return cleaned;
+  }
+}
+
+class _StoredUser {
+  const _StoredUser({
+    required this.id,
+    required this.email,
+    required this.normalizedEmail,
+    required this.passwordHash,
+    this.name,
+    this.photoUrl,
+  });
+
+  factory _StoredUser.fromJson(Map<String, dynamic> json) {
+    final rawEmail = (json['email'] as String?)?.trim() ?? '';
+    final normalized =
+        (json['normalizedEmail'] as String?) ?? rawEmail.toLowerCase();
+
+    return _StoredUser(
+      id: json['id'] as String,
+      email: rawEmail,
+      normalizedEmail: normalized,
+      passwordHash: json['passwordHash'] as String? ?? '',
+      name: (json['name'] as String?)?.trim(),
+      photoUrl: json['photoUrl'] as String?,
+    );
+  }
+
+  final String id;
+  final String email;
+  final String normalizedEmail;
+  final String passwordHash;
+  final String? name;
+  final String? photoUrl;
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'id': id,
+      'email': email,
+      'normalizedEmail': normalizedEmail,
+      'passwordHash': passwordHash,
+      'name': name,
+      'photoUrl': photoUrl,
+    };
+  }
+
+  AuthUser toAuthUser() {
+    return AuthUser(
+      id: id,
+      email: email,
+      name: name,
+      photoUrl: photoUrl,
+    );
+  }
 }

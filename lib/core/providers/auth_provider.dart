@@ -5,6 +5,9 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/auth_user.dart';
+import '../services/auth_service.dart';
+
 /// AuthProvider - Gerenciador de Estado de Autenticação
 ///
 /// IMPLEMENTAÇÃO ATUAL:
@@ -14,7 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// - Pronto para migração para Firebase
 ///
 /// ESTRATÉGIA DE MIGRAÇÃO PARA FIREBASE:
-/// 
+///
 /// 1. Adicionar dependências no pubspec.yaml:
 /// ```yaml
 /// dependencies:
@@ -26,7 +29,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// 2. Inicializar Firebase no main.dart:
 /// ```dart
 /// import 'package:firebase_core/firebase_core.dart';
-/// 
+///
 /// void main() async {
 ///   WidgetsFlutterBinding.ensureInitialized();
 ///   await Firebase.initializeApp();
@@ -35,9 +38,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// ```
 ///
 /// 3. Trocar flag useFirebase para true
-/// 
+///
 /// 4. Descomentar imports do Firebase no topo deste arquivo
-/// 
+///
 /// 5. Implementar métodos seguindo os exemplos comentados abaixo
 ///
 /// INTEGRAÇÃO COM AuthService:
@@ -93,190 +96,168 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// // );
 /// // final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
 
-class AuthUser {
-    final String id;
-    final String? email;
-    final String? name;
-    final String? photoUrl;
-
-    AuthUser({
-        required this.id,
-        this.email,
-        this.name,
-        this.photoUrl,
-    });
-
-    AuthUser copyWith({
-        String? id,
-        String? email,
-        String? name,
-        String? photoUrl,
-    }) {
-        return AuthUser(
-            id: id ?? this.id,
-            email: email ?? this.email,
-            name: name ?? this.name,
-            photoUrl: photoUrl ?? this.photoUrl,
-        );
-    }
-
-    Map<String, dynamic> toJson() => {
-                'id': id,
-                'email': email,
-                'name': name,
-                'photoUrl': photoUrl,
-            };
-
-    factory AuthUser.fromJson(Map<String, dynamic> json) => AuthUser(
-                id: json['id'] as String,
-                email: json['email'] as String?,
-                name: json['name'] as String?,
-                photoUrl: json['photoUrl'] as String?,
-            );
-}
-
 class AuthProvider extends ChangeNotifier {
-    static const String _authUserKey = 'auth_user';
+  static const String _authUserKey = 'auth_user';
 
-    AuthUser? _user;
-    bool _initialized = false;
+  AuthProvider({AuthService? authService})
+      : _authService = authService ?? AuthService();
 
-    // Toggle this to true and implement Firebase code to switch to Firebase auth.
-    // (Left false by default so app remains functional without Firebase packages)
-    final bool useFirebase = false;
+  AuthUser? _user;
+  bool _initialized = false;
+  final AuthService _authService;
 
-    AuthUser? get user => _user;
-    bool get isSignedIn => _user != null;
-    bool get initialized => _initialized;
+  // Toggle this to true and implement Firebase code to switch to Firebase auth.
+  // (Left false by default so app remains functional without Firebase packages)
+  final bool useFirebase = false;
 
-    /// Initialize provider (load persisted user if any).
-    Future<void> initialize() async {
-        final prefs = await SharedPreferences.getInstance();
-        final raw = prefs.getString(_authUserKey);
-        if (raw != null) {
-            try {
-                final Map<String, dynamic> json = jsonDecode(raw);
-                _user = AuthUser.fromJson(json);
-            } catch (_) {
-                _user = null;
-            }
+  AuthUser? get user => _user;
+  bool get isSignedIn => _user != null;
+  bool get initialized => _initialized;
+
+  /// Initialize provider (load persisted user if any).
+  Future<void> initialize() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_authUserKey);
+    if (raw != null) {
+      try {
+        final Map<String, dynamic> json =
+            jsonDecode(raw) as Map<String, dynamic>;
+        final persistedUser = AuthUser.fromJson(json);
+        final storedUser = await _authService.getUserById(persistedUser.id);
+        _user = storedUser ?? persistedUser;
+        if (storedUser == null) {
+          await prefs.remove(_authUserKey);
         }
-        _initialized = true;
-        notifyListeners();
-    }
-
-    /// Sign in with email/password.
-    ///
-    /// Future implementation using Firebase is shown in file comments.
-    /// Current fallback persists a minimal user to SharedPreferences.
-    Future<AuthUser?> signInWithEmail(String email, String password) async {
-        if (useFirebase) {
-            // TODO: Replace with FirebaseAuth implementation.
-            // final userCredential = await FirebaseAuth.instance
-            //     .signInWithEmailAndPassword(email: email, password: password);
-            // final fbUser = userCredential.user;
-            // _user = _authUserFromFirebaseUser(fbUser);
-            // await _persistUser();
-            // notifyListeners();
-            // return _user;
-            throw UnimplementedError('Firebase integration not enabled.');
-        }
-
-        // Fallback behavior: create a lightweight user and persist.
-        final id = 'local_${email.hashCode}_${DateTime.now().millisecondsSinceEpoch}';
-        _user = AuthUser(id: id, email: email, name: null, photoUrl: null);
-        await _persistUser();
-        notifyListeners();
-        return _user;
-    }
-
-    /// Register with email/password.
-    Future<AuthUser?> signUpWithEmail(String email, String password) async {
-        if (useFirebase) {
-            // TODO: Replace with FirebaseAuth implementation.
-            // final userCredential = await FirebaseAuth.instance
-            //     .createUserWithEmailAndPassword(email: email, password: password);
-            // _user = _authUserFromFirebaseUser(userCredential.user);
-            // await _persistUser();
-            // notifyListeners();
-            // return _user;
-            throw UnimplementedError('Firebase integration not enabled.');
-        }
-
-        // Fallback: behave like sign-in for local-only mode.
-        return signInWithEmail(email, password);
-    }
-
-    /// Sign in with Google (placeholder).
-    Future<AuthUser?> signInWithGoogle() async {
-        if (useFirebase) {
-            // TODO: Replace with Google Sign-In + Firebase credential flow.
-            // final googleUser = await GoogleSignIn().signIn();
-            // final googleAuth = await googleUser!.authentication;
-            // final credential = GoogleAuthProvider.credential(
-            //   accessToken: googleAuth.accessToken,
-            //   idToken: googleAuth.idToken,
-            // );
-            // final userCredential =
-            //     await FirebaseAuth.instance.signInWithCredential(credential);
-            // _user = _authUserFromFirebaseUser(userCredential.user);
-            // await _persistUser();
-            // notifyListeners();
-            // return _user;
-            throw UnimplementedError('Firebase integration not enabled.');
-        }
-
-        // Fallback: not supported without Firebase; throw to make developer aware.
-        throw UnimplementedError('Google Sign-In requires Firebase integration.');
-    }
-
-    /// Send password reset (placeholder).
-    Future<void> sendPasswordReset(String email) async {
-        if (useFirebase) {
-            // TODO: Replace with FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-            throw UnimplementedError('Firebase integration not enabled.');
-        }
-
-        // Fallback: no-op for local-only mode.
-        return;
-    }
-
-    /// Sign out current user.
-    Future<void> signOut() async {
-        if (useFirebase) {
-            // TODO: Replace with FirebaseAuth sign out flows.
-            // await FirebaseAuth.instance.signOut();
-            throw UnimplementedError('Firebase integration not enabled.');
-        }
-
+      } catch (_) {
         _user = null;
-        final prefs = await SharedPreferences.getInstance();
         await prefs.remove(_authUserKey);
-        notifyListeners();
+      }
+    }
+    _initialized = true;
+    notifyListeners();
+  }
+
+  /// Sign in with email/password.
+  ///
+  /// Future implementation using Firebase is shown in file comments.
+  /// Current fallback persists a minimal user to SharedPreferences.
+  Future<AuthUser?> signInWithEmail(String email, String password) async {
+    if (useFirebase) {
+      // TODO: Replace with FirebaseAuth implementation.
+      // final userCredential = await FirebaseAuth.instance
+      //     .signInWithEmailAndPassword(email: email, password: password);
+      // final fbUser = userCredential.user;
+      // _user = _authUserFromFirebaseUser(fbUser);
+      // await _persistUser();
+      // notifyListeners();
+      // return _user;
+      throw UnimplementedError('Firebase integration not enabled.');
     }
 
-    Future<void> _persistUser() async {
-        final prefs = await SharedPreferences.getInstance();
-        if (_user == null) {
-            await prefs.remove(_authUserKey);
-            return;
-        }
-        final raw = jsonEncode(_user!.toJson());
-        await prefs.setString(_authUserKey, raw);
+    final authUser = await _authService.signInWithEmail(
+      email: email,
+      password: password,
+    );
+    _user = authUser;
+    await _persistUser();
+    notifyListeners();
+    return _user;
+  }
+
+  /// Register with email/password.
+  Future<AuthUser?> signUpWithEmail(String email, String password,
+      {String? name}) async {
+    if (useFirebase) {
+      // TODO: Replace with FirebaseAuth implementation.
+      // final userCredential = await FirebaseAuth.instance
+      //     .createUserWithEmailAndPassword(email: email, password: password);
+      // _user = _authUserFromFirebaseUser(userCredential.user);
+      // await _persistUser();
+      // notifyListeners();
+      // return _user;
+      throw UnimplementedError('Firebase integration not enabled.');
     }
 
-    // Helper for converting a Firebase User (when migrating) to AuthUser.
-    // Uncomment when using Firebase:
-    //
-    // AuthUser _authUserFromFirebaseUser(User? fbUser) {
-    //   if (fbUser == null) {
-    //     throw StateError('Firebase user is null');
-    //   }
-    //   return AuthUser(
-    //     id: fbUser.uid,
-    //     email: fbUser.email,
-    //     name: fbUser.displayName,
-    //     photoUrl: fbUser.photoURL,
-    //   );
-    // }
+    final newUser = await _authService.signUpWithEmail(
+      email: email,
+      password: password,
+      name: name,
+    );
+    _user = newUser;
+    await _persistUser();
+    notifyListeners();
+    return _user;
+  }
+
+  /// Sign in with Google (placeholder).
+  Future<AuthUser?> signInWithGoogle() async {
+    if (useFirebase) {
+      // TODO: Replace with Google Sign-In + Firebase credential flow.
+      // final googleUser = await GoogleSignIn().signIn();
+      // final googleAuth = await googleUser!.authentication;
+      // final credential = GoogleAuthProvider.credential(
+      //   accessToken: googleAuth.accessToken,
+      //   idToken: googleAuth.idToken,
+      // );
+      // final userCredential =
+      //     await FirebaseAuth.instance.signInWithCredential(credential);
+      // _user = _authUserFromFirebaseUser(userCredential.user);
+      // await _persistUser();
+      // notifyListeners();
+      // return _user;
+      throw UnimplementedError('Firebase integration not enabled.');
+    }
+
+    // Fallback: not supported without Firebase; throw to make developer aware.
+    throw UnimplementedError('Google Sign-In requires Firebase integration.');
+  }
+
+  /// Send password reset (placeholder).
+  Future<void> sendPasswordReset(String email) async {
+    if (useFirebase) {
+      // TODO: Replace with FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      throw UnimplementedError('Firebase integration not enabled.');
+    }
+
+    await _authService.requestPasswordReset(email: email);
+  }
+
+  /// Sign out current user.
+  Future<void> signOut() async {
+    if (useFirebase) {
+      // TODO: Replace with FirebaseAuth sign out flows.
+      // await FirebaseAuth.instance.signOut();
+      throw UnimplementedError('Firebase integration not enabled.');
+    }
+
+    _user = null;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_authUserKey);
+    notifyListeners();
+  }
+
+  Future<void> _persistUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (_user == null) {
+      await prefs.remove(_authUserKey);
+      return;
+    }
+    final raw = jsonEncode(_user!.toJson());
+    await prefs.setString(_authUserKey, raw);
+  }
+
+  // Helper for converting a Firebase User (when migrating) to AuthUser.
+  // Uncomment when using Firebase:
+  //
+  // AuthUser _authUserFromFirebaseUser(User? fbUser) {
+  //   if (fbUser == null) {
+  //     throw StateError('Firebase user is null');
+  //   }
+  //   return AuthUser(
+  //     id: fbUser.uid,
+  //     email: fbUser.email,
+  //     name: fbUser.displayName,
+  //     photoUrl: fbUser.photoURL,
+  //   );
+  // }
 }

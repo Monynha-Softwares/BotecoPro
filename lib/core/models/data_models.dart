@@ -164,13 +164,15 @@ class TableModel {
     TableStatus? status,
     int? capacity,
     String? currentOrderId,
+    bool clearCurrentOrderId = false,
   }) {
     return TableModel(
       id: id,
       number: number ?? this.number,
       status: status ?? this.status,
       capacity: capacity ?? this.capacity,
-      currentOrderId: currentOrderId ?? this.currentOrderId,
+      currentOrderId:
+          clearCurrentOrderId ? null : (currentOrderId ?? this.currentOrderId),
     );
   }
 
@@ -279,13 +281,12 @@ class Order {
     List<OrderItem>? items,
     this.status = OrderStatus.pending,
     this.isClosed = false,
-  })
-      : id = id ?? uuid.v4(),
+  })  : id = id ?? uuid.v4(),
         createdAt = createdAt ?? DateTime.now(),
         items = items ?? [];
 
-  double get total => items.fold(
-      0, (previousValue, element) => previousValue + element.total);
+  double get total =>
+      items.fold(0, (previousValue, element) => previousValue + element.total);
 
   Order copyWith({
     String? tableId,
@@ -347,8 +348,7 @@ class Sale {
     required this.total,
     DateTime? timestamp,
     this.paymentMethod = PaymentMethod.cash,
-  })
-      : id = id ?? uuid.v4(),
+  })  : id = id ?? uuid.v4(),
         timestamp = timestamp ?? DateTime.now();
 
   Sale copyWith({
@@ -455,8 +455,7 @@ class Recipe {
     required this.price,
     this.instructions = '',
     List<RecipeIngredient>? ingredients,
-  })
-      : id = id ?? uuid.v4(),
+  })  : id = id ?? uuid.v4(),
         ingredients = ingredients ?? [];
 
   Recipe copyWith({
@@ -495,8 +494,9 @@ class Recipe {
       price: json['price'].toDouble(),
       instructions: json['instructions'] ?? '',
       ingredients: (json['ingredients'] as List?)
-          ?.map((i) => RecipeIngredient.fromJson(i))
-          .toList() ?? [],
+              ?.map((i) => RecipeIngredient.fromJson(i))
+              .toList() ??
+          [],
     );
   }
 }
@@ -577,8 +577,7 @@ class InternalProduction {
     this.finalizedAt,
     this.status = ProductionStatus.inProgress,
     List<ProductionIngredient>? ingredients,
-  })
-      : id = id ?? uuid.v4(),
+  })  : id = id ?? uuid.v4(),
         createdAt = createdAt ?? DateTime.now(),
         ingredients = ingredients ?? [];
 
@@ -631,13 +630,14 @@ class InternalProduction {
       recipeId: json['recipeId'],
       notes: json['notes'] ?? '',
       createdAt: DateTime.parse(json['createdAt']),
-      finalizedAt: json['finalizedAt'] != null 
-          ? DateTime.parse(json['finalizedAt']) 
+      finalizedAt: json['finalizedAt'] != null
+          ? DateTime.parse(json['finalizedAt'])
           : null,
       status: ProductionStatus.values[json['status']],
       ingredients: (json['ingredients'] as List?)
-          ?.map((i) => ProductionIngredient.fromJson(i))
-          .toList() ?? [],
+              ?.map((i) => ProductionIngredient.fromJson(i))
+              .toList() ??
+          [],
     );
   }
 }
