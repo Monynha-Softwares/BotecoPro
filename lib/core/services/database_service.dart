@@ -369,47 +369,64 @@ class DatabaseService {
   Future<void> closeOrder(String orderId) async {
     final orders = await getOrders();
     final index = orders.indexWhere((e) => e.id == orderId);
-    if (index != -1) {
-      orders[index] = orders[index].copyWith(isClosed: true);
-      await saveOrders(orders);
-
-      // Atualiza o estoque dos produtos
-      final products = await getProducts();
-      for (var item in orders[index].items) {
-        final productIndex =
-            products.indexWhere((p) => p.id == item.productId);
-        if (productIndex != -1) {
-          final currentStock = products[productIndex].stockQuantity;
-          final updatedStock = max(currentStock - item.quantity, 0);
-          products[productIndex] =
-              products[productIndex].copyWith(stockQuantity: updatedStock);
-        }
-      }
-      await saveProducts(products);
-
-      // Libera a mesa
-      final tables = await getTables();
-      final tableIndex =
-          tables.indexWhere((t) => t.id == orders[index].tableId);
-      if (tableIndex != -1) {
-        final table = tables[tableIndex];
-        tables[tableIndex] = TableModel(
-          id: table.id,
-          number: table.number,
-          status: TableStatus.free,
-          capacity: table.capacity,
-          currentOrderId: null,
-        );
-        await saveTables(tables);
-      }
-
-      // Cria uma venda
-      final sale = Sale(
-        orderId: orderId,
-        total: orders[index].total,
-      );
-      await addSale(sale);
+    if (index == -1) {
+      return;
     }
+
+    final order = orders[index];
+    final completedItems = order.items
+        .map((item) => item.status == OrderStatus.canceled
+            ? item
+            : item.copyWith(status: OrderStatus.delivered))
+        .toList();
+
+    final updatedOrder = order.copyWith(
+      status: order.status == OrderStatus.canceled
+          ? order.status
+          : OrderStatus.delivered,
+      items: completedItems,
+      isClosed: true,
+    );
+
+    orders[index] = updatedOrder;
+    await saveOrders(orders);
+
+    final products = await getProducts();
+    var productsUpdated = false;
+    for (final item in order.items) {
+      if (item.status == OrderStatus.canceled) {
+        continue;
+      }
+      final productIndex = products.indexWhere((p) => p.id == item.productId);
+      if (productIndex == -1) {
+        continue;
+      }
+      final currentStock = products[productIndex].stockQuantity;
+      final updatedStock = max(currentStock - item.quantity, 0);
+      products[productIndex] =
+          products[productIndex].copyWith(stockQuantity: updatedStock);
+      productsUpdated = true;
+    }
+    if (productsUpdated) {
+      await saveProducts(products);
+    }
+
+    final tables = await getTables();
+    final tableIndex = tables.indexWhere((t) => t.id == order.tableId);
+    if (tableIndex != -1) {
+      tables[tableIndex] = tables[tableIndex].copyWith(
+        status: TableStatus.free,
+        currentOrderId: null,
+        setCurrentOrderId: true,
+      );
+      await saveTables(tables);
+    }
+
+    final sale = Sale(
+      orderId: orderId,
+      total: updatedOrder.total,
+    );
+    await addSale(sale);
   }
 
   Future<void> cancelOrder(String orderId) async {
@@ -439,6 +456,7 @@ class DatabaseService {
       tables[tableIndex] = tables[tableIndex].copyWith(
         status: TableStatus.free,
         currentOrderId: null,
+        setCurrentOrderId: true,
       );
       await saveTables(tables);
     }

@@ -164,13 +164,16 @@ class TableModel {
     TableStatus? status,
     int? capacity,
     String? currentOrderId,
+    bool setCurrentOrderId = false,
   }) {
     return TableModel(
       id: id,
       number: number ?? this.number,
       status: status ?? this.status,
       capacity: capacity ?? this.capacity,
-      currentOrderId: currentOrderId ?? this.currentOrderId,
+      currentOrderId: (setCurrentOrderId || currentOrderId != null)
+          ? currentOrderId
+          : this.currentOrderId,
     );
   }
 

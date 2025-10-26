@@ -55,6 +55,7 @@
 /// - intl: Formatação de datas e moeda (pt_BR)
 ///
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -68,8 +69,9 @@ import 'presentation/pages/products_page.dart';
 import 'presentation/pages/recipes_page.dart';
 import 'presentation/pages/login_page.dart';
 import 'presentation/pages/tables_page.dart';
-import 'theme.dart';
 import 'presentation/widgets/bottom_navigation.dart';
+import 'theme.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -77,6 +79,10 @@ void main() async {
   // Inicializa a localização para português brasileiro
   await initializeDateFormatting('pt_BR', null);
   Intl.defaultLocale = 'pt_BR';
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   runApp(const AppProviders());
 }
@@ -158,10 +164,10 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-                  Icons.sports_bar,
-                  size: 80,
-                  color: Theme.of(context).colorScheme.onPrimary,
-                )
+              Icons.sports_bar,
+              size: 80,
+              color: Theme.of(context).colorScheme.onPrimary,
+            )
                 .animate(
                   onPlay: (controller) => controller.repeat(reverse: true),
                 )
@@ -173,23 +179,26 @@ class _SplashScreenState extends State<SplashScreen> {
             Text(
               'Boteco PRO',
               style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
             ).animate().fadeIn(
-              duration: const Duration(milliseconds: 800),
-              curve: Curves.easeIn,
-            ),
+                  duration: const Duration(milliseconds: 800),
+                  curve: Curves.easeIn,
+                ),
             const SizedBox(height: 8),
             Text(
               'Gestão completa para seu bar',
               style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
-              ),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onPrimary
+                        .withOpacity(0.8),
+                  ),
             ).animate().fadeIn(
-              delay: const Duration(milliseconds: 400),
-              duration: const Duration(milliseconds: 800),
-            ),
+                  delay: const Duration(milliseconds: 400),
+                  duration: const Duration(milliseconds: 800),
+                ),
             const SizedBox(height: 48),
             CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(
