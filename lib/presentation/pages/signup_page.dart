@@ -2,6 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:provider/provider.dart';
+import '../../core/providers/auth_provider.dart';
+import '../../main.dart';
 // TODO: Descomentar quando implementar autenticação
 // import '../../core/providers/auth_provider.dart';
 // import 'package:provider/provider.dart';
@@ -15,7 +18,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 /// - Design responsivo e animado
 ///
 /// TODO: IMPLEMENTAÇÕES FUTURAS
-/// 
+///
 /// 1. Integrar com AuthProvider:
 ///    ```dart
 ///    final authProvider = context.read<AuthProvider>();
@@ -86,7 +89,7 @@ class _SignupPageState extends State<SignupPage> {
     //     email: _emailController.text.trim(),
     //     password: _passwordController.text,
     //   );
-    //   
+    //
     //   if (mounted) {
     //     ScaffoldMessenger.of(context).showSnackBar(
     //       const SnackBar(
@@ -110,20 +113,33 @@ class _SignupPageState extends State<SignupPage> {
     //   }
     // }
 
-    // TEMPORÁRIO: Simulação de cadastro para desenvolvimento
-    await Future.delayed(const Duration(seconds: 1));
-    
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Cadastro será implementado em breve!'),
-          backgroundColor: Colors.blue,
-        ),
+    try {
+      final authProvider = context.read<AuthProvider>();
+      await authProvider.signUpWithEmail(
+        _emailController.text.trim(),
+        _passwordController.text,
       );
-      setState(() {
-        _isLoading = false;
-      });
-      Navigator.of(context).pop();
+
+      if (!mounted) {
+        return;
+      }
+
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+        (route) => false,
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao cadastrar: $e')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -156,179 +172,195 @@ class _SignupPageState extends State<SignupPage> {
                   children: [
                     // Logo
                     Icon(
-                      Icons.sports_bar,
-                      size: 80,
-                      color: Theme.of(context).colorScheme.primary,
-                    )
+                          Icons.sports_bar,
+                          size: 80,
+                          color: Theme.of(context).colorScheme.primary,
+                        )
                         .animate()
                         .fadeIn(duration: const Duration(milliseconds: 600))
                         .scale(delay: const Duration(milliseconds: 200)),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Título
                     Text(
                       'Criar Conta',
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                      style: Theme.of(context).textTheme.headlineMedium!
+                          .copyWith(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).colorScheme.primary,
                           ),
-                    )
-                        .animate()
-                        .fadeIn(delay: const Duration(milliseconds: 300)),
-                    
+                    ).animate().fadeIn(
+                      delay: const Duration(milliseconds: 300),
+                    ),
+
                     const SizedBox(height: 8),
-                    
+
                     Text(
                       'Comece a gerenciar seu bar agora',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface.withAlpha(179),
-                          ),
-                    )
-                        .animate()
-                        .fadeIn(delay: const Duration(milliseconds: 400)),
-                    
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withAlpha(179),
+                      ),
+                    ).animate().fadeIn(
+                      delay: const Duration(milliseconds: 400),
+                    ),
+
                     const SizedBox(height: 32),
-                    
+
                     // Campo Nome
                     TextFormField(
-                      controller: _nameController,
-                      keyboardType: TextInputType.name,
-                      textCapitalization: TextCapitalization.words,
-                      decoration: InputDecoration(
-                        labelText: 'Nome completo',
-                        hintText: 'João Silva',
-                        prefixIcon: const Icon(Icons.person_outlined),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Por favor, insira seu nome';
-                        }
-                        if (value.length < 3) {
-                          return 'Nome deve ter pelo menos 3 caracteres';
-                        }
-                        return null;
-                      },
-                    )
+                          controller: _nameController,
+                          keyboardType: TextInputType.name,
+                          textCapitalization: TextCapitalization.words,
+                          decoration: InputDecoration(
+                            labelText: 'Nome completo',
+                            hintText: 'João Silva',
+                            prefixIcon: const Icon(Icons.person_outlined),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Por favor, insira seu nome';
+                            }
+                            if (value.length < 3) {
+                              return 'Nome deve ter pelo menos 3 caracteres';
+                            }
+                            return null;
+                          },
+                        )
                         .animate()
                         .fadeIn(delay: const Duration(milliseconds: 500))
-                        .moveX(begin: -30, delay: const Duration(milliseconds: 500)),
-                    
+                        .moveX(
+                          begin: -30,
+                          delay: const Duration(milliseconds: 500),
+                        ),
+
                     const SizedBox(height: 16),
-                    
+
                     // Campo Email
                     TextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        labelText: 'Email',
-                        hintText: 'seu@email.com',
-                        prefixIcon: const Icon(Icons.email_outlined),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Por favor, insira seu email';
-                        }
-                        if (!value.contains('@') || !value.contains('.')) {
-                          return 'Email inválido';
-                        }
-                        return null;
-                      },
-                    )
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            labelText: 'Email',
+                            hintText: 'seu@email.com',
+                            prefixIcon: const Icon(Icons.email_outlined),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Por favor, insira seu email';
+                            }
+                            if (!value.contains('@') || !value.contains('.')) {
+                              return 'Email inválido';
+                            }
+                            return null;
+                          },
+                        )
                         .animate()
                         .fadeIn(delay: const Duration(milliseconds: 600))
-                        .moveX(begin: -30, delay: const Duration(milliseconds: 600)),
-                    
+                        .moveX(
+                          begin: -30,
+                          delay: const Duration(milliseconds: 600),
+                        ),
+
                     const SizedBox(height: 16),
-                    
+
                     // Campo Senha
                     TextFormField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      decoration: InputDecoration(
-                        labelText: 'Senha',
-                        hintText: '••••••••',
-                        prefixIcon: const Icon(Icons.lock_outlined),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
+                          controller: _passwordController,
+                          obscureText: _obscurePassword,
+                          decoration: InputDecoration(
+                            labelText: 'Senha',
+                            hintText: '••••••••',
+                            prefixIcon: const Icon(Icons.lock_outlined),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Por favor, insira sua senha';
+                            }
+                            if (value.length < 6) {
+                              return 'Senha deve ter pelo menos 6 caracteres';
+                            }
+                            return null;
                           },
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Por favor, insira sua senha';
-                        }
-                        if (value.length < 6) {
-                          return 'Senha deve ter pelo menos 6 caracteres';
-                        }
-                        return null;
-                      },
-                    )
+                        )
                         .animate()
                         .fadeIn(delay: const Duration(milliseconds: 700))
-                        .moveX(begin: -30, delay: const Duration(milliseconds: 700)),
-                    
+                        .moveX(
+                          begin: -30,
+                          delay: const Duration(milliseconds: 700),
+                        ),
+
                     const SizedBox(height: 16),
-                    
+
                     // Campo Confirmar Senha
                     TextFormField(
-                      controller: _confirmPasswordController,
-                      obscureText: _obscureConfirmPassword,
-                      decoration: InputDecoration(
-                        labelText: 'Confirmar senha',
-                        hintText: '••••••••',
-                        prefixIcon: const Icon(Icons.lock_outlined),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscureConfirmPassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
+                          controller: _confirmPasswordController,
+                          obscureText: _obscureConfirmPassword,
+                          decoration: InputDecoration(
+                            labelText: 'Confirmar senha',
+                            hintText: '••••••••',
+                            prefixIcon: const Icon(Icons.lock_outlined),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscureConfirmPassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscureConfirmPassword =
+                                      !_obscureConfirmPassword;
+                                });
+                              },
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
-                          onPressed: () {
-                            setState(() {
-                              _obscureConfirmPassword = !_obscureConfirmPassword;
-                            });
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Por favor, confirme sua senha';
+                            }
+                            if (value != _passwordController.text) {
+                              return 'As senhas não coincidem';
+                            }
+                            return null;
                           },
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Por favor, confirme sua senha';
-                        }
-                        if (value != _passwordController.text) {
-                          return 'As senhas não coincidem';
-                        }
-                        return null;
-                      },
-                    )
+                        )
                         .animate()
                         .fadeIn(delay: const Duration(milliseconds: 800))
-                        .moveX(begin: -30, delay: const Duration(milliseconds: 800)),
-                    
+                        .moveX(
+                          begin: -30,
+                          delay: const Duration(milliseconds: 800),
+                        ),
+
                     const SizedBox(height: 16),
-                    
+
                     // Checkbox Termos
                     Row(
                       children: [
@@ -351,7 +383,9 @@ class _SignupPageState extends State<SignupPage> {
                             child: Text(
                               'Aceito os termos de uso e política de privacidade',
                               style: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withOpacity(0.8),
                                 fontSize: 13,
                               ),
                             ),
@@ -359,43 +393,49 @@ class _SignupPageState extends State<SignupPage> {
                         ),
                       ],
                     ),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Botão Cadastrar
                     ElevatedButton(
-                      onPressed: _isLoading ? null : _handleSignup,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            )
-                          : const Text(
-                              'Cadastrar',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          onPressed: _isLoading ? null : _handleSignup,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
+                            foregroundColor: Theme.of(
+                              context,
+                            ).colorScheme.onPrimary,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                    )
+                          ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                )
+                              : const Text(
+                                  'Cadastrar',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        )
                         .animate()
                         .fadeIn(delay: const Duration(milliseconds: 900))
                         .scale(delay: const Duration(milliseconds: 900)),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Link para Login
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -403,7 +443,9 @@ class _SignupPageState extends State<SignupPage> {
                         Text(
                           'Já tem uma conta? ',
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withOpacity(0.7),
                           ),
                         ),
                         TextButton(

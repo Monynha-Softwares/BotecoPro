@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:provider/provider.dart';
+import '../../core/providers/auth_provider.dart';
 import '../../main.dart';
 // TODO(auth): Descomentar quando implementar autenticação.
 // Consulte docs/DOCUMENTATION_INDEX.md (Seção "⚠️ Estado atual da autenticação") para o roadmap de integração.
@@ -19,7 +21,7 @@ import 'signup_page.dart';
 ///
 /// TODO(auth): IMPLEMENTAÇÕES FUTURAS.
 /// Consulte docs/DOCUMENTATION_INDEX.md (Seção "⚠️ Estado atual da autenticação") para orientações detalhadas.
-/// 
+///
 /// 1. Integrar com AuthProvider:
 ///    ```dart
 ///    final authProvider = context.read<AuthProvider>();
@@ -73,7 +75,7 @@ class _LoginPageState extends State<LoginPage> {
     //     _emailController.text.trim(),
     //     _passwordController.text,
     //   );
-    //   
+    //
     //   if (mounted) {
     //     Navigator.of(context).pushReplacement(
     //       MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
@@ -93,13 +95,32 @@ class _LoginPageState extends State<LoginPage> {
     //   }
     // }
 
-    // TEMPORÁRIO: Bypass de autenticação para desenvolvimento
-    await Future.delayed(const Duration(seconds: 1));
-    
-    if (mounted) {
+    try {
+      final authProvider = context.read<AuthProvider>();
+      await authProvider.signInWithEmail(
+        _emailController.text.trim(),
+        _passwordController.text,
+      );
+
+      if (!mounted) {
+        return;
+      }
+
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
       );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao fazer login: $e')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -131,110 +152,119 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     // Logo
                     Icon(
-                      Icons.sports_bar,
-                      size: 80,
-                      color: Theme.of(context).colorScheme.primary,
-                    )
+                          Icons.sports_bar,
+                          size: 80,
+                          color: Theme.of(context).colorScheme.primary,
+                        )
                         .animate()
                         .fadeIn(duration: const Duration(milliseconds: 600))
                         .scale(delay: const Duration(milliseconds: 200)),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Título
                     Text(
                       'Boteco PRO',
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                      style: Theme.of(context).textTheme.headlineMedium!
+                          .copyWith(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).colorScheme.primary,
                           ),
-                    )
-                        .animate()
-                        .fadeIn(delay: const Duration(milliseconds: 300)),
-                    
+                    ).animate().fadeIn(
+                      delay: const Duration(milliseconds: 300),
+                    ),
+
                     const SizedBox(height: 8),
-                    
+
                     Text(
                       'Gestão completa para seu bar',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface.withAlpha(179),
-                          ),
-                    )
-                        .animate()
-                        .fadeIn(delay: const Duration(milliseconds: 400)),
-                    
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withAlpha(179),
+                      ),
+                    ).animate().fadeIn(
+                      delay: const Duration(milliseconds: 400),
+                    ),
+
                     const SizedBox(height: 48),
-                    
+
                     // Campo Email
                     TextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        labelText: 'Email',
-                        hintText: 'seu@email.com',
-                        prefixIcon: const Icon(Icons.email_outlined),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Por favor, insira seu email';
-                        }
-                        if (!value.contains('@')) {
-                          return 'Email inválido';
-                        }
-                        return null;
-                      },
-                    )
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            labelText: 'Email',
+                            hintText: 'seu@email.com',
+                            prefixIcon: const Icon(Icons.email_outlined),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Por favor, insira seu email';
+                            }
+                            if (!value.contains('@')) {
+                              return 'Email inválido';
+                            }
+                            return null;
+                          },
+                        )
                         .animate()
                         .fadeIn(delay: const Duration(milliseconds: 500))
-                        .moveX(begin: -30, delay: const Duration(milliseconds: 500)),
-                    
+                        .moveX(
+                          begin: -30,
+                          delay: const Duration(milliseconds: 500),
+                        ),
+
                     const SizedBox(height: 16),
-                    
+
                     // Campo Senha
                     TextFormField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      decoration: InputDecoration(
-                        labelText: 'Senha',
-                        hintText: '••••••••',
-                        prefixIcon: const Icon(Icons.lock_outlined),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
+                          controller: _passwordController,
+                          obscureText: _obscurePassword,
+                          decoration: InputDecoration(
+                            labelText: 'Senha',
+                            hintText: '••••••••',
+                            prefixIcon: const Icon(Icons.lock_outlined),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Por favor, insira sua senha';
+                            }
+                            if (value.length < 6) {
+                              return 'Senha deve ter pelo menos 6 caracteres';
+                            }
+                            return null;
                           },
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Por favor, insira sua senha';
-                        }
-                        if (value.length < 6) {
-                          return 'Senha deve ter pelo menos 6 caracteres';
-                        }
-                        return null;
-                      },
-                    )
+                        )
                         .animate()
                         .fadeIn(delay: const Duration(milliseconds: 600))
-                        .moveX(begin: -30, delay: const Duration(milliseconds: 600)),
-                    
+                        .moveX(
+                          begin: -30,
+                          delay: const Duration(milliseconds: 600),
+                        ),
+
                     const SizedBox(height: 8),
-                    
+
                     // Link Esqueci a Senha
                     Align(
                       alignment: Alignment.centerRight,
@@ -243,7 +273,9 @@ class _LoginPageState extends State<LoginPage> {
                           // TODO: Implementar recuperação de senha
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Recuperação de senha será implementada em breve'),
+                              content: Text(
+                                'Recuperação de senha será implementada em breve',
+                              ),
                             ),
                           );
                         },
@@ -255,43 +287,49 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Botão Entrar
                     ElevatedButton(
-                      onPressed: _isLoading ? null : _handleLogin,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            )
-                          : const Text(
-                              'Entrar',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          onPressed: _isLoading ? null : _handleLogin,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
+                            foregroundColor: Theme.of(
+                              context,
+                            ).colorScheme.onPrimary,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                    )
+                          ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                )
+                              : const Text(
+                                  'Entrar',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        )
                         .animate()
                         .fadeIn(delay: const Duration(milliseconds: 700))
                         .scale(delay: const Duration(milliseconds: 700)),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Divider
                     Row(
                       children: [
@@ -301,16 +339,18 @@ class _LoginPageState extends State<LoginPage> {
                           child: Text(
                             'OU',
                             style: TextStyle(
-                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withOpacity(0.6),
                             ),
                           ),
                         ),
                         const Expanded(child: Divider()),
                       ],
                     ),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Botão Google
                     OutlinedButton.icon(
                       onPressed: _handleGoogleLogin,
@@ -322,12 +362,12 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                    )
-                        .animate()
-                        .fadeIn(delay: const Duration(milliseconds: 800)),
-                    
+                    ).animate().fadeIn(
+                      delay: const Duration(milliseconds: 800),
+                    ),
+
                     const SizedBox(height: 32),
-                    
+
                     // Link para Cadastro
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -335,13 +375,17 @@ class _LoginPageState extends State<LoginPage> {
                         Text(
                           'Não tem uma conta? ',
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withOpacity(0.7),
                           ),
                         ),
                         TextButton(
                           onPressed: () {
                             Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => const SignupPage()),
+                              MaterialPageRoute(
+                                builder: (_) => const SignupPage(),
+                              ),
                             );
                           },
                           child: Text(
