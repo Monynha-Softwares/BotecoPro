@@ -56,6 +56,7 @@
 ///
 
 import 'dart:convert';
+import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/data_models.dart';
 
@@ -379,8 +380,9 @@ class DatabaseService {
             products.indexWhere((p) => p.id == item.productId);
         if (productIndex != -1) {
           final currentStock = products[productIndex].stockQuantity;
-          products[productIndex] = products[productIndex]
-              .copyWith(stockQuantity: currentStock - item.quantity);
+          final updatedStock = max(currentStock - item.quantity, 0);
+          products[productIndex] =
+              products[productIndex].copyWith(stockQuantity: updatedStock);
         }
       }
       await saveProducts(products);
