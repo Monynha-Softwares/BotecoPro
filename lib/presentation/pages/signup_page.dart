@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import '../../core/providers/auth_provider.dart';
+import '../../core/services/auth_service.dart';
 import '../../main.dart';
 // TODO: Descomentar quando implementar autenticação
 // import '../../core/providers/auth_provider.dart';
@@ -118,6 +119,7 @@ class _SignupPageState extends State<SignupPage> {
       await authProvider.signUpWithEmail(
         _emailController.text.trim(),
         _passwordController.text,
+        name: _nameController.text.trim(),
       );
 
       if (!mounted) {
@@ -128,11 +130,17 @@ class _SignupPageState extends State<SignupPage> {
         MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
         (route) => false,
       );
+    } on AuthFailure catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error.message)),
+        );
+      }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro ao cadastrar: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao cadastrar: $e')),
+        );
       }
     } finally {
       if (mounted) {

@@ -55,6 +55,7 @@
 /// - intl: Formatação de datas e moeda (pt_BR)
 ///
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -70,6 +71,7 @@ import 'presentation/pages/login_page.dart';
 import 'presentation/pages/tables_page.dart';
 import 'theme.dart';
 import 'presentation/widgets/bottom_navigation.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -77,6 +79,10 @@ void main() async {
   // Inicializa a localização para português brasileiro
   await initializeDateFormatting('pt_BR', null);
   Intl.defaultLocale = 'pt_BR';
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   runApp(const AppProviders());
 }
