@@ -390,8 +390,12 @@ class DatabaseService {
       final tableIndex =
           tables.indexWhere((t) => t.id == orders[index].tableId);
       if (tableIndex != -1) {
-        tables[tableIndex] = tables[tableIndex].copyWith(
+        final table = tables[tableIndex];
+        tables[tableIndex] = TableModel(
+          id: table.id,
+          number: table.number,
           status: TableStatus.free,
+          capacity: table.capacity,
           currentOrderId: null,
         );
         await saveTables(tables);
@@ -403,6 +407,42 @@ class DatabaseService {
         total: orders[index].total,
       );
       await addSale(sale);
+    }
+  }
+
+  Future<void> cancelOrder(String orderId) async {
+    final orders = await getOrders();
+    final index = orders.indexWhere((order) => order.id == orderId);
+    if (index == -1) {
+      return;
+    }
+
+    final canceledItems = orders[index]
+        .items
+        .map((item) => item.status == OrderStatus.canceled
+            ? item
+            : item.copyWith(status: OrderStatus.canceled))
+        .toList();
+
+    orders[index] = orders[index].copyWith(
+      status: OrderStatus.canceled,
+      items: canceledItems,
+      isClosed: true,
+    );
+    await saveOrders(orders);
+
+    final tables = await getTables();
+    final tableIndex = tables.indexWhere((t) => t.id == orders[index].tableId);
+    if (tableIndex != -1) {
+      final table = tables[tableIndex];
+      tables[tableIndex] = TableModel(
+        id: table.id,
+        number: table.number,
+        status: TableStatus.free,
+        capacity: table.capacity,
+        currentOrderId: null,
+      );
+      await saveTables(tables);
     }
   }
 
