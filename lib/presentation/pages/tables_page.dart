@@ -28,14 +28,36 @@ class _TablesPageState extends State<TablesPage> {
       _isLoading = true;
     });
 
-    final tables = await _databaseService.getTables();
-    tables.sort((a, b) => a.number.compareTo(b.number));
+    try {
+      final tables = await _databaseService.getTables();
+      tables.sort((a, b) => a.number.compareTo(b.number));
 
-    if (mounted) {
-      setState(() {
-        _tables = tables;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _tables = tables;
+          _isLoading = false;
+        });
+      }
+    } catch (e, stackTrace) {
+      debugPrint('Erro ao carregar mesas: $e\n$stackTrace');
+      
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao carregar mesas: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            action: SnackBarAction(
+              label: 'Tentar novamente',
+              textColor: Colors.white,
+              onPressed: _loadTables,
+            ),
+          ),
+        );
+      }
     }
   }
 

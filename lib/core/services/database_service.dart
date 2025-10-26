@@ -58,6 +58,7 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:synchronized/synchronized.dart';
 import '../models/data_models.dart';
 
 /// DatabaseService - Gerenciador de persistência local com SharedPreferences
@@ -75,6 +76,27 @@ class DatabaseService {
   static final DatabaseService _instance = DatabaseService._internal();
   factory DatabaseService() => _instance;
   DatabaseService._internal();
+
+  // Lock para prevenir race conditions em operações concorrentes
+  final Lock _lock = Lock();
+
+  /// Valida formato de UUID v4.
+  /// 
+  /// Lança ArgumentError se o ID não for válido.
+  /// Isso previne injeção de código e garante integridade dos dados.
+  String _validateId(String id) {
+    // Regex para UUID v4: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
+    final uuidRegex = RegExp(
+      r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
+      caseSensitive: false,
+    );
+    
+    if (!uuidRegex.hasMatch(id)) {
+      throw ArgumentError('ID inválido: $id. Esperado formato UUID v4.');
+    }
+    
+    return id;
+  }
 
   // Carrega dados iniciais se necessário
   Future<void> initializeData() async {
@@ -247,18 +269,23 @@ class DatabaseService {
   }
 
   Future<void> updateSupplier(Supplier supplier) async {
-    final suppliers = await getSuppliers();
-    final index = suppliers.indexWhere((e) => e.id == supplier.id);
-    if (index != -1) {
-      suppliers[index] = supplier;
-      await saveSuppliers(suppliers);
-    }
+    await _lock.synchronized(() async {
+      final suppliers = await getSuppliers();
+      final index = suppliers.indexWhere((e) => e.id == supplier.id);
+      if (index != -1) {
+        suppliers[index] = supplier;
+        await saveSuppliers(suppliers);
+      }
+    });
   }
 
   Future<void> deleteSupplier(String id) async {
-    final suppliers = await getSuppliers();
-    suppliers.removeWhere((e) => e.id == id);
-    await saveSuppliers(suppliers);
+    await _lock.synchronized(() async {
+      _validateId(id);
+      final suppliers = await getSuppliers();
+      suppliers.removeWhere((e) => e.id == id);
+      await saveSuppliers(suppliers);
+    });
   }
 
   // Métodos para Produtos
@@ -281,27 +308,35 @@ class DatabaseService {
   }
 
   Future<void> updateProduct(Product product) async {
-    final products = await getProducts();
-    final index = products.indexWhere((e) => e.id == product.id);
-    if (index != -1) {
-      products[index] = product;
-      await saveProducts(products);
-    }
+    await _lock.synchronized(() async {
+      final products = await getProducts();
+      final index = products.indexWhere((e) => e.id == product.id);
+      if (index != -1) {
+        products[index] = product;
+        await saveProducts(products);
+      }
+    });
   }
 
   Future<void> deleteProduct(String id) async {
-    final products = await getProducts();
-    products.removeWhere((e) => e.id == id);
-    await saveProducts(products);
+    await _lock.synchronized(() async {
+      _validateId(id);
+      final products = await getProducts();
+      products.removeWhere((e) => e.id == id);
+      await saveProducts(products);
+    });
   }
 
   Future<void> updateProductStock(String id, int newQuantity) async {
-    final products = await getProducts();
-    final index = products.indexWhere((e) => e.id == id);
-    if (index != -1) {
-      products[index] = products[index].copyWith(stockQuantity: newQuantity);
-      await saveProducts(products);
-    }
+    await _lock.synchronized(() async {
+      _validateId(id);
+      final products = await getProducts();
+      final index = products.indexWhere((e) => e.id == id);
+      if (index != -1) {
+        products[index] = products[index].copyWith(stockQuantity: newQuantity);
+        await saveProducts(products);
+      }
+    });
   }
 
   // Métodos para Mesas
@@ -318,12 +353,14 @@ class DatabaseService {
   }
 
   Future<void> updateTable(TableModel table) async {
-    final tables = await getTables();
-    final index = tables.indexWhere((e) => e.id == table.id);
-    if (index != -1) {
-      tables[index] = table;
-      await saveTables(tables);
-    }
+    await _lock.synchronized(() async {
+      final tables = await getTables();
+      final index = tables.indexWhere((e) => e.id == table.id);
+      if (index != -1) {
+        tables[index] = table;
+        await saveTables(tables);
+      }
+    });
   }
 
   // Métodos para Pedidos
@@ -357,89 +394,97 @@ class DatabaseService {
   }
 
   Future<void> updateOrder(Order order) async {
-    final orders = await getOrders();
-    final index = orders.indexWhere((e) => e.id == order.id);
-    if (index != -1) {
-      orders[index] = order;
-      await saveOrders(orders);
-    }
+    await _lock.synchronized(() async {
+      final orders = await getOrders();
+      final index = orders.indexWhere((e) => e.id == order.id);
+      if (index != -1) {
+        orders[index] = order;
+        await saveOrders(orders);
+      }
+    });
   }
 
   Future<void> closeOrder(String orderId) async {
-    final orders = await getOrders();
-    final index = orders.indexWhere((e) => e.id == orderId);
-    if (index != -1) {
-      orders[index] = orders[index].copyWith(isClosed: true);
-      await saveOrders(orders);
+    await _lock.synchronized(() async {
+      _validateId(orderId);
+      final orders = await getOrders();
+      final index = orders.indexWhere((e) => e.id == orderId);
+      if (index != -1) {
+        orders[index] = orders[index].copyWith(isClosed: true);
+        await saveOrders(orders);
 
-      // Atualiza o estoque dos produtos
-      final products = await getProducts();
-      for (var item in orders[index].items) {
-        final productIndex = products.indexWhere((p) => p.id == item.productId);
-        if (productIndex != -1) {
-          final currentStock = products[productIndex].stockQuantity;
-          final updatedStock = max(currentStock - item.quantity, 0);
-          products[productIndex] =
-              products[productIndex].copyWith(stockQuantity: updatedStock);
+        // Atualiza o estoque dos produtos
+        final products = await getProducts();
+        for (var item in orders[index].items) {
+          final productIndex = products.indexWhere((p) => p.id == item.productId);
+          if (productIndex != -1) {
+            final currentStock = products[productIndex].stockQuantity;
+            final updatedStock = max(currentStock - item.quantity, 0);
+            products[productIndex] =
+                products[productIndex].copyWith(stockQuantity: updatedStock);
+          }
         }
-      }
-      await saveProducts(products);
+        await saveProducts(products);
 
-      // Libera a mesa
-      final tables = await getTables();
-      final tableIndex =
-          tables.indexWhere((t) => t.id == orders[index].tableId);
-      if (tableIndex != -1) {
-        final table = tables[tableIndex];
-        tables[tableIndex] = TableModel(
-          id: table.id,
-          number: table.number,
-          status: TableStatus.free,
-          capacity: table.capacity,
-          currentOrderId: null,
+        // Libera a mesa
+        final tables = await getTables();
+        final tableIndex =
+            tables.indexWhere((t) => t.id == orders[index].tableId);
+        if (tableIndex != -1) {
+          final table = tables[tableIndex];
+          tables[tableIndex] = TableModel(
+            id: table.id,
+            number: table.number,
+            status: TableStatus.free,
+            capacity: table.capacity,
+            currentOrderId: null,
+          );
+          await saveTables(tables);
+        }
+
+        // Cria uma venda
+        final sale = Sale(
+          orderId: orderId,
+          total: orders[index].total,
         );
-        await saveTables(tables);
+        await addSale(sale);
       }
-
-      // Cria uma venda
-      final sale = Sale(
-        orderId: orderId,
-        total: orders[index].total,
-      );
-      await addSale(sale);
-    }
+    });
   }
 
   Future<void> cancelOrder(String orderId) async {
-    final orders = await getOrders();
-    final index = orders.indexWhere((order) => order.id == orderId);
-    if (index == -1) {
-      return;
-    }
+    await _lock.synchronized(() async {
+      _validateId(orderId);
+      final orders = await getOrders();
+      final index = orders.indexWhere((order) => order.id == orderId);
+      if (index == -1) {
+        return;
+      }
 
-    final canceledItems = orders[index]
-        .items
-        .map((item) => item.status == OrderStatus.canceled
-            ? item
-            : item.copyWith(status: OrderStatus.canceled))
-        .toList();
+      final canceledItems = orders[index]
+          .items
+          .map((item) => item.status == OrderStatus.canceled
+              ? item
+              : item.copyWith(status: OrderStatus.canceled))
+          .toList();
 
-    orders[index] = orders[index].copyWith(
-      status: OrderStatus.canceled,
-      items: canceledItems,
-      isClosed: true,
-    );
-    await saveOrders(orders);
-
-    final tables = await getTables();
-    final tableIndex = tables.indexWhere((t) => t.id == orders[index].tableId);
-    if (tableIndex != -1) {
-      tables[tableIndex] = tables[tableIndex].copyWith(
-        status: TableStatus.free,
-        clearCurrentOrderId: true,
+      orders[index] = orders[index].copyWith(
+        status: OrderStatus.canceled,
+        items: canceledItems,
+        isClosed: true,
       );
-      await saveTables(tables);
-    }
+      await saveOrders(orders);
+
+      final tables = await getTables();
+      final tableIndex = tables.indexWhere((t) => t.id == orders[index].tableId);
+      if (tableIndex != -1) {
+        tables[tableIndex] = tables[tableIndex].copyWith(
+          status: TableStatus.free,
+          clearCurrentOrderId: true,
+        );
+        await saveTables(tables);
+      }
+    });
   }
 
   // Métodos para Vendas
@@ -463,6 +508,7 @@ class DatabaseService {
 
   // Métodos para consultas específicas
   Future<Order?> getActiveOrderForTable(String tableId) async {
+    _validateId(tableId);
     final orders = await getOrders();
     try {
       return orders.firstWhere(
@@ -519,29 +565,37 @@ class DatabaseService {
   }
 
   Future<void> updateRecipe(Recipe recipe) async {
-    final recipes = await getRecipes();
-    final index = recipes.indexWhere((e) => e.id == recipe.id);
-    if (index != -1) {
-      recipes[index] = recipe;
-      await saveRecipes(recipes);
-    }
+    await _lock.synchronized(() async {
+      final recipes = await getRecipes();
+      final index = recipes.indexWhere((e) => e.id == recipe.id);
+      if (index != -1) {
+        recipes[index] = recipe;
+        await saveRecipes(recipes);
+      }
+    });
   }
 
   Future<void> deleteRecipe(String id) async {
-    final recipes = await getRecipes();
-    recipes.removeWhere((e) => e.id == id);
-    await saveRecipes(recipes);
+    await _lock.synchronized(() async {
+      _validateId(id);
+      final recipes = await getRecipes();
+      recipes.removeWhere((e) => e.id == id);
+      await saveRecipes(recipes);
+    });
   }
 
   Future<void> addRecipeIngredient(
       String recipeId, RecipeIngredient ingredient) async {
-    final recipes = await getRecipes();
-    final index = recipes.indexWhere((e) => e.id == recipeId);
-    if (index != -1) {
-      final ingredients = [...recipes[index].ingredients, ingredient];
-      recipes[index] = recipes[index].copyWith(ingredients: ingredients);
-      await saveRecipes(recipes);
-    }
+    await _lock.synchronized(() async {
+      _validateId(recipeId);
+      final recipes = await getRecipes();
+      final index = recipes.indexWhere((e) => e.id == recipeId);
+      if (index != -1) {
+        final ingredients = [...recipes[index].ingredients, ingredient];
+        recipes[index] = recipes[index].copyWith(ingredients: ingredients);
+        await saveRecipes(recipes);
+      }
+    });
   }
 
   // Métodos para Produções Caseiras
@@ -568,29 +622,37 @@ class DatabaseService {
   }
 
   Future<void> updateInternalProduction(InternalProduction production) async {
-    final productions = await getInternalProductions();
-    final index = productions.indexWhere((e) => e.id == production.id);
-    if (index != -1) {
-      productions[index] = production;
-      await saveInternalProductions(productions);
-    }
+    await _lock.synchronized(() async {
+      final productions = await getInternalProductions();
+      final index = productions.indexWhere((e) => e.id == production.id);
+      if (index != -1) {
+        productions[index] = production;
+        await saveInternalProductions(productions);
+      }
+    });
   }
 
   Future<void> deleteInternalProduction(String id) async {
-    final productions = await getInternalProductions();
-    productions.removeWhere((e) => e.id == id);
-    await saveInternalProductions(productions);
+    await _lock.synchronized(() async {
+      _validateId(id);
+      final productions = await getInternalProductions();
+      productions.removeWhere((e) => e.id == id);
+      await saveInternalProductions(productions);
+    });
   }
 
   Future<void> addProductionIngredient(
       String productionId, ProductionIngredient ingredient) async {
-    final productions = await getInternalProductions();
-    final index = productions.indexWhere((e) => e.id == productionId);
-    if (index != -1) {
-      final ingredients = [...productions[index].ingredients, ingredient];
-      productions[index] =
-          productions[index].copyWith(ingredients: ingredients);
-      await saveInternalProductions(productions);
-    }
+    await _lock.synchronized(() async {
+      _validateId(productionId);
+      final productions = await getInternalProductions();
+      final index = productions.indexWhere((e) => e.id == productionId);
+      if (index != -1) {
+        final ingredients = [...productions[index].ingredients, ingredient];
+        productions[index] =
+            productions[index].copyWith(ingredients: ingredients);
+        await saveInternalProductions(productions);
+      }
+    });
   }
 }

@@ -33,17 +33,39 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       _isLoading = true;
     });
 
-    final products = await _databaseService.getProducts();
-    final freshOrder = await _getUpdatedOrder();
+    try {
+      final products = await _databaseService.getProducts();
+      final freshOrder = await _getUpdatedOrder();
 
-    if (mounted) {
-      setState(() {
-        _products = products;
-        if (freshOrder != null) {
-          _order = freshOrder;
-        }
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _products = products;
+          if (freshOrder != null) {
+            _order = freshOrder;
+          }
+          _isLoading = false;
+        });
+      }
+    } catch (e, stackTrace) {
+      debugPrint('Erro ao carregar produtos: $e\n$stackTrace');
+      
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao carregar dados: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            action: SnackBarAction(
+              label: 'Tentar novamente',
+              textColor: Colors.white,
+              onPressed: _loadProducts,
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -54,6 +76,12 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     } catch (e) {
       return null;
     }
+  }
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
   }
 
   @override

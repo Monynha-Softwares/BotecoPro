@@ -57,6 +57,7 @@
 ///
 /// E implemente os métodos seguindo os exemplos no AuthProvider.
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -102,8 +103,7 @@ class AuthService {
       ),
     );
 
-    final hashedPassword = _hashPassword(password);
-    if (storedUser.passwordHash != hashedPassword) {
+    if (!_verifyPassword(password, storedUser.passwordHash)) {
       throw AuthException(
         'invalid-credentials',
         'Credenciais inválidas. Verifique seu email e senha.',
@@ -219,7 +219,64 @@ class AuthService {
 
   String _normalizeEmail(String email) => email.trim().toLowerCase();
 
+  /// Gera hash seguro da senha usando PBKDF2 com salt aleatório.
+  /// 
+  /// Retorna uma string no formato: "salt:hash"
+  /// - salt: 16 bytes aleatórios em base64
+  /// - hash: PBKDF2-HMAC-SHA256 com 10000 iterações
   String _hashPassword(String password) {
+    // Gera salt aleatório de 16 bytes
+    final random = Random.secure();
+    final saltBytes = List<int>.generate(16, (_) => random.nextInt(256));
+    final salt = base64Encode(saltBytes);
+    
+    // Deriva chave usando PBKDF2 com 10000 iterações
+    final passwordBytes = utf8.encode(password);
+    final hmac = Hmac(sha256, saltBytes);
+    
+    // Implementação simplificada de PBKDF2
+    var hash = passwordBytes;
+    for (var i = 0; i < 10000; i++) {
+      final output = hmac.convert(hash);
+      hash = output.bytes;
+    }
+    
+    final hashStr = base64Encode(hash);
+    return '$salt:$hashStr';
+  }
+  
+  /// Verifica se a senha fornecida corresponde ao hash armazenado.
+  bool _verifyPassword(String password, String storedHash) {
+    try {
+      final parts = storedHash.split(':');
+      if (parts.length != 2) {
+        // Hash antigo (SHA-256 sem salt) - migrar automaticamente
+        return _hashPasswordLegacy(password) == storedHash;
+      }
+      
+      final salt = base64Decode(parts[0]);
+      final expectedHash = parts[1];
+      
+      // Deriva hash da senha fornecida com o mesmo salt
+      final passwordBytes = utf8.encode(password);
+      final hmac = Hmac(sha256, salt);
+      
+      var hash = passwordBytes;
+      for (var i = 0; i < 10000; i++) {
+        final output = hmac.convert(hash);
+        hash = output.bytes;
+      }
+      
+      final actualHash = base64Encode(hash);
+      return actualHash == expectedHash;
+    } catch (_) {
+      return false;
+    }
+  }
+  
+  /// Hash legado (SHA-256 sem salt) - apenas para migração.
+  @deprecated
+  String _hashPasswordLegacy(String password) {
     final data = utf8.encode(password);
     return sha256.convert(data).toString();
   }

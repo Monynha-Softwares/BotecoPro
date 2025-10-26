@@ -30,16 +30,38 @@ class _ProductsPageState extends State<ProductsPage> {
       _isLoading = true;
     });
 
-    final products = await _databaseService.getProducts();
-    final suppliers = await _databaseService.getSuppliers();
+    try {
+      final products = await _databaseService.getProducts();
+      final suppliers = await _databaseService.getSuppliers();
 
-    if (mounted) {
-      setState(() {
-        _products = products;
-        _filteredProducts = _applyFilter(products, _selectedCategory);
-        _suppliers = suppliers;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _products = products;
+          _filteredProducts = _applyFilter(products, _selectedCategory);
+          _suppliers = suppliers;
+          _isLoading = false;
+        });
+      }
+    } catch (e, stackTrace) {
+      debugPrint('Erro ao carregar dados de produtos: $e\n$stackTrace');
+      
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao carregar produtos: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            action: SnackBarAction(
+              label: 'Tentar novamente',
+              textColor: Colors.white,
+              onPressed: _loadData,
+            ),
+          ),
+        );
+      }
     }
   }
 
