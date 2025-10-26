@@ -750,9 +750,10 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         confirmText: 'Sim, Cancelar',
         cancelText: 'Não',
         onConfirm: () async {
-          await _databaseService.closeOrder(_order.id);
+          await _databaseService.cancelOrder(_order.id);
+          Navigator.pop(context);
           if (mounted) {
-            Navigator.pop(context);
+            Navigator.pop(this.context);
           }
         },
       ),
