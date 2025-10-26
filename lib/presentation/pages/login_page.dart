@@ -109,11 +109,17 @@ class _LoginPageState extends State<LoginPage> {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
       );
+    } on AuthProviderException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message)),
+        );
+      }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro ao fazer login: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao fazer login: $e')),
+        );
       }
     } finally {
       if (mounted) {
@@ -126,12 +132,51 @@ class _LoginPageState extends State<LoginPage> {
 
   // TODO(auth): Implementar login com Google (ver docs/DOCUMENTATION_INDEX.md, seção "⚠️ Estado atual da autenticação").
   Future<void> _handleGoogleLogin() async {
-    // Implementação futura
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Login com Google será implementado em breve'),
-      ),
-    );
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final authProvider = context.read<AuthProvider>();
+      final user = await authProvider.signInWithGoogle();
+
+      if (!mounted) {
+        return;
+      }
+
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Login com Google cancelado pelo usuário / Google sign-in cancelled',
+            ),
+          ),
+        );
+        return;
+      }
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+      );
+    } on AuthProviderException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message)),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao fazer login com Google: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -152,10 +197,10 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     // Logo
                     Icon(
-                          Icons.sports_bar,
-                          size: 80,
-                          color: Theme.of(context).colorScheme.primary,
-                        )
+                      Icons.sports_bar,
+                      size: 80,
+                      color: Theme.of(context).colorScheme.primary,
+                    )
                         .animate()
                         .fadeIn(duration: const Duration(milliseconds: 600))
                         .scale(delay: const Duration(milliseconds: 200)),
@@ -166,14 +211,14 @@ class _LoginPageState extends State<LoginPage> {
                     Text(
                       'Boteco PRO',
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineMedium!
-                          .copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                      style:
+                          Theme.of(context).textTheme.headlineMedium!.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
                     ).animate().fadeIn(
-                      delay: const Duration(milliseconds: 300),
-                    ),
+                          delay: const Duration(milliseconds: 300),
+                        ),
 
                     const SizedBox(height: 8),
 
@@ -181,38 +226,38 @@ class _LoginPageState extends State<LoginPage> {
                       'Gestão completa para seu bar',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withAlpha(179),
-                      ),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withAlpha(179),
+                          ),
                     ).animate().fadeIn(
-                      delay: const Duration(milliseconds: 400),
-                    ),
+                          delay: const Duration(milliseconds: 400),
+                        ),
 
                     const SizedBox(height: 48),
 
                     // Campo Email
                     TextFormField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          decoration: InputDecoration(
-                            labelText: 'Email',
-                            hintText: 'seu@email.com',
-                            prefixIcon: const Icon(Icons.email_outlined),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Por favor, insira seu email';
-                            }
-                            if (!value.contains('@')) {
-                              return 'Email inválido';
-                            }
-                            return null;
-                          },
-                        )
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        hintText: 'seu@email.com',
+                        prefixIcon: const Icon(Icons.email_outlined),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor, insira seu email';
+                        }
+                        if (!value.contains('@')) {
+                          return 'Email inválido';
+                        }
+                        return null;
+                      },
+                    )
                         .animate()
                         .fadeIn(delay: const Duration(milliseconds: 500))
                         .moveX(
@@ -224,38 +269,38 @@ class _LoginPageState extends State<LoginPage> {
 
                     // Campo Senha
                     TextFormField(
-                          controller: _passwordController,
-                          obscureText: _obscurePassword,
-                          decoration: InputDecoration(
-                            labelText: 'Senha',
-                            hintText: '••••••••',
-                            prefixIcon: const Icon(Icons.lock_outlined),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _obscurePassword = !_obscurePassword;
-                                });
-                              },
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                      controller: _passwordController,
+                      obscureText: _obscurePassword,
+                      decoration: InputDecoration(
+                        labelText: 'Senha',
+                        hintText: '••••••••',
+                        prefixIcon: const Icon(Icons.lock_outlined),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Por favor, insira sua senha';
-                            }
-                            if (value.length < 6) {
-                              return 'Senha deve ter pelo menos 6 caracteres';
-                            }
-                            return null;
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
                           },
-                        )
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor, insira sua senha';
+                        }
+                        if (value.length < 6) {
+                          return 'Senha deve ter pelo menos 6 caracteres';
+                        }
+                        return null;
+                      },
+                    )
                         .animate()
                         .fadeIn(delay: const Duration(milliseconds: 600))
                         .moveX(
@@ -292,38 +337,38 @@ class _LoginPageState extends State<LoginPage> {
 
                     // Botão Entrar
                     ElevatedButton(
-                          onPressed: _isLoading ? null : _handleLogin,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(
-                              context,
-                            ).colorScheme.primary,
-                            foregroundColor: Theme.of(
-                              context,
-                            ).colorScheme.onPrimary,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
-                                    ),
-                                  ),
-                                )
-                              : const Text(
-                                  'Entrar',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                      onPressed: _isLoading ? null : _handleLogin,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.primary,
+                        foregroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onPrimary,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
                                 ),
-                        )
+                              ),
+                            )
+                          : const Text(
+                              'Entrar',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                    )
                         .animate()
                         .fadeIn(delay: const Duration(milliseconds: 700))
                         .scale(delay: const Duration(milliseconds: 700)),
@@ -353,7 +398,7 @@ class _LoginPageState extends State<LoginPage> {
 
                     // Botão Google
                     OutlinedButton.icon(
-                      onPressed: _handleGoogleLogin,
+                      onPressed: _isLoading ? null : _handleGoogleLogin,
                       icon: const Icon(Icons.g_mobiledata, size: 28),
                       label: const Text('Continuar com Google'),
                       style: OutlinedButton.styleFrom(
@@ -363,8 +408,8 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ).animate().fadeIn(
-                      delay: const Duration(milliseconds: 800),
-                    ),
+                          delay: const Duration(milliseconds: 800),
+                        ),
 
                     const SizedBox(height: 32),
 
