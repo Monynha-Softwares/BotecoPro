@@ -124,8 +124,10 @@ class AuthProvider extends ChangeNotifier {
             jsonDecode(raw) as Map<String, dynamic>;
         final persistedUser = AuthUser.fromJson(json);
         final storedUser = await _authService.getUserById(persistedUser.id);
-        _user = storedUser ?? persistedUser;
-        if (storedUser == null) {
+        if (storedUser != null) {
+          _user = storedUser;
+        } else {
+          _user = null;
           await prefs.remove(_authUserKey);
         }
       } catch (_) {
