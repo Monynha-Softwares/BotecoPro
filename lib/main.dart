@@ -59,11 +59,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
+import 'core/providers/auth_provider.dart';
 import 'presentation/pages/home_page.dart';
 import 'presentation/pages/production_page.dart';
 import 'presentation/pages/products_page.dart';
 import 'presentation/pages/recipes_page.dart';
+import 'presentation/pages/login_page.dart';
 import 'presentation/pages/tables_page.dart';
 import 'theme.dart';
 import 'presentation/widgets/bottom_navigation.dart';
@@ -75,7 +78,21 @@ void main() async {
   await initializeDateFormatting('pt_BR', null);
   Intl.defaultLocale = 'pt_BR';
 
-  runApp(const MyApp());
+  runApp(const AppProviders());
+}
+
+class AppProviders extends StatelessWidget {
+  const AppProviders({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
+      ],
+      child: const MyApp(),
+    );
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -105,16 +122,31 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _navigateToHome();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeAndNavigate();
+    });
   }
 
-  Future<void> _navigateToHome() async {
-    await Future.delayed(const Duration(seconds: 2));
-    if (mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
-      );
+  Future<void> _initializeAndNavigate() async {
+    final authProvider = context.read<AuthProvider>();
+
+    if (!authProvider.initialized) {
+      await authProvider.initialize();
     }
+
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (!mounted) {
+      return;
+    }
+
+    final nextPage = authProvider.isSignedIn
+        ? const MainNavigationScreen()
+        : const LoginPage();
+
+    Navigator.of(
+      context,
+    ).pushReplacement(MaterialPageRoute(builder: (context) => nextPage));
   }
 
   @override
@@ -126,41 +158,43 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.sports_bar,
-              size: 80,
-              color: Theme.of(context).colorScheme.onPrimary,
-            )
+                  Icons.sports_bar,
+                  size: 80,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                )
                 .animate(
-                    onPlay: (controller) => controller.repeat(reverse: true))
+                  onPlay: (controller) => controller.repeat(reverse: true),
+                )
                 .scale(
-                    duration: const Duration(seconds: 1),
-                    curve: Curves.easeInOut),
+                  duration: const Duration(seconds: 1),
+                  curve: Curves.easeInOut,
+                ),
             const SizedBox(height: 24),
             Text(
               'Boteco PRO',
               style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onPrimary,
-                  ),
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
             ).animate().fadeIn(
-                duration: const Duration(milliseconds: 800),
-                curve: Curves.easeIn),
+              duration: const Duration(milliseconds: 800),
+              curve: Curves.easeIn,
+            ),
             const SizedBox(height: 8),
             Text(
               'Gestão completa para seu bar',
               style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onPrimary
-                        .withOpacity(0.8),
-                  ),
+                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+              ),
             ).animate().fadeIn(
-                delay: const Duration(milliseconds: 400),
-                duration: const Duration(milliseconds: 800)),
+              delay: const Duration(milliseconds: 400),
+              duration: const Duration(milliseconds: 800),
+            ),
             const SizedBox(height: 48),
             CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(
-                  Theme.of(context).colorScheme.onPrimary),
+                Theme.of(context).colorScheme.onPrimary,
+              ),
             ),
           ],
         ),
@@ -202,7 +236,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     final isWebLarge = MediaQuery.of(context).size.width > 800;
-    
+
     if (isWebLarge) {
       // Layout desktop/web avec sidebar
       return Scaffold(
@@ -211,7 +245,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             // Navigation latérale
             NavigationRail(
               selectedIndex: _currentTab.index,
-              onDestinationSelected: (index) => _selectTab(NavigationTab.values[index]),
+              onDestinationSelected: (index) =>
+                  _selectTab(NavigationTab.values[index]),
               backgroundColor: Theme.of(context).colorScheme.surface,
               leading: Container(
                 padding: const EdgeInsets.all(16),
@@ -260,7 +295,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         ),
       );
     }
-    
+
     // Layout mobile avec bottom navigation
     return Scaffold(
       body: IndexedStack(
