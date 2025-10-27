@@ -51,6 +51,15 @@
 ///   firebase_auth: ^4.15.0
 ///   google_sign_in: ^6.1.5
 /// ```
+///
+/// NOTA: dart:async é necessário para StreamController e StreamSubscription.
+/// - StreamController<AuthUser?>: Cria um stream broadcast para notificar mudanças
+///   no estado de autenticação para múltiplos listeners na aplicação.
+/// - StreamSubscription<User?>: Gerencia a assinatura do stream do Firebase Auth,
+///   permitindo cancelamento adequado no dispose() para evitar memory leaks.
+/// Esses componentes implementam o padrão reativo de observação de mudanças
+/// no estado de autenticação, permitindo que a aplicação reaja automaticamente
+/// a eventos de login/logout de usuários.
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
