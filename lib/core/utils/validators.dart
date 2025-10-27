@@ -96,8 +96,8 @@ class Validators {
       return 'Nome deve ter pelo menos 3 caracteres';
     }
 
-    // Verifica se contém apenas letras e espaços
-    if (!RegExp(r'^[a-zA-ZÀ-ÿ\s]+$').hasMatch(value)) {
+    // Verifica se contém apenas letras e espaços (Unicode-aware)
+    if (!RegExp(r'^[\p{L}\s]+$', unicode: true).hasMatch(value)) {
       return 'Nome deve conter apenas letras';
     }
 
