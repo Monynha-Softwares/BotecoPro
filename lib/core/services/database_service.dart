@@ -402,6 +402,12 @@ class DatabaseService {
         continue;
       }
       final currentStock = products[productIndex].stockQuantity;
+      if (currentStock - item.quantity < 0) {
+        print(
+          '[DatabaseService] WARNING: Insufficient stock for product "${products[productIndex].name}" (ID: ${products[productIndex].id}). '
+          'Attempted to deliver ${item.quantity}, but only $currentStock in stock. Stock will be set to 0.'
+        );
+      }
       final updatedStock = max(currentStock - item.quantity, 0);
       products[productIndex] =
           products[productIndex].copyWith(stockQuantity: updatedStock);
