@@ -109,7 +109,7 @@ class _LoginPageState extends State<LoginPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-              'Login com Google cancelado pelo usuário / Google sign-in cancelled',
+              'Login com Google cancelado pelo usuário',
             ),
           ),
         );
