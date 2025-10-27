@@ -126,7 +126,7 @@ flutter:
    - Ative reCAPTCHA v3 para web
    - Configure tokens para Android/iOS
 
-2. **Restricões de API Key**
+2. **Restrições de API Key**
    - No Google Cloud Console
    - Restrinja API key por domínio
    - Apenas `seu-dominio.com` autorizado
