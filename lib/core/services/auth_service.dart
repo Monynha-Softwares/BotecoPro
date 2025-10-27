@@ -1,31 +1,29 @@
 // lib/core/services/auth_service.dart
 
-/// AuthService - Placeholder para implementação futura de autenticação
+/// AuthService - Serviço de Autenticação com Firebase
 ///
-/// Este serviço será responsável pela autenticação de usuários no aplicativo.
-/// Atualmente está vazio e pronto para ser implementado quando necessário.
-/// Consulte docs/DOCUMENTATION_INDEX.md (Seção "⚠️ Estado atual da autenticação")
-/// para orientação completa sobre os próximos passos de desenvolvimento.
+/// Este serviço é responsável pela autenticação de usuários no aplicativo.
+/// Implementa todas as funcionalidades de autenticação usando Firebase Auth.
 ///
-/// IMPLEMENTAÇÕES FUTURAS PREVISTAS:
+/// FUNCIONALIDADES IMPLEMENTADAS:
 ///
 /// 1. Autenticação com Firebase:
-///    - Login com email e senha
-///    - Cadastro de novos usuários
-///    - Login com Google
-///    - Recuperação de senha
-///    - Logout
+///    - Login com email e senha ✅
+///    - Cadastro de novos usuários ✅
+///    - Login com Google ✅
+///    - Recuperação de senha ✅
+///    - Logout ✅
 ///
 /// 2. Gerenciamento de Sessão:
-///    - Verificação de usuário autenticado
-///    - Persistência de sessão
-///    - Token de autenticação
+///    - Verificação de usuário autenticado ✅
+///    - Persistência de sessão ✅
+///    - Stream de mudanças de autenticação ✅
 ///
 /// 3. Integração com AuthProvider:
-///    - Este service será chamado pelo AuthProvider
-///    - AuthProvider gerenciará o estado da autenticação
+///    - Este service é chamado pelo AuthProvider ✅
+///    - AuthProvider gerencia o estado da autenticação ✅
 ///
-/// EXEMPLO DE USO FUTURO:
+/// EXEMPLO DE USO:
 /// ```dart
 /// final authService = AuthService();
 ///
@@ -46,16 +44,13 @@
 /// await authService.signOut();
 /// ```
 ///
-/// INTEGRAÇÃO COM FIREBASE:
-/// Para integrar com Firebase, adicione as dependências:
+/// DEPENDÊNCIAS NECESSÁRIAS:
 /// ```yaml
 /// dependencies:
 ///   firebase_core: ^2.24.0
 ///   firebase_auth: ^4.15.0
 ///   google_sign_in: ^6.1.5
 /// ```
-///
-/// E implemente os métodos seguindo os exemplos no AuthProvider.
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -100,11 +95,6 @@ class AuthServiceException implements Exception {
 }
 
 class AuthService implements BaseAuthService {
-  // TODO(auth): Implementar singleton pattern se necessário (ver docs/DOCUMENTATION_INDEX.md, seção "⚠️ Estado atual da autenticação").
-  // static final AuthService _instance = AuthService._internal();
-  // factory AuthService() => _instance;
-  // AuthService._internal();
-
   AuthService({
     FirebaseAuth? firebaseAuth,
     GoogleSignIn? googleSignIn,
@@ -137,7 +127,7 @@ class AuthService implements BaseAuthService {
     _authStateController.close();
   }
 
-  /// TODO(auth): Implementar login com email e senha.
+  /// Faz login com email e senha usando Firebase Auth.
   @override
   Future<AuthUser?> signInWithEmailAndPassword({
     required String email,
@@ -158,7 +148,7 @@ class AuthService implements BaseAuthService {
     }
   }
 
-  /// TODO(auth): Implementar cadastro de novo usuário.
+  /// Registra novo usuário com email e senha no Firebase Auth.
   @override
   Future<AuthUser?> registerWithEmailAndPassword({
     required String email,
@@ -185,7 +175,7 @@ class AuthService implements BaseAuthService {
     }
   }
 
-  /// TODO(auth): Implementar login com Google.
+  /// Faz login com conta Google (suporta Web e Mobile).
   @override
   Future<AuthUser?> signInWithGoogle() async {
     try {
@@ -217,7 +207,7 @@ class AuthService implements BaseAuthService {
     }
   }
 
-  /// TODO(auth): Implementar logout.
+  /// Faz logout do usuário atual.
   @override
   Future<void> signOut() async {
     try {
@@ -235,7 +225,7 @@ class AuthService implements BaseAuthService {
     }
   }
 
-  /// TODO(auth): Implementar recuperação de senha.
+  /// Envia email de recuperação de senha.
   @override
   Future<void> sendPasswordResetEmail(String email) async {
     try {
@@ -249,13 +239,13 @@ class AuthService implements BaseAuthService {
     }
   }
 
-  /// TODO(auth): Implementar verificação de usuário autenticado.
+  /// Retorna o usuário atualmente autenticado.
   @override
   Future<AuthUser?> getCurrentUser() async {
     return _authUserFromFirebase(_firebaseAuth.currentUser);
   }
 
-  /// TODO(auth): Implementar stream de mudanças de autenticação.
+  /// Stream de mudanças no estado de autenticação.
   Stream<AuthUser?> observeAuthState() => authStateChanges;
 
   AuthUser? _authUserFromFirebase(User? user) {

@@ -4,35 +4,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import '../../core/providers/auth_provider.dart';
+import '../../core/utils/validators.dart';
 import '../../main.dart';
-// TODO: Descomentar quando implementar autenticação
-// import '../../core/providers/auth_provider.dart';
-// import 'package:provider/provider.dart';
 
 /// SignupPage - Tela de cadastro do aplicativo
 ///
 /// IMPLEMENTAÇÃO ATUAL:
-/// - Interface de cadastro com nome, email e senha (não funcional)
-/// - Botão "Cadastrar" volta para tela de login
-/// - Validação básica de formulário
-/// - Design responsivo e animado
+/// - Interface de cadastro com nome, email e senha ✅
+/// - Integração completa com Firebase Auth ✅
+/// - Confirmação de senha ✅
+/// - Checkbox de termos de uso ✅
+/// - Validação de formulário ✅
+/// - Tratamento de erros ✅
+/// - Design responsivo e animado ✅
 ///
-/// TODO: IMPLEMENTAÇÕES FUTURAS
-///
-/// 1. Integrar com AuthProvider:
-///    ```dart
-///    final authProvider = context.read<AuthProvider>();
-///    await authProvider.registerWithEmail(name, email, password);
-///    ```
-///
-/// 2. Adicionar confirmação de senha
-/// 3. Implementar validação de senha forte
-/// 4. Adicionar termos de uso e política de privacidade
-/// 5. Implementar feedback de erro/sucesso
-/// 6. Adicionar loading durante cadastro
-/// 7. Redirecionar automaticamente após cadastro bem-sucedido
-///
-/// OBSERVAÇÃO: Atualmente apenas mostra interface para desenvolvimento
+/// FUNCIONALIDADES:
+/// - Cadastro com email/senha/nome
+/// - Validação de confirmação de senha
+/// - Aceite obrigatório de termos
+/// - Feedback visual (loading, erros)
+/// - Redirecionamento automático após cadastro
 class SignupPage extends StatefulWidget {
   const SignupPage({Key? key}) : super(key: key);
 
@@ -60,7 +51,7 @@ class _SignupPageState extends State<SignupPage> {
     super.dispose();
   }
 
-  // TODO: Implementar cadastro real com AuthProvider
+  /// Processa o cadastro via Firebase Auth.
   Future<void> _handleSignup() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -79,39 +70,6 @@ class _SignupPageState extends State<SignupPage> {
     setState(() {
       _isLoading = true;
     });
-
-    // TODO: Substituir por lógica real de cadastro
-    // Exemplo:
-    // try {
-    //   final authProvider = context.read<AuthProvider>();
-    //   await authProvider.registerWithEmail(
-    //     name: _nameController.text.trim(),
-    //     email: _emailController.text.trim(),
-    //     password: _passwordController.text,
-    //   );
-    //
-    //   if (mounted) {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       const SnackBar(
-    //         content: Text('Cadastro realizado com sucesso!'),
-    //         backgroundColor: Colors.green,
-    //       ),
-    //     );
-    //     Navigator.of(context).pop();
-    //   }
-    // } catch (e) {
-    //   if (mounted) {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       SnackBar(content: Text('Erro ao cadastrar: $e')),
-    //     );
-    //   }
-    // } finally {
-    //   if (mounted) {
-    //     setState(() {
-    //       _isLoading = false;
-    //     });
-    //   }
-    // }
 
     try {
       final authProvider = context.read<AuthProvider>();
@@ -231,15 +189,7 @@ class _SignupPageState extends State<SignupPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Por favor, insira seu nome';
-                        }
-                        if (value.length < 3) {
-                          return 'Nome deve ter pelo menos 3 caracteres';
-                        }
-                        return null;
-                      },
+                      validator: Validators.validateName,
                     )
                         .animate()
                         .fadeIn(delay: const Duration(milliseconds: 500))
@@ -262,15 +212,7 @@ class _SignupPageState extends State<SignupPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Por favor, insira seu email';
-                        }
-                        if (!value.contains('@') || !value.contains('.')) {
-                          return 'Email inválido';
-                        }
-                        return null;
-                      },
+                      validator: Validators.validateEmail,
                     )
                         .animate()
                         .fadeIn(delay: const Duration(milliseconds: 600))
@@ -288,6 +230,8 @@ class _SignupPageState extends State<SignupPage> {
                       decoration: InputDecoration(
                         labelText: 'Senha',
                         hintText: '••••••••',
+                        helperText: 'Mín. 6 caracteres, 1 maiúscula, 1 minúscula, 1 número',
+                        helperMaxLines: 2,
                         prefixIcon: const Icon(Icons.lock_outlined),
                         suffixIcon: IconButton(
                           icon: Icon(
@@ -305,15 +249,7 @@ class _SignupPageState extends State<SignupPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Por favor, insira sua senha';
-                        }
-                        if (value.length < 6) {
-                          return 'Senha deve ter pelo menos 6 caracteres';
-                        }
-                        return null;
-                      },
+                      validator: Validators.validatePassword,
                     )
                         .animate()
                         .fadeIn(delay: const Duration(milliseconds: 700))
@@ -349,15 +285,10 @@ class _SignupPageState extends State<SignupPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Por favor, confirme sua senha';
-                        }
-                        if (value != _passwordController.text) {
-                          return 'As senhas não coincidem';
-                        }
-                        return null;
-                      },
+                      validator: (value) => Validators.validatePasswordConfirmation(
+                        value,
+                        _passwordController.text,
+                      ),
                     )
                         .animate()
                         .fadeIn(delay: const Duration(milliseconds: 800))

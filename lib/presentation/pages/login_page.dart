@@ -4,38 +4,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import '../../core/providers/auth_provider.dart';
+import '../../core/utils/validators.dart';
 import '../../main.dart';
-// TODO(auth): Descomentar quando implementar autenticação.
-// Consulte docs/DOCUMENTATION_INDEX.md (Seção "⚠️ Estado atual da autenticação") para o roadmap de integração.
-// import '../../core/providers/auth_provider.dart';
-// import 'package:provider/provider.dart';
 import 'signup_page.dart';
 
 /// LoginPage - Tela de login do aplicativo
 ///
 /// IMPLEMENTAÇÃO ATUAL:
-/// - Interface de login com email e senha (não funcional)
-/// - Botão "Entrar" redireciona temporariamente direto para o app
+/// - Interface de login com email e senha ✅
+/// - Integração completa com Firebase Auth ✅
+/// - Login com Google funcionando ✅
+/// - Validação de formulário ✅
+/// - Tratamento de erros ✅
+/// - Design responsivo e animado ✅
+/// - Feedback visual (loading, erros) ✅
+///
+/// FUNCIONALIDADES:
+/// - Login com email/senha
+/// - Login com Google
+/// - Link para recuperação de senha (TODO futuro)
 /// - Link para tela de cadastro
-/// - Design responsivo e animado
-///
-/// TODO(auth): IMPLEMENTAÇÕES FUTURAS.
-/// Consulte docs/DOCUMENTATION_INDEX.md (Seção "⚠️ Estado atual da autenticação") para orientações detalhadas.
-///
-/// 1. Integrar com AuthProvider:
-///    ```dart
-///    final authProvider = context.read<AuthProvider>();
-///    await authProvider.signInWithEmail(email, password);
-///    ```
-///
-/// 2. Adicionar validação de formulário
-/// 3. Implementar feedback de erro/sucesso
-/// 4. Adicionar loading durante autenticação
-/// 5. Implementar "Lembrar-me"
-/// 6. Adicionar login com Google
-/// 7. Implementar recuperação de senha
-///
-/// OBSERVAÇÃO: Atualmente bypassa autenticação para desenvolvimento
+/// - Animações suaves com flutter_animate
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
 
@@ -57,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  // TODO(auth): Implementar login real com AuthProvider (ver docs/DOCUMENTATION_INDEX.md, seção "⚠️ Estado atual da autenticação").
+  /// Processa o login com email e senha via Firebase Auth.
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -66,34 +55,6 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _isLoading = true;
     });
-
-    // TODO(auth): Substituir por lógica real de autenticação (ver docs/DOCUMENTATION_INDEX.md, seção "⚠️ Estado atual da autenticação").
-    // Exemplo:
-    // try {
-    //   final authProvider = context.read<AuthProvider>();
-    //   await authProvider.signInWithEmail(
-    //     _emailController.text.trim(),
-    //     _passwordController.text,
-    //   );
-    //
-    //   if (mounted) {
-    //     Navigator.of(context).pushReplacement(
-    //       MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
-    //     );
-    //   }
-    // } catch (e) {
-    //   if (mounted) {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       SnackBar(content: Text('Erro ao fazer login: $e')),
-    //     );
-    //   }
-    // } finally {
-    //   if (mounted) {
-    //     setState(() {
-    //       _isLoading = false;
-    //     });
-    //   }
-    // }
 
     try {
       final authProvider = context.read<AuthProvider>();
@@ -130,7 +91,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  // TODO(auth): Implementar login com Google (ver docs/DOCUMENTATION_INDEX.md, seção "⚠️ Estado atual da autenticação").
+  /// Processa o login com Google via Firebase Auth.
   Future<void> _handleGoogleLogin() async {
     setState(() {
       _isLoading = true;
@@ -177,6 +138,98 @@ class _LoginPageState extends State<LoginPage> {
         });
       }
     }
+  }
+
+  /// Mostra dialog para recuperação de senha.
+  void _showPasswordResetDialog() {
+    final emailController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Recuperar Senha'),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Digite seu email para receber um link de recuperação de senha.',
+                style: TextStyle(fontSize: 14),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  hintText: 'seu@email.com',
+                  prefixIcon: const Icon(Icons.email_outlined),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                validator: Validators.validateEmail,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (!formKey.currentState!.validate()) {
+                return;
+              }
+
+              Navigator.pop(context);
+
+              try {
+                final authProvider = context.read<AuthProvider>();
+                await authProvider.sendPasswordReset(
+                  emailController.text.trim(),
+                );
+
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Email de recuperação enviado! Verifique sua caixa de entrada.',
+                      ),
+                      backgroundColor: Colors.green,
+                      duration: Duration(seconds: 5),
+                    ),
+                  );
+                }
+              } on AuthProviderException catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(e.message),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Erro ao enviar email: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            },
+            child: const Text('Enviar'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -248,15 +301,7 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Por favor, insira seu email';
-                        }
-                        if (!value.contains('@')) {
-                          return 'Email inválido';
-                        }
-                        return null;
-                      },
+                      validator: Validators.validateEmail,
                     )
                         .animate()
                         .fadeIn(delay: const Duration(milliseconds: 500))
@@ -291,15 +336,7 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Por favor, insira sua senha';
-                        }
-                        if (value.length < 6) {
-                          return 'Senha deve ter pelo menos 6 caracteres';
-                        }
-                        return null;
-                      },
+                      validator: Validators.validatePasswordSimple,
                     )
                         .animate()
                         .fadeIn(delay: const Duration(milliseconds: 600))
@@ -314,16 +351,7 @@ class _LoginPageState extends State<LoginPage> {
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () {
-                          // TODO: Implementar recuperação de senha
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Recuperação de senha será implementada em breve',
-                              ),
-                            ),
-                          );
-                        },
+                        onPressed: _showPasswordResetDialog,
                         child: Text(
                           'Esqueceu a senha?',
                           style: TextStyle(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import '../../core/services/database_service.dart';
 import '../widgets/shared_widgets.dart';
 import '../../core/models/data_models.dart';
@@ -28,14 +29,33 @@ class _TablesPageState extends State<TablesPage> {
       _isLoading = true;
     });
 
-    final tables = await _databaseService.getTables();
-    tables.sort((a, b) => a.number.compareTo(b.number));
+    try {
+      final tables = await _databaseService.getTables();
+      tables.sort((a, b) => a.number.compareTo(b.number));
 
-    if (mounted) {
-      setState(() {
-        _tables = tables;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _tables = tables;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao carregar mesas: $e'),
+            backgroundColor: Colors.red,
+            action: SnackBarAction(
+              label: 'Tentar novamente',
+              textColor: Colors.white,
+              onPressed: _loadTables,
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -44,7 +64,7 @@ class _TablesPageState extends State<TablesPage> {
     return Scaffold(
       appBar: const CustomAppBar(title: 'Gerenciar Mesas'),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const ShimmerGridLoader(itemCount: 8, crossAxisCount: 2)
           : RefreshIndicator(
               onRefresh: _loadTables,
               child: Column(
@@ -198,7 +218,22 @@ class _TablesPageState extends State<TablesPage> {
     final Color statusColor = isOccupied ? Colors.orange : Colors.green;
     final String statusText = isOccupied ? 'Ocupada' : 'Disponível';
 
-    return Card(
+    return Slidable(
+      key: Key(table.id),
+      enabled: !isOccupied,
+      endActionPane: isOccupied ? null : ActionPane(
+        motion: const ScrollMotion(),
+        children: [
+          SlidableAction(
+            onPressed: (_) => _showDeleteTableConfirmation(table),
+            backgroundColor: Colors.red,
+            foregroundColor: Colors.white,
+            icon: Icons.delete,
+            label: 'Excluir',
+          ),
+        ],
+      ),
+      child: Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
@@ -294,6 +329,7 @@ class _TablesPageState extends State<TablesPage> {
           ],
         ),
       ),
+    ),
     );
   }
 
@@ -453,6 +489,42 @@ class _TablesPageState extends State<TablesPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showDeleteTableConfirmation(TableModel table) {
+    showDialog(
+      context: context,
+      builder: (context) => ConfirmationDialog(
+        title: 'Excluir Mesa',
+        content: 'Tem certeza que deseja excluir a Mesa ${table.number}?\n\nEsta ação não pode ser desfeita.',
+        confirmText: 'Sim, Excluir',
+        isDestructive: true,
+        onConfirm: () async {
+          try {
+            _tables.removeWhere((t) => t.id == table.id);
+            await _databaseService.saveTables(_tables);
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Mesa ${table.number} excluída com sucesso'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              _loadTables();
+            }
+          } catch (e) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Erro ao excluir mesa: $e'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
+        },
       ),
     );
   }

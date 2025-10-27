@@ -32,21 +32,37 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadData() async {
-    await _databaseService.initializeData();
-    
-    final tables = await _databaseService.getTables();
-    final activeOrders = await _databaseService.getActiveOrders();
-    final todaySales = await _databaseService.getTodaySales();
-    final lowStockProducts = await _databaseService.getLowStockProducts(10);
+    try {
+      await _databaseService.initializeData();
+      
+      final tables = await _databaseService.getTables();
+      final activeOrders = await _databaseService.getActiveOrders();
+      final todaySales = await _databaseService.getTodaySales();
+      final lowStockProducts = await _databaseService.getLowStockProducts(10);
 
-    if (mounted) {
-      setState(() {
-        _tables = tables;
-        _activeOrders = activeOrders;
-        _activeTablesCount = tables.where((table) => table.status == TableStatus.occupied).length;
-        _todaySales = todaySales;
-        _lowStockProductsCount = lowStockProducts.length;
-      });
+      if (mounted) {
+        setState(() {
+          _tables = tables;
+          _activeOrders = activeOrders;
+          _activeTablesCount = tables.where((table) => table.status == TableStatus.occupied).length;
+          _todaySales = todaySales;
+          _lowStockProductsCount = lowStockProducts.length;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao carregar dados: $e'),
+            backgroundColor: Colors.red,
+            action: SnackBarAction(
+              label: 'Tentar novamente',
+              textColor: Colors.white,
+              onPressed: _loadData,
+            ),
+          ),
+        );
+      }
     }
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../core/models/data_models.dart';
 import 'package:intl/intl.dart';
 
@@ -80,7 +81,10 @@ class MenuCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return Semantics(
+      button: true,
+      label: title,
+      child: Card(
       elevation: 2,
       margin: const EdgeInsets.all(8),
       clipBehavior: Clip.antiAlias,
@@ -88,6 +92,11 @@ class MenuCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Container(
+          // Garantir touch target mínimo 48x48
+          constraints: const BoxConstraints(
+            minHeight: 48,
+            minWidth: 48,
+          ),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: backgroundColor != null
@@ -123,6 +132,7 @@ class MenuCard extends StatelessWidget {
           ),
         ),
       ),
+    ),
     )
         .animate()
         .fadeIn(duration: const Duration(milliseconds: 300))
@@ -239,7 +249,9 @@ class StatusBadge extends StatelessWidget {
         break;
     }
 
-    return Container(
+    return Semantics(
+      label: 'Status do pedido: $statusText',
+      child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: badgeColor.withOpacity(0.2),
@@ -264,6 +276,7 @@ class StatusBadge extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }
@@ -285,19 +298,31 @@ class QuantitySelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Semantics(
+      label: 'Selecione quantidade, atual: $quantity',
+      child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        IconButton(
+        Semantics(
+          button: true,
+          label: 'Diminuir quantidade',
+          enabled: quantity > min,
+          child: IconButton(
           icon: Icon(
             Icons.remove_circle_outline,
             color: quantity <= min
                 ? Theme.of(context).colorScheme.outline
                 : Theme.of(context).colorScheme.primary,
           ),
+          // Garantir touch target 48x48
+          constraints: const BoxConstraints(
+            minWidth: 48,
+            minHeight: 48,
+          ),
           onPressed: quantity <= min
               ? null
               : () => onChanged(quantity - 1),
+        ),
         ),
         Container(
           width: 40,
@@ -317,18 +342,29 @@ class QuantitySelector extends StatelessWidget {
                 ),
           ),
         ),
-        IconButton(
+        Semantics(
+          button: true,
+          label: 'Aumentar quantidade',
+          enabled: quantity < max,
+          child: IconButton(
           icon: Icon(
             Icons.add_circle_outline,
             color: quantity >= max
                 ? Theme.of(context).colorScheme.outline
                 : Theme.of(context).colorScheme.primary,
           ),
+          // Garantir touch target 48x48
+          constraints: const BoxConstraints(
+            minWidth: 48,
+            minHeight: 48,
+          ),
           onPressed: quantity >= max
               ? null
               : () => onChanged(quantity + 1),
         ),
+        ),
       ],
+    ),
     );
   }
 }
@@ -588,5 +624,122 @@ class ActionButton extends StatelessWidget {
     )
     .animate()
     .scale(delay: const Duration(milliseconds: 100), duration: const Duration(milliseconds: 200));
+  }
+}
+
+/// Widget de shimmer loader para listas
+class ShimmerListLoader extends StatelessWidget {
+  final int itemCount;
+  final double itemHeight;
+
+  const ShimmerListLoader({
+    Key? key,
+    this.itemCount = 5,
+    this.itemHeight = 80,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: itemCount,
+      padding: const EdgeInsets.all(16),
+      itemBuilder: (context, index) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          child: Shimmer.fromColors(
+            baseColor: Colors.grey[300]!,
+            highlightColor: Colors.grey[100]!,
+            child: Container(
+              height: itemHeight,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Widget de shimmer loader para grid
+class ShimmerGridLoader extends StatelessWidget {
+  final int itemCount;
+  final int crossAxisCount;
+
+  const ShimmerGridLoader({
+    Key? key,
+    this.itemCount = 6,
+    this.crossAxisCount = 2,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 1,
+      ),
+      itemCount: itemCount,
+      itemBuilder: (context, index) {
+        return Shimmer.fromColors(
+          baseColor: Colors.grey[300]!,
+          highlightColor: Colors.grey[100]!,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Widget de shimmer loader para cards
+class ShimmerCardLoader extends StatelessWidget {
+  const ShimmerCardLoader({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: Container(
+        margin: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 150,
+              height: 20,
+              color: Colors.white,
+            ),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              height: 16,
+              color: Colors.white,
+            ),
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              height: 16,
+              color: Colors.white,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

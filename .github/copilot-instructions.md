@@ -4,6 +4,24 @@ BotecoPro is a Flutter bar management application for complete operations includ
 
 ## Architecture Overview
 
+### Authentication System ✅
+- **Firebase Auth**: Fully integrated and functional
+- **Features Implemented**:
+  - ✅ Email/password authentication
+  - ✅ Google Sign-In (Web + Mobile)
+  - ✅ Password reset
+  - ✅ User registration
+  - ✅ Session persistence
+  - ✅ Auth state management with Provider
+- **Files**:
+  - `lib/core/services/auth_service.dart` - Firebase Auth integration
+  - `lib/core/providers/auth_provider.dart` - State management
+  - `lib/core/models/auth_user.dart` - User model
+  - `lib/presentation/pages/login_page.dart` - Login UI
+  - `lib/presentation/pages/signup_page.dart` - Registration UI
+  - `lib/core/utils/auth_guard.dart` - Route protection
+  - `lib/core/utils/validators.dart` - Form validation
+
 ### Data Persistence Pattern
 - **Local Storage**: Uses `SharedPreferences` exclusively for all data (no backend/database server)
 - **Serialization**: All models implement `toJson()` and `fromJson()` for SharedPreferences storage

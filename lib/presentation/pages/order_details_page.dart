@@ -173,8 +173,8 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
               child: EmptyStateCard(
                 message: 'Nenhum item adicionado',
                 icon: Icons.shopping_cart,
-                actionText: 'Adicionar Item',
-                onAction: _showAddItemDialog,
+                actionText: _order.isClosed ? null : 'Adicionar Item',
+                onAction: _order.isClosed ? null : _showAddItemDialog,
               ),
             )
           : ListView.builder(
@@ -190,9 +190,12 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
 
   Widget _buildOrderItemCard(OrderItem item, int index) {
     final delay = Duration(milliseconds: 50 * index);
+    final isOrderClosed = _order.isClosed;
+    
     return Slidable(
       key: Key(item.id),
-      endActionPane: ActionPane(
+      enabled: !isOrderClosed,
+      endActionPane: isOrderClosed ? null : ActionPane(
         motion: const ScrollMotion(),
         dismissible: DismissiblePane(onDismissed: () => _removeItem(item)),
         children: [
@@ -338,7 +341,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
   }
 
   Widget _buildStatusButton(OrderItem item) {
-    if (item.status == OrderStatus.canceled || item.status == OrderStatus.delivered) {
+    if (_order.isClosed || item.status == OrderStatus.canceled || item.status == OrderStatus.delivered) {
       return const SizedBox.shrink();
     }
 
@@ -706,7 +709,29 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
           ),
         ],
       ),
-      child: Row(
+      child: _order.isClosed 
+        ? Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.lock, color: Colors.grey[600]),
+                const SizedBox(width: 8),
+                Text(
+                  'Pedido Fechado - Não é possível editar',
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          )
+        : Row(
         children: [
           Expanded(
             child: ActionButton(

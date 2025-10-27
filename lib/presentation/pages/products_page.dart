@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import '../../core/services/database_service.dart';
 import '../widgets/shared_widgets.dart';
 import '../../core/models/data_models.dart';
@@ -18,6 +20,9 @@ class _ProductsPageState extends State<ProductsPage> {
   List<Supplier> _suppliers = [];
   bool _isLoading = true;
   ProductCategory? _selectedCategory;
+  Timer? _debounceTimer;
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
   
   @override
   void initState() {
@@ -25,29 +30,78 @@ class _ProductsPageState extends State<ProductsPage> {
     _loadData();
   }
 
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    _searchController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
     });
 
-    final products = await _databaseService.getProducts();
-    final suppliers = await _databaseService.getSuppliers();
+    try {
+      final products = await _databaseService.getProducts();
+      final suppliers = await _databaseService.getSuppliers();
 
-    if (mounted) {
-      setState(() {
-        _products = products;
-        _filteredProducts = _applyFilter(products, _selectedCategory);
-        _suppliers = suppliers;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _products = products;
+          _filteredProducts = _applyFilter(products, _selectedCategory);
+          _suppliers = suppliers;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao carregar produtos: $e'),
+            backgroundColor: Colors.red,
+            action: SnackBarAction(
+              label: 'Tentar novamente',
+              textColor: Colors.white,
+              onPressed: _loadData,
+            ),
+          ),
+        );
+      }
     }
   }
 
   List<Product> _applyFilter(List<Product> products, ProductCategory? category) {
-    if (category == null) {
-      return products;
+    var filtered = products;
+    
+    // Filtrar por categoria
+    if (category != null) {
+      filtered = filtered.where((p) => p.category == category).toList();
     }
-    return products.where((p) => p.category == category).toList();
+    
+    // Filtrar por busca
+    if (_searchQuery.isNotEmpty) {
+      final query = _searchQuery.toLowerCase();
+      filtered = filtered.where((p) => 
+        p.name.toLowerCase().contains(query) || 
+        p.description.toLowerCase().contains(query)
+      ).toList();
+    }
+    
+    return filtered;
+  }
+
+  void _onSearchChanged(String query) {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      setState(() {
+        _searchQuery = query;
+        _filteredProducts = _applyFilter(_products, _selectedCategory);
+      });
+    });
   }
 
   @override
@@ -55,11 +109,12 @@ class _ProductsPageState extends State<ProductsPage> {
     return Scaffold(
       appBar: const CustomAppBar(title: 'Produtos'),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const ShimmerListLoader(itemCount: 6, itemHeight: 90)
           : RefreshIndicator(
               onRefresh: _loadData,
               child: Column(
                 children: [
+                  _buildSearchBar(),
                   _buildCategoryFilter(),
                   _buildProductsList(),
                 ],
@@ -72,6 +127,35 @@ class _ProductsPageState extends State<ProductsPage> {
         icon: const Icon(Icons.add),
         label: const Text('Novo Produto'),
       ).animate().scale(delay: const Duration(milliseconds: 300)),
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      color: Theme.of(context).colorScheme.surface,
+      child: TextField(
+        controller: _searchController,
+        onChanged: _onSearchChanged,
+        decoration: InputDecoration(
+          hintText: 'Buscar produtos por nome ou descrição...',
+          prefixIcon: const Icon(Icons.search),
+          suffixIcon: _searchQuery.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _searchController.clear();
+                    _onSearchChanged('');
+                  },
+                )
+              : null,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          filled: true,
+          fillColor: Theme.of(context).colorScheme.background,
+        ),
+      ),
     );
   }
 
@@ -94,9 +178,12 @@ class _ProductsPageState extends State<ProductsPage> {
           CategoryFilter(
             selectedCategory: _selectedCategory,
             onCategorySelected: (category) {
-              setState(() {
-                _selectedCategory = category;
-                _filteredProducts = _applyFilter(_products, category);
+              _debounceTimer?.cancel();
+              _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+                setState(() {
+                  _selectedCategory = category;
+                  _filteredProducts = _applyFilter(_products, category);
+                });
               });
             },
           ),
@@ -139,7 +226,21 @@ class _ProductsPageState extends State<ProductsPage> {
           )
         : null;
 
-    return Card(
+    return Slidable(
+      key: Key(product.id),
+      endActionPane: ActionPane(
+        motion: const ScrollMotion(),
+        children: [
+          SlidableAction(
+            onPressed: (_) => _showDeleteProductConfirmation(product),
+            backgroundColor: Colors.red,
+            foregroundColor: Colors.white,
+            icon: Icons.delete,
+            label: 'Excluir',
+          ),
+        ],
+      ),
+      child: Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -301,6 +402,7 @@ class _ProductsPageState extends State<ProductsPage> {
           ],
         ),
       ),
+    ),
     )
         .animate(delay: delay)
         .fadeIn(duration: const Duration(milliseconds: 300))
@@ -872,7 +974,42 @@ class _ProductsPageState extends State<ProductsPage> {
                 ),
               ),
             ],
-          );
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteProductConfirmation(Product product) {
+    showDialog(
+      context: context,
+      builder: (context) => ConfirmationDialog(
+        title: 'Excluir Produto',
+        content: 'Tem certeza que deseja excluir o produto "${product.name}"?\n\nEsta ação não pode ser desfeita.',
+        confirmText: 'Sim, Excluir',
+        isDestructive: true,
+        onConfirm: () async {
+          try {
+            await _databaseService.deleteProduct(product.id);
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Produto "${product.name}" excluído com sucesso'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              _loadData();
+            }
+          } catch (e) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Erro ao excluir produto: $e'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
         },
       ),
     );
