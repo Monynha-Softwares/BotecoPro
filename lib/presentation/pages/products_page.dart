@@ -141,7 +141,6 @@ class _ProductsPageState extends State<ProductsPage> {
   }
 
   Widget _buildProductCard(Product product, int index) {
-    final delay = Duration(milliseconds: 50 * index);
     // Encontrar o fornecedor (se existir)
     final supplier = product.supplierId != null
         ? _suppliers.firstWhere(
@@ -165,12 +164,12 @@ class _ProductsPageState extends State<ProductsPage> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: _getCategoryColor(product.category).withOpacity(0.2),
+                    color: getProductCategoryColor(product.category).withOpacity(0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
-                    _getCategoryIcon(product.category),
-                    color: _getCategoryColor(product.category),
+                    getProductCategoryIcon(product.category),
+                    color: getProductCategoryColor(product.category),
                     size: 32,
                   ),
                 ),
@@ -312,33 +311,10 @@ class _ProductsPageState extends State<ProductsPage> {
           ],
         ),
       ),
-    )
-        .animate(delay: delay)
-        .fadeIn(duration: const Duration(milliseconds: 300))
-        .moveY(begin: 20, duration: const Duration(milliseconds: 300));
+    ).animateCard(index);
   }
 
-  Color _getCategoryColor(ProductCategory category) {
-    switch (category) {
-      case ProductCategory.drink:
-        return Colors.blue;
-      case ProductCategory.food:
-        return Colors.orange;
-      case ProductCategory.other:
-        return Colors.purple;
-    }
-  }
 
-  IconData _getCategoryIcon(ProductCategory category) {
-    switch (category) {
-      case ProductCategory.drink:
-        return Icons.local_bar;
-      case ProductCategory.food:
-        return Icons.restaurant;
-      case ProductCategory.other:
-        return Icons.category;
-    }
-  }
 
   void _showAddProductDialog() {
     final TextEditingController nameController = TextEditingController();
@@ -374,36 +350,7 @@ class _ProductsPageState extends State<ProductsPage> {
                     decoration: const InputDecoration(
                       labelText: 'Categoria*',
                     ),
-                    items: ProductCategory.values.map((category) {
-                      String label;
-                      IconData icon;
-                      
-                      switch (category) {
-                        case ProductCategory.drink:
-                          label = 'Bebida';
-                          icon = Icons.local_bar;
-                          break;
-                        case ProductCategory.food:
-                          label = 'Comida';
-                          icon = Icons.restaurant;
-                          break;
-                        case ProductCategory.other:
-                          label = 'Outro';
-                          icon = Icons.category;
-                          break;
-                      }
-                      
-                      return DropdownMenuItem(
-                        value: category,
-                        child: Row(
-                          children: [
-                            Icon(icon, size: 20),
-                            const SizedBox(width: 8),
-                            Text(label),
-                          ],
-                        ),
-                      );
-                    }).toList(),
+                    items: buildProductCategoryDropdownItems(),
                     onChanged: (value) {
                       if (value != null) {
                         setState(() {
@@ -496,25 +443,12 @@ class _ProductsPageState extends State<ProductsPage> {
                   final description = descriptionController.text.trim();
                   final unit = unitController.text.trim();
                   
-                  if (name.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Nome do produto é obrigatório')),
-                    );
+                  if (!validateRequiredField(context, name, 'Nome do produto')) {
                     return;
                   }
                   
-                  if (priceText.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Preço é obrigatório')),
-                    );
-                    return;
-                  }
-                  
-                  final price = double.tryParse(priceText.replaceAll(',', '.'));
-                  if (price == null || price <= 0) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Preço inválido')),
-                    );
+                  final price = validateAndParsePrice(context, priceText);
+                  if (price == null) {
                     return;
                   }
                   
@@ -583,36 +517,7 @@ class _ProductsPageState extends State<ProductsPage> {
                     decoration: const InputDecoration(
                       labelText: 'Categoria*',
                     ),
-                    items: ProductCategory.values.map((category) {
-                      String label;
-                      IconData icon;
-                      
-                      switch (category) {
-                        case ProductCategory.drink:
-                          label = 'Bebida';
-                          icon = Icons.local_bar;
-                          break;
-                        case ProductCategory.food:
-                          label = 'Comida';
-                          icon = Icons.restaurant;
-                          break;
-                        case ProductCategory.other:
-                          label = 'Outro';
-                          icon = Icons.category;
-                          break;
-                      }
-                      
-                      return DropdownMenuItem(
-                        value: category,
-                        child: Row(
-                          children: [
-                            Icon(icon, size: 20),
-                            const SizedBox(width: 8),
-                            Text(label),
-                          ],
-                        ),
-                      );
-                    }).toList(),
+                    items: buildProductCategoryDropdownItems(),
                     onChanged: (value) {
                       if (value != null) {
                         setState(() {
@@ -684,25 +589,12 @@ class _ProductsPageState extends State<ProductsPage> {
                   final description = descriptionController.text.trim();
                   final unit = unitController.text.trim();
                   
-                  if (name.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Nome do produto é obrigatório')),
-                    );
+                  if (!validateRequiredField(context, name, 'Nome do produto')) {
                     return;
                   }
                   
-                  if (priceText.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Preço é obrigatório')),
-                    );
-                    return;
-                  }
-                  
-                  final price = double.tryParse(priceText.replaceAll(',', '.'));
-                  if (price == null || price <= 0) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Preço inválido')),
-                    );
+                  final price = validateAndParsePrice(context, priceText);
+                  if (price == null) {
                     return;
                   }
                   

@@ -85,7 +85,6 @@ class _SuppliersPageState extends State<SuppliersPage> {
   }
 
   Widget _buildSupplierCard(Supplier supplier, int index) {
-    final delay = Duration(milliseconds: 50 * index);
     return Card(
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 12),
@@ -225,10 +224,7 @@ class _SuppliersPageState extends State<SuppliersPage> {
           ],
         ),
       ),
-    )
-        .animate(delay: delay)
-        .fadeIn(duration: const Duration(milliseconds: 300))
-        .moveY(begin: 20, duration: const Duration(milliseconds: 300));
+    ).animateCard(index);
   }
 
   void _showAddSupplierDialog() {
@@ -296,17 +292,11 @@ class _SuppliersPageState extends State<SuppliersPage> {
               final address = addressController.text.trim();
               final notes = notesController.text.trim();
 
-              if (name.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Nome do fornecedor é obrigatório')),
-                );
+              if (!validateRequiredField(context, name, 'Nome do fornecedor')) {
                 return;
               }
 
-              if (contact.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Contato é obrigatório')),
-                );
+              if (!validateRequiredField(context, contact, 'Contato')) {
                 return;
               }
 
@@ -404,17 +394,11 @@ class _SuppliersPageState extends State<SuppliersPage> {
               final address = addressController.text.trim();
               final notes = notesController.text.trim();
 
-              if (name.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Nome do fornecedor é obrigatório')),
-                );
+              if (!validateRequiredField(context, name, 'Nome do fornecedor')) {
                 return;
               }
 
-              if (contact.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Contato é obrigatório')),
-                );
+              if (!validateRequiredField(context, contact, 'Contato')) {
                 return;
               }
 

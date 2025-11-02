@@ -91,7 +91,6 @@ class _ProductionPageState extends State<ProductionPage> {
   }
 
   Widget _buildProductionCard(InternalProduction production, int index) {
-    final delay = Duration(milliseconds: 50 * index);
     final isFinalized = production.status == ProductionStatus.finalized;
     final statusColor = isFinalized ? Colors.green : Colors.blue;
     final statusText = isFinalized ? 'Finalizada' : 'Em Andamento';
@@ -287,10 +286,7 @@ class _ProductionPageState extends State<ProductionPage> {
           ),
         ),
       ),
-    )
-        .animate(delay: delay)
-        .fadeIn(duration: const Duration(milliseconds: 300))
-        .moveY(begin: 20, duration: const Duration(milliseconds: 300));
+    ).animateCard(index);
   }
 
   void _showAddProductionDialog() {
