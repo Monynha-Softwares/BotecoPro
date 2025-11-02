@@ -182,12 +182,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   NavigationTab _currentTab = NavigationTab.home;
 
   late final Map<NavigationTab, Widget> _screens;
+  // Key to access HomePage state for manual reload when switching tabs
+  final GlobalKey _homeKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
     _screens = {
-      NavigationTab.home: HomePage(onTabSelected: _selectTab),
+      NavigationTab.home: HomePage(key: _homeKey, onTabSelected: _selectTab),
       NavigationTab.tables: const TablesPage(),
       NavigationTab.products: const ProductsPage(),
       NavigationTab.recipes: const RecipesPage(),
@@ -196,9 +198,18 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   void _selectTab(NavigationTab tab) {
-    setState(() {
-      _currentTab = tab;
-    });
+    if (tab == NavigationTab.home) {
+      // Trigger a reload on Home if available
+      final state = _homeKey.currentState;
+      try {
+        // Call `reload()` on _HomePageState via dynamic access
+        // ignore: avoid_dynamic_calls
+        (state as dynamic)?.reload?.call();
+      } catch (_) {
+        // no-op if method not available
+      }
+    }
+    setState(() => _currentTab = tab);
   }
 
   @override

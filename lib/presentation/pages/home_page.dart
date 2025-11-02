@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/services/database_service.dart';
 import '../widgets/shared_widgets.dart';
@@ -24,11 +25,24 @@ class _HomePageState extends State<HomePage> {
   int _lowStockProductsCount = 0;
   List<TableModel> _tables = [];
   List<Order> _activeOrders = [];
+  StreamSubscription<String>? _dbSub;
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    // Listen to database changes to auto-refresh KPIs and lists
+    _dbSub = _databaseService.changes.listen((_) {
+      if (mounted) {
+        _loadData();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _dbSub?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadData() async {
@@ -48,6 +62,11 @@ class _HomePageState extends State<HomePage> {
         _lowStockProductsCount = lowStockProducts.length;
       });
     }
+  }
+
+  // Exposed for parent to trigger a manual refresh when switching tabs
+  void reload() {
+    _loadData();
   }
 
   String _capitalize(String s) =>

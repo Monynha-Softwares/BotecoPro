@@ -58,6 +58,7 @@ library;
 
 
 import 'dart:convert';
+import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/data_models.dart';
 
@@ -76,6 +77,16 @@ class DatabaseService {
   static final DatabaseService _instance = DatabaseService._internal();
   factory DatabaseService() => _instance;
   DatabaseService._internal();
+
+  // Broadcast stream to notify UI about data changes
+  final StreamController<String> _changesController =
+      StreamController<String>.broadcast();
+  Stream<String> get changes => _changesController.stream;
+  void _notify(String topic) {
+    if (!_changesController.isClosed) {
+      _changesController.add(topic);
+    }
+  }
 
   // Carrega dados iniciais se necessário
   Future<void> initializeData() async {
@@ -240,6 +251,7 @@ class DatabaseService {
     final suppliersJson =
         suppliers.map((e) => jsonEncode(e.toJson())).toList();
     await prefs.setStringList(_suppliersKey, suppliersJson);
+    _notify('suppliers');
   }
 
   Future<void> addSupplier(Supplier supplier) async {
@@ -274,6 +286,7 @@ class DatabaseService {
     final prefs = await SharedPreferences.getInstance();
     final productsJson = products.map((e) => jsonEncode(e.toJson())).toList();
     await prefs.setStringList(_productsKey, productsJson);
+    _notify('products');
   }
 
   Future<void> addProduct(Product product) async {
@@ -317,6 +330,7 @@ class DatabaseService {
     final prefs = await SharedPreferences.getInstance();
     final tablesJson = tables.map((e) => jsonEncode(e.toJson())).toList();
     await prefs.setStringList(_tablesKey, tablesJson);
+    _notify('tables');
   }
 
   Future<void> updateTable(TableModel table) async {
@@ -339,12 +353,13 @@ class DatabaseService {
     final prefs = await SharedPreferences.getInstance();
     final ordersJson = orders.map((e) => jsonEncode(e.toJson())).toList();
     await prefs.setStringList(_ordersKey, ordersJson);
+    _notify('orders');
   }
 
   Future<void> addOrder(Order order) async {
     final orders = await getOrders();
     orders.add(order);
-    await saveOrders(orders);
+  await saveOrders(orders);
 
     // Atualiza status da mesa
     final tables = await getTables();
@@ -372,7 +387,7 @@ class DatabaseService {
     final index = orders.indexWhere((e) => e.id == orderId);
     if (index != -1) {
       orders[index] = orders[index].copyWith(isClosed: true);
-      await saveOrders(orders);
+  await saveOrders(orders);
 
       // Atualiza o estoque dos produtos
       final products = await getProducts();
@@ -385,7 +400,7 @@ class DatabaseService {
               .copyWith(stockQuantity: currentStock - item.quantity);
         }
       }
-      await saveProducts(products);
+  await saveProducts(products);
 
       // Libera a mesa
       final tables = await getTables();
@@ -405,6 +420,11 @@ class DatabaseService {
         total: orders[index].total,
       );
       await addSale(sale);
+      // Emit a consolidated notification for dashboards/home KPIs
+      _notify('orders');
+      _notify('sales');
+      _notify('tables');
+      _notify('products');
     }
   }
 
@@ -419,6 +439,7 @@ class DatabaseService {
     final prefs = await SharedPreferences.getInstance();
     final salesJson = sales.map((e) => jsonEncode(e.toJson())).toList();
     await prefs.setStringList(_salesKey, salesJson);
+    _notify('sales');
   }
 
   Future<void> addSale(Sale sale) async {
@@ -474,6 +495,7 @@ class DatabaseService {
     final prefs = await SharedPreferences.getInstance();
     final recipesJson = recipes.map((e) => jsonEncode(e.toJson())).toList();
     await prefs.setStringList(_recipesKey, recipesJson);
+    _notify('recipes');
   }
 
   Future<void> addRecipe(Recipe recipe) async {
@@ -518,6 +540,7 @@ class DatabaseService {
     final prefs = await SharedPreferences.getInstance();
     final productionsJson = productions.map((e) => jsonEncode(e.toJson())).toList();
     await prefs.setStringList(_productionsKey, productionsJson);
+    _notify('productions');
   }
 
   Future<void> addInternalProduction(InternalProduction production) async {
