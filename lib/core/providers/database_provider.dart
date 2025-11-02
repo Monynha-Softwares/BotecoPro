@@ -70,7 +70,10 @@ library;
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path_provider/path_provider.dart';
+// NOTA: path_provider removido para compatibilidade web
+// Se precisar usar DatabaseProvider, adicione path_provider de volta
+// e use apenas em plataformas mobile/desktop
+// import 'package:path_provider/path_provider.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 import '../models/data_models.dart';
@@ -88,11 +91,17 @@ class DatabaseProvider {
         if (dbFileName != null) _databaseFileName = dbFileName;
         if (_database != null) return;
 
-        final dir = await getApplicationDocumentsDirectory();
-        final path = '${dir.path}/$_databaseFileName';
+        // NOTA: Desabilitado para web - path_provider não funciona na web
+        // Para usar este provider, execute em mobile/desktop e adicione path_provider
+        throw UnsupportedError(
+          'DatabaseProvider não é suportado na web. Use DatabaseService com SharedPreferences.'
+        );
+        
+        // final dir = await getApplicationDocumentsDirectory();
+        // final path = '${dir.path}/$_databaseFileName';
 
         // Ensure directory exists
-        await Directory(dir.path).create(recursive: true);
+        // await Directory(dir.path).create(recursive: true);
 
         // Open DB (synchronous under the hood, but wrapped in Future for API consistency)
         _database = sqlite3.open(path);

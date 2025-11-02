@@ -360,7 +360,7 @@ class DatabaseService {
   Future<List<Supplier>> getSuppliers() async {
     // Return cached data if available
     if (_suppliersCache != null) {
-      return _suppliersCache![_suppliersKey]!;
+      return _suppliersCache!;
     }
     
     try {
@@ -371,7 +371,7 @@ class DatabaseService {
           .toList();
       
       // Cache the result
-      _suppliersCache = {_suppliersKey: suppliers};
+      _suppliersCache = suppliers;
       return suppliers;
     } catch (error) {
       print('Error loading suppliers: $error');
@@ -420,7 +420,7 @@ class DatabaseService {
   Future<List<Product>> getProducts() async {
     // Return cached data if available
     if (_productsCache != null) {
-      return _productsCache![_productsKey]!;
+      return _productsCache!;
     }
     
     try {
@@ -429,7 +429,7 @@ class DatabaseService {
       final products = productsJson.map((jsonString) => Product.fromJson(jsonDecode(jsonString))).toList();
       
       // Cache the result
-      _productsCache = {_productsKey: products};
+      _productsCache = products;
       return products;
     } catch (error) {
       print('Error loading products: $error');
@@ -486,7 +486,7 @@ class DatabaseService {
   Future<List<TableModel>> getTables() async {
     // Return cached data if available
     if (_tablesCache != null) {
-      return _tablesCache![_tablesKey]!;
+      return _tablesCache!;
     }
     
     try {
@@ -495,7 +495,7 @@ class DatabaseService {
       final tables = tablesJson.map((jsonString) => TableModel.fromJson(jsonDecode(jsonString))).toList();
       
       // Cache the result
-      _tablesCache = {_tablesKey: tables};
+      _tablesCache = tables;
       return tables;
     } catch (error) {
       print('Error loading tables: $error');
@@ -531,7 +531,7 @@ class DatabaseService {
   Future<List<Order>> getOrders() async {
     // Return cached data if available
     if (_ordersCache != null) {
-      return _ordersCache![_ordersKey]!;
+      return _ordersCache!;
     }
     
     try {
@@ -540,7 +540,7 @@ class DatabaseService {
       final orders = ordersJson.map((jsonString) => Order.fromJson(jsonDecode(jsonString))).toList();
       
       // Cache the result
-      _ordersCache = {_ordersKey: orders};
+      _ordersCache = orders;
       return orders;
     } catch (error) {
       print('Error loading orders: $error');
@@ -662,7 +662,7 @@ class DatabaseService {
   Future<List<Sale>> getSales() async {
     // Return cached data if available
     if (_salesCache != null) {
-      return _salesCache![_salesKey]!;
+      return _salesCache!;
     }
     
     try {
@@ -671,7 +671,7 @@ class DatabaseService {
       final sales = salesJson.map((jsonString) => Sale.fromJson(jsonDecode(jsonString))).toList();
       
       // Cache the result
-      _salesCache = {_salesKey: sales};
+      _salesCache = sales;
       return sales;
     } catch (error) {
       print('Error loading sales: $error');
@@ -742,7 +742,7 @@ class DatabaseService {
   Future<List<Recipe>> getRecipes() async {
     // Return cached data if available
     if (_recipesCache != null) {
-      return _recipesCache![_recipesKey]!;
+      return _recipesCache!;
     }
     
     try {
@@ -751,7 +751,7 @@ class DatabaseService {
       final recipes = recipesJson.map((jsonString) => Recipe.fromJson(jsonDecode(jsonString))).toList();
       
       // Cache the result
-      _recipesCache = {_recipesKey: recipes};
+      _recipesCache = recipes;
       return recipes;
     } catch (error) {
       print('Error loading recipes: $error');
@@ -809,7 +809,7 @@ class DatabaseService {
   Future<List<InternalProduction>> getInternalProductions() async {
     // Return cached data if available
     if (_productionsCache != null) {
-      return _productionsCache![_productionsKey]!;
+      return _productionsCache!;
     }
     
     try {
@@ -818,7 +818,7 @@ class DatabaseService {
       final productions = productionsJson.map((jsonString) => InternalProduction.fromJson(jsonDecode(jsonString))).toList();
       
       // Cache the result
-      _productionsCache = {_productionsKey: productions};
+      _productionsCache = productions;
       return productions;
     } catch (error) {
       print('Error loading productions: $error');
