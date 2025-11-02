@@ -19,6 +19,129 @@ String formatDate(DateTime dateTime) {
   return DateFormat('dd/MM/yyyy', 'pt_BR').format(dateTime);
 }
 
+// Parse de preço com tratamento de vírgula
+double? parsePrice(String priceText) {
+  return double.tryParse(priceText.replaceAll(',', '.'));
+}
+
+// Validação de campo obrigatório com mensagem de erro
+bool validateRequiredField(BuildContext context, String value, String fieldName) {
+  if (value.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('$fieldName é obrigatório')),
+    );
+    return false;
+  }
+  return true;
+}
+
+// Validação de preço
+bool validatePrice(BuildContext context, String priceText) {
+  if (priceText.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Preço é obrigatório')),
+    );
+    return false;
+  }
+  
+  final price = parsePrice(priceText);
+  if (price == null || price <= 0) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Preço inválido')),
+    );
+    return false;
+  }
+  return true;
+}
+
+// Retorna a cor para uma categoria de produto
+Color getProductCategoryColor(ProductCategory category) {
+  switch (category) {
+    case ProductCategory.drink:
+      return Colors.blue;
+    case ProductCategory.food:
+      return Colors.orange;
+    case ProductCategory.other:
+      return Colors.purple;
+  }
+}
+
+// Retorna o ícone para uma categoria de produto
+IconData getProductCategoryIcon(ProductCategory category) {
+  switch (category) {
+    case ProductCategory.drink:
+      return Icons.local_bar;
+    case ProductCategory.food:
+      return Icons.restaurant;
+    case ProductCategory.other:
+      return Icons.category;
+  }
+}
+
+// Retorna o label para uma categoria de produto
+String getProductCategoryLabel(ProductCategory category) {
+  switch (category) {
+    case ProductCategory.drink:
+      return 'Bebida';
+    case ProductCategory.food:
+      return 'Comida';
+    case ProductCategory.other:
+      return 'Outro';
+  }
+}
+
+// Retorna o ícone para um tipo de receita
+IconData getRecipeTypeIcon(RecipeType type) {
+  return type == RecipeType.food ? Icons.restaurant : Icons.local_bar;
+}
+
+// Retorna o label para um tipo de receita
+String getRecipeTypeLabel(RecipeType type) {
+  return type == RecipeType.food ? 'Comida' : 'Bebida';
+}
+
+// Constrói itens de dropdown para ProductCategory
+List<DropdownMenuItem<ProductCategory>> buildProductCategoryDropdownItems() {
+  return ProductCategory.values.map((category) {
+    return DropdownMenuItem(
+      value: category,
+      child: Row(
+        children: [
+          Icon(getProductCategoryIcon(category), size: 20),
+          const SizedBox(width: 8),
+          Text(getProductCategoryLabel(category)),
+        ],
+      ),
+    );
+  }).toList();
+}
+
+// Constrói itens de dropdown para RecipeType
+List<DropdownMenuItem<RecipeType>> buildRecipeTypeDropdownItems() {
+  return [
+    DropdownMenuItem(
+      value: RecipeType.food,
+      child: Row(
+        children: [
+          Icon(getRecipeTypeIcon(RecipeType.food), size: 20),
+          const SizedBox(width: 8),
+          Text(getRecipeTypeLabel(RecipeType.food)),
+        ],
+      ),
+    ),
+    DropdownMenuItem(
+      value: RecipeType.drink,
+      child: Row(
+        children: [
+          Icon(getRecipeTypeIcon(RecipeType.drink), size: 20),
+          const SizedBox(width: 8),
+          Text(getRecipeTypeLabel(RecipeType.drink)),
+        ],
+      ),
+    ),
+  ];
+}
+
 // AppBar customizada para o app
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;

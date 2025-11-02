@@ -296,17 +296,11 @@ class _SuppliersPageState extends State<SuppliersPage> {
               final address = addressController.text.trim();
               final notes = notesController.text.trim();
 
-              if (name.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Nome do fornecedor é obrigatório')),
-                );
+              if (!validateRequiredField(context, name, 'Nome do fornecedor')) {
                 return;
               }
 
-              if (contact.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Contato é obrigatório')),
-                );
+              if (!validateRequiredField(context, contact, 'Contato')) {
                 return;
               }
 
@@ -404,17 +398,11 @@ class _SuppliersPageState extends State<SuppliersPage> {
               final address = addressController.text.trim();
               final notes = notesController.text.trim();
 
-              if (name.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Nome do fornecedor é obrigatório')),
-                );
+              if (!validateRequiredField(context, name, 'Nome do fornecedor')) {
                 return;
               }
 
-              if (contact.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Contato é obrigatório')),
-                );
+              if (!validateRequiredField(context, contact, 'Contato')) {
                 return;
               }
 
