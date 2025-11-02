@@ -48,10 +48,13 @@ class _HomePageState extends State<HomePage> {
   Future<void> _loadData() async {
     await _databaseService.initializeData();
     
-    final tables = await _databaseService.getTables();
-    final activeOrders = await _databaseService.getActiveOrders();
-    final todaySales = await _databaseService.getTodaySales();
-    final lowStockProducts = await _databaseService.getLowStockProducts(10);
+    // Load all data in parallel for better performance using Dart 3 record types
+    final (tables, activeOrders, todaySales, lowStockProducts) = await (
+      _databaseService.getTables(),
+      _databaseService.getActiveOrders(),
+      _databaseService.getTodaySales(),
+      _databaseService.getLowStockProducts(10)
+    ).wait;
 
     if (mounted) {
       setState(() {

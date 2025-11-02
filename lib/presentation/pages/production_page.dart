@@ -40,9 +40,12 @@ class _ProductionPageState extends State<ProductionPage> {
       _isLoading = true;
     });
 
-    final products = await _databaseService.getProducts();
-    final recipes = await _databaseService.getRecipes();
-    final productions = await _databaseService.getInternalProductions();
+    // Load all data in parallel using Dart 3.0 record pattern matching
+    final (products, recipes, productions) = await (
+      _databaseService.getProducts(),
+      _databaseService.getRecipes(),
+      _databaseService.getInternalProductions()
+    ).wait;
 
     if (mounted) {
       setState(() {

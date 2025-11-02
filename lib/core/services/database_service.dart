@@ -84,6 +84,9 @@ class DatabaseService {
 
   // Mutex for write operations to prevent race conditions
   final Map<String, Completer<void>> _writeLocks = {};
+  
+  // Global operation lock for complex multi-entity operations like closeOrder
+  Completer<void>? _closeOrderLock;
 
   // Broadcast stream to notify UI about data changes
   final StreamController<String> _changesController =
@@ -93,6 +96,15 @@ class DatabaseService {
   // Debounce notification to avoid excessive UI updates
   Timer? _notifyTimer;
   final Set<String> _pendingNotifications = {};
+
+  // In-memory cache for frequently accessed data
+  List<Supplier>? _suppliersCache;
+  List<Product>? _productsCache;
+  List<TableModel>? _tablesCache;
+  List<Order>? _ordersCache;
+  List<Sale>? _salesCache;
+  List<Recipe>? _recipesCache;
+  List<InternalProduction>? _productionsCache;
 
   /// Get cached SharedPreferences instance (web-optimized)
   Future<SharedPreferences> get _prefsInstance async {
@@ -138,6 +150,9 @@ class DatabaseService {
     
     _pendingNotifications.add(topic);
     
+    // Invalidate cache for the changed topic
+    _invalidateCache(topic);
+    
     // Cancel existing timer and create new one
     _notifyTimer?.cancel();
     _notifyTimer = Timer(const Duration(milliseconds: 50), () {
@@ -146,6 +161,44 @@ class DatabaseService {
       }
       _pendingNotifications.clear();
     });
+  }
+
+  /// Invalidate cache for specific data type
+  void _invalidateCache(String key) {
+    switch (key) {
+      case 'suppliers':
+        _suppliersCache = null;
+        break;
+      case 'products':
+        _productsCache = null;
+        break;
+      case 'tables':
+        _tablesCache = null;
+        break;
+      case 'orders':
+        _ordersCache = null;
+        break;
+      case 'sales':
+        _salesCache = null;
+        break;
+      case 'recipes':
+        _recipesCache = null;
+        break;
+      case 'productions':
+        _productionsCache = null;
+        break;
+    }
+  }
+
+  /// Clear all in-memory caches (useful for memory management)
+  void clearCache() {
+    _suppliersCache = null;
+    _productsCache = null;
+    _tablesCache = null;
+    _ordersCache = null;
+    _salesCache = null;
+    _recipesCache = null;
+    _productionsCache = null;
   }
 
   /// Dispose resources (call when app closes)
@@ -305,12 +358,21 @@ class DatabaseService {
 
   // Métodos para Fornecedores
   Future<List<Supplier>> getSuppliers() async {
+    // Return cached data if available
+    if (_suppliersCache != null) {
+      return _suppliersCache![_suppliersKey]!;
+    }
+    
     try {
       final prefs = await _prefsInstance;
       final suppliersJson = prefs.getStringList(_suppliersKey) ?? [];
-      return suppliersJson
+      final suppliers = suppliersJson
           .map((e) => Supplier.fromJson(jsonDecode(e)))
           .toList();
+      
+      // Cache the result
+      _suppliersCache = {_suppliersKey: suppliers};
+      return suppliers;
     } catch (e) {
       print('Error loading suppliers: $e');
       return [];
@@ -356,10 +418,19 @@ class DatabaseService {
 
   // Métodos para Produtos
   Future<List<Product>> getProducts() async {
+    // Return cached data if available
+    if (_productsCache != null) {
+      return _productsCache![_productsKey]!;
+    }
+    
     try {
       final prefs = await _prefsInstance;
       final productsJson = prefs.getStringList(_productsKey) ?? [];
-      return productsJson.map((e) => Product.fromJson(jsonDecode(e))).toList();
+      final products = productsJson.map((e) => Product.fromJson(jsonDecode(e))).toList();
+      
+      // Cache the result
+      _productsCache = {_productsKey: products};
+      return products;
     } catch (e) {
       print('Error loading products: $e');
       return [];
@@ -413,10 +484,19 @@ class DatabaseService {
 
   // Métodos para Mesas
   Future<List<TableModel>> getTables() async {
+    // Return cached data if available
+    if (_tablesCache != null) {
+      return _tablesCache![_tablesKey]!;
+    }
+    
     try {
       final prefs = await _prefsInstance;
       final tablesJson = prefs.getStringList(_tablesKey) ?? [];
-      return tablesJson.map((e) => TableModel.fromJson(jsonDecode(e))).toList();
+      final tables = tablesJson.map((e) => TableModel.fromJson(jsonDecode(e))).toList();
+      
+      // Cache the result
+      _tablesCache = {_tablesKey: tables};
+      return tables;
     } catch (e) {
       print('Error loading tables: $e');
       return [];
@@ -449,10 +529,19 @@ class DatabaseService {
 
   // Métodos para Pedidos
   Future<List<Order>> getOrders() async {
+    // Return cached data if available
+    if (_ordersCache != null) {
+      return _ordersCache![_ordersKey]!;
+    }
+    
     try {
       final prefs = await _prefsInstance;
       final ordersJson = prefs.getStringList(_ordersKey) ?? [];
-      return ordersJson.map((e) => Order.fromJson(jsonDecode(e))).toList();
+      final orders = ordersJson.map((e) => Order.fromJson(jsonDecode(e))).toList();
+      
+      // Cache the result
+      _ordersCache = {_ordersKey: orders};
+      return orders;
     } catch (e) {
       print('Error loading orders: $e');
       return [];
@@ -501,57 +590,89 @@ class DatabaseService {
   }
 
   Future<void> closeOrder(String orderId) async {
-    final orders = await getOrders();
-    final index = orders.indexWhere((e) => e.id == orderId);
-    if (index != -1) {
+    // Acquire global lock to prevent concurrent closeOrder operations
+    while (_closeOrderLock != null) {
+      await _closeOrderLock!.future;
+    }
+    _closeOrderLock = Completer<void>();
+    
+    try {
+      // Fetch all required data in parallel for better performance
+      // Including sales to avoid stale cache in addSale
+      final results = await Future.wait([
+        getOrders(),
+        getProducts(),
+        getTables(),
+        getSales(),
+      ]);
+      
+      final orders = results[0] as List<Order>;
+      final products = results[1] as List<Product>;
+      final tables = results[2] as List<TableModel>;
+      final sales = results[3] as List<Sale>;
+      
+      final index = orders.indexWhere((e) => e.id == orderId);
+      if (index == -1) return;
+      
+      // Close the order
       orders[index] = orders[index].copyWith(isClosed: true);
-  await saveOrders(orders);
-
-      // Atualiza o estoque dos produtos
-      final products = await getProducts();
+      
+      // Update product stock
       for (var item in orders[index].items) {
-        final productIndex =
-            products.indexWhere((p) => p.id == item.productId);
+        final productIndex = products.indexWhere((p) => p.id == item.productId);
         if (productIndex != -1) {
           final currentStock = products[productIndex].stockQuantity;
           products[productIndex] = products[productIndex]
               .copyWith(stockQuantity: currentStock - item.quantity);
         }
       }
-  await saveProducts(products);
-
-      // Libera a mesa
-      final tables = await getTables();
-      final tableIndex =
-          tables.indexWhere((t) => t.id == orders[index].tableId);
+      
+      // Free the table
+      final tableIndex = tables.indexWhere((t) => t.id == orders[index].tableId);
       if (tableIndex != -1) {
         tables[tableIndex] = tables[tableIndex].copyWith(
           status: TableStatus.free,
           currentOrderId: null,
         );
-        await saveTables(tables);
       }
-
-      // Cria uma venda
+      
+      // Create sale record and add to sales list
       final sale = Sale(
         orderId: orderId,
         total: orders[index].total,
       );
-      await addSale(sale);
-      // Emit a consolidated notification for dashboards/home KPIs
-      _notify('orders');
-      _notify('sales');
-      _notify('tables');
-      _notify('products');
+      sales.add(sale);
+      
+      // Batch all saves together to minimize I/O
+      // Note: Using direct list updates to avoid race conditions
+      await Future.wait([
+        saveOrders(orders),
+        saveProducts(products),
+        saveTables(tables),
+        saveSales(sales),
+      ]);
+    } finally {
+      // Always release the lock
+      _closeOrderLock!.complete();
+      _closeOrderLock = null;
     }
   }
 
   // Métodos para Vendas
   Future<List<Sale>> getSales() async {
+    // Return cached data if available
+    if (_salesCache != null) {
+      return _salesCache![_salesKey]!;
+    }
+    
     try {
       final prefs = await _prefsInstance;
       final salesJson = prefs.getStringList(_salesKey) ?? [];
-      return salesJson.map((e) => Sale.fromJson(jsonDecode(e))).toList();
+      final sales = salesJson.map((e) => Sale.fromJson(jsonDecode(e))).toList();
+      
+      // Cache the result
+      _salesCache = {_salesKey: sales};
+      return sales;
     } catch (e) {
       print('Error loading sales: $e');
       return [];
@@ -599,13 +720,15 @@ class DatabaseService {
   Future<double> getTodaySales() async {
     final sales = await getSales();
     final today = DateTime.now();
-    final todaySales = sales.where((sale) =>
-        sale.timestamp.year == today.year &&
-        sale.timestamp.month == today.month &&
-        sale.timestamp.day == today.day);
+    final startOfDay = DateTime(today.year, today.month, today.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+    
+    // More efficient filtering with early exit
     double total = 0;
-    for (var sale in todaySales) {
-      total += sale.total;
+    for (var sale in sales) {
+      if (!sale.timestamp.isBefore(startOfDay) && sale.timestamp.isBefore(endOfDay)) {
+        total += sale.total;
+      }
     }
     return total;
   }
@@ -617,10 +740,19 @@ class DatabaseService {
   
   // Métodos para Receitas
   Future<List<Recipe>> getRecipes() async {
+    // Return cached data if available
+    if (_recipesCache != null) {
+      return _recipesCache![_recipesKey]!;
+    }
+    
     try {
       final prefs = await _prefsInstance;
       final recipesJson = prefs.getStringList(_recipesKey) ?? [];
-      return recipesJson.map((e) => Recipe.fromJson(jsonDecode(e))).toList();
+      final recipes = recipesJson.map((e) => Recipe.fromJson(jsonDecode(e))).toList();
+      
+      // Cache the result
+      _recipesCache = {_recipesKey: recipes};
+      return recipes;
     } catch (e) {
       print('Error loading recipes: $e');
       return [];
@@ -675,10 +807,19 @@ class DatabaseService {
 
   // Métodos para Produções Caseiras
   Future<List<InternalProduction>> getInternalProductions() async {
+    // Return cached data if available
+    if (_productionsCache != null) {
+      return _productionsCache![_productionsKey]!;
+    }
+    
     try {
       final prefs = await _prefsInstance;
       final productionsJson = prefs.getStringList(_productionsKey) ?? [];
-      return productionsJson.map((e) => InternalProduction.fromJson(jsonDecode(e))).toList();
+      final productions = productionsJson.map((e) => InternalProduction.fromJson(jsonDecode(e))).toList();
+      
+      // Cache the result
+      _productionsCache = {_productionsKey: productions};
+      return productions;
     } catch (e) {
       print('Error loading productions: $e');
       return [];

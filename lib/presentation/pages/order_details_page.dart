@@ -33,8 +33,11 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       _isLoading = true;
     });
 
-    final products = await _databaseService.getProducts();
-    final freshOrder = await _getUpdatedOrder();
+    // Load products and order in parallel using Dart 3.0 record types
+    final (products, freshOrder) = await (
+      _databaseService.getProducts(),
+      _getUpdatedOrder(),
+    ).wait;
 
     if (mounted) {
       setState(() {

@@ -41,8 +41,11 @@ class _ProductsPageState extends State<ProductsPage> {
       _isLoading = true;
     });
 
-    final products = await _databaseService.getProducts();
-    final suppliers = await _databaseService.getSuppliers();
+    // Load products and suppliers in parallel
+    final (products, suppliers) = await (
+      _databaseService.getProducts(),
+      _databaseService.getSuppliers(),
+    ).wait;
 
     if (mounted) {
       setState(() {
