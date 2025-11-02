@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'dart:async';
 import '../../core/services/database_service.dart';
 import '../widgets/shared_widgets.dart';
 import '../../core/models/data_models.dart';
@@ -16,11 +17,21 @@ class _RecipesPageState extends State<RecipesPage> {
   bool _isLoading = true;
   List<Recipe> _recipes = [];
   List<Product> _products = [];
+  StreamSubscription<String>? _dbSub;
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    _dbSub = _databaseService.changes.listen((_) {
+      if (mounted) _loadData();
+    });
+  }
+
+  @override
+  void dispose() {
+    _dbSub?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadData() async {

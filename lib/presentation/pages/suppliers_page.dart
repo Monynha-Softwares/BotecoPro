@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'dart:async';
 import '../../core/services/database_service.dart';
 import '../widgets/shared_widgets.dart';
 import '../../core/models/data_models.dart';
@@ -15,11 +16,21 @@ class _SuppliersPageState extends State<SuppliersPage> {
   final DatabaseService _databaseService = DatabaseService();
   List<Supplier> _suppliers = [];
   bool _isLoading = true;
+  StreamSubscription<String>? _dbSub;
 
   @override
   void initState() {
     super.initState();
     _loadSuppliers();
+    _dbSub = _databaseService.changes.listen((_) {
+      if (mounted) _loadSuppliers();
+    });
+  }
+
+  @override
+  void dispose() {
+    _dbSub?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadSuppliers() async {
