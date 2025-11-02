@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clerk Authentication Test - Boteco PRO</title>
+    
+    <!-- Clerk JavaScript SDK -->
+    <script
+        async
+        crossorigin="anonymous"
+        data-clerk-publishable-key="pk_test_c3Ryb25nLXF1ZXR6YWwtMTUuY2xlcmsuYWNjb3VudHMuZGV2JA"
+        src="https://strong-quetzal-15.clerk.accounts.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js"
+        type="text/javascript">
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .auth-section {
+            display: none;
+        }
+        
+        .auth-section.active {
+            display: block;
+        }
+        
+        .signed-out {
+            text-align: center;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin: 10px 0;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #5568d3;
+        }
+        
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .user-info {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: block;
+            border: 4px solid #667eea;
+        }
+        
+        .user-name {
+            font-size: 22px;
+            font-weight: 600;
+            color: #333;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        
+        .user-email {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px 0;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .info {
+            background: #e0f2fe;
+            border-left: 4px solid #0284c7;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .info-title {
+            font-weight: 600;
+            color: #0c4a6e;
+            margin-bottom: 5px;
+        }
+        
+        .info-text {
+            color: #075985;
+            font-size: 14px;
+        }
+        
+        #clerk-mount-point {
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🍺</div>
+            <h1>Boteco PRO</h1>
+            <p class="subtitle">Teste de Autenticação com Clerk</p>
+        </div>
+        
+        <!-- Loading State -->
+        <div id="loading" class="auth-section active">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 20px; color: #666;">Carregando Clerk...</p>
+            </div>
+        </div>
+        
+        <!-- Signed Out State -->
+        <div id="signed-out" class="auth-section">
+            <div class="signed-out">
+                <div class="info">
+                    <div class="info-title">✨ Bem-vindo!</div>
+                    <div class="info-text">Faça login ou crie uma conta para acessar o Boteco PRO</div>
+                </div>
+                
+                <button onclick="openSignIn()" class="btn">
+                    🔐 Fazer Login
+                </button>
+                
+                <button onclick="openSignUp()" class="btn btn-secondary">
+                    ✍️ Criar Conta
+                </button>
+                
+                <div id="clerk-mount-point"></div>
+            </div>
+        </div>
+        
+        <!-- Signed In State -->
+        <div id="signed-in" class="auth-section">
+            <div class="user-info">
+                <img id="user-avatar" src="" alt="Avatar" class="user-avatar">
+                <div id="user-name" class="user-name"></div>
+                <div id="user-email" class="user-email"></div>
+            </div>
+            
+            <div class="info">
+                <div class="info-title">✅ Autenticação Bem-sucedida!</div>
+                <div class="info-text">Você está conectado com Clerk. A sessão persiste entre recarregamentos.</div>
+            </div>
+            
+            <button onclick="openProfile()" class="btn">
+                👤 Gerenciar Perfil
+            </button>
+            
+            <button onclick="signOut()" class="btn btn-danger">
+                🚪 Sair
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        let clerkInstance = null;
+        
+        // Wait for Clerk to load
+        async function initializeClerk() {
+            try {
+                // Wait for Clerk to be available
+                while (typeof window.Clerk === 'undefined') {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                
+                clerkInstance = window.Clerk;
+                
+                // Load Clerk
+                await clerkInstance.load();
+                
+                // Set up auth listener
+                clerkInstance.addListener((resources) => {
+                    updateUI(resources.user);
+                });
+                
+                // Initial UI update
+                updateUI(clerkInstance.user);
+                
+                console.log('Clerk initialized successfully');
+            } catch (error) {
+                console.error('Error initializing Clerk:', error);
+                showSection('signed-out');
+            }
+        }
+        
+        function updateUI(user) {
+            if (user) {
+                // User is signed in
+                document.getElementById('user-name').textContent = 
+                    `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Usuário';
+                document.getElementById('user-email').textContent = 
+                    user.primaryEmailAddress?.emailAddress || 'Sem email';
+                document.getElementById('user-avatar').src = 
+                    user.imageUrl || 'https://via.placeholder.com/80';
+                
+                showSection('signed-in');
+            } else {
+                // User is signed out
+                showSection('signed-out');
+            }
+        }
+        
+        function showSection(sectionId) {
+            document.querySelectorAll('.auth-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+        }
+        
+        function openSignIn() {
+            if (clerkInstance) {
+                clerkInstance.openSignIn();
+            }
+        }
+        
+        function openSignUp() {
+            if (clerkInstance) {
+                clerkInstance.openSignUp();
+            }
+        }
+        
+        function openProfile() {
+            if (clerkInstance) {
+                clerkInstance.openUserProfile();
+            }
+        }
+        
+        async function signOut() {
+            if (clerkInstance) {
+                await clerkInstance.signOut();
+            }
+        }
+        
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeClerk);
+        } else {
+            initializeClerk();
+        }
+    </script>
+</body>
+</html>

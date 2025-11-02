@@ -15,6 +15,7 @@ Aplicação completa em Flutter para gerenciar operações de bar: mesas, pedido
 
 ### ✅ Funcionalidades Implementadas
 
+- **🔐 Autenticação com Clerk** - Login, Cadastro e Gerenciamento de Perfil
 - **📊 Dashboard** - KPIs em tempo real (mesas ativas, vendas, estoque baixo)
 - **🪑 Gerenciamento de Mesas** - Criar, editar, gerenciar status
 - **📦 Catálogo de Produtos** - Inventário com preço, estoque, categoria
@@ -24,6 +25,7 @@ Aplicação completa em Flutter para gerenciar operações de bar: mesas, pedido
 - **👥 Fornecedores** - Manter contatos de fornecedores
 - **💾 Persistência** - localStorage - dados persistem entre sessões
 - **📱 Responsive** - Funciona desktop, tablet e mobile
+- **🔒 Rotas Protegidas** - Acesso controlado por autenticação
 
 ---
 
@@ -54,6 +56,13 @@ flutter --version
 git clone https://github.com/Monynha-Softwares/tree/master/BotecoPro.git
 cd BotecoPro
 
+# Configure Clerk (necessário)
+# 1. Copie o arquivo .env.example para .env
+cp .env.example .env
+
+# 2. Adicione sua chave Clerk publishable key no .env
+# CLERK_PUBLISHABLE_KEY=pk_test_your_key_here
+
 # Baixe dependências
 flutter pub get
 
@@ -65,6 +74,13 @@ flutter build web --release
 
 # Serve build/web em http://localhost:8080
 cd build/web && python3 -m http.server 8080
+```
+
+#### Testar Autenticação Clerk
+```bash
+# Abra o arquivo de teste em um navegador
+python3 -m http.server 8080
+# Acesse: http://localhost:8080/test_clerk_auth.html
 ```
 
 ---
@@ -94,6 +110,79 @@ flutter run -d macos                # macOS
 
 ---
 
+## 🔐 Autenticação com Clerk
+
+### Configuração
+
+BotecoPro usa [Clerk](https://clerk.com) para autenticação de usuários na versão web.
+
+#### Requisitos
+- Conta no Clerk (gratuita para desenvolvimento)
+- Chave Publishable Key do Clerk
+
+#### Passos para Configuração
+
+1. **Criar Aplicação no Clerk**
+   - Acesse [dashboard.clerk.com](https://dashboard.clerk.com)
+   - Crie um novo aplicativo
+   - Copie a "Publishable Key"
+
+2. **Configurar Variáveis de Ambiente**
+   ```bash
+   # Copie o arquivo de exemplo
+   cp .env.example .env
+   
+   # Edite .env e adicione sua chave
+   CLERK_PUBLISHABLE_KEY=pk_test_your_key_here
+   ```
+
+3. **A chave também está em web/index.html**
+   - Para desenvolvimento, a chave é carregada automaticamente
+   - Para produção, atualize com sua própria chave
+
+#### Funcionalidades de Autenticação
+
+- ✅ **Sign In** - Login com email/senha ou OAuth (Google, GitHub, etc.)
+- ✅ **Sign Up** - Registro de novos usuários
+- ✅ **User Profile** - Gerenciamento de perfil e configurações
+- ✅ **Session Management** - Sessões persistentes e seguras
+- ✅ **Protected Routes** - Redirecionamento automático para login
+- ✅ **Password Reset** - Recuperação de senha via email
+
+#### Fluxo de Autenticação
+
+```
+1. Usuário acessa a aplicação
+2. AuthProvider verifica estado de autenticação
+3. Se não autenticado → Redireciona para LoginPage
+4. Usuário faz login via Clerk modal
+5. Clerk gerencia autenticação e retorna token
+6. AuthProvider atualiza estado
+7. Usuário é redirecionado para MainNavigationScreen
+8. Sessão persiste entre recarregamentos
+```
+
+#### Testar Autenticação
+
+Um arquivo de teste standalone está disponível:
+
+```bash
+# Inicie um servidor local
+python3 -m http.server 8080
+
+# Acesse em seu navegador
+http://localhost:8080/test_clerk_auth.html
+```
+
+Este teste demonstra:
+- Clerk SDK carregando corretamente
+- Modal de Sign In/Sign Up
+- Gerenciamento de perfil
+- Sign Out
+- Persistência de sessão
+
+---
+
 ## 📊 Estrutura Projeto
 
 ```
@@ -107,16 +196,18 @@ lib/
 │   ├── models/
 │   │   └── data_models.dart
 │   ├── providers/
-│   │   ├── auth_provider.dart
+│   │   ├── auth_provider.dart         # Gerenciamento de estado de autenticação
 │   │   └── database_provider.dart
 │   └── services/
 │       ├── auth_service.dart
+│       ├── clerk_service.dart         # Interface com Clerk JS SDK
 │       └── database_service.dart
 └── presentation/
     ├── pages/
     │   ├── home_page.dart
-    │   ├── login_page.dart
-    │   ├── signup_page.dart
+    │   ├── login_page.dart            # Página de login com Clerk
+    │   ├── signup_page.dart           # Página de cadastro com Clerk
+    │   ├── profile_page.dart          # Página de perfil do usuário
     │   ├── order_details_page.dart
     │   ├── production_page.dart
     │   ├── products_page.dart
@@ -128,8 +219,12 @@ lib/
         └── shared_widgets.dart
 
 web/
-├── index.html                   # Página raiz (SPA)
+├── index.html                   # Página raiz (SPA) com Clerk SDK
 └── manifest.json                # Web app manifest
+
+.env                             # Variáveis de ambiente (Clerk key)
+.env.example                     # Exemplo de configuração
+test_clerk_auth.html             # Teste standalone de autenticação
 
 build/
 └── web/                         # 📦 Saída de build (~3.8 MB)
@@ -452,11 +547,12 @@ MIT License - veja [LICENSE](LICENSE)
 - **Framework**: Flutter 3.x
 - **Linguagem**: Dart
 - **Platform**: Web (HTML5/WebAssembly)
+- **Autenticação**: Clerk (clerk-js v5)
 - **Persistência**: localStorage (IndexedDB)
 - **UI**: Material Design 3
 - **Localização**: Portuguese (Brazil)
 - **Deployment**: Firebase Hosting, Coolify, AWS S3, VPS
-- **Dependências**: flutter_animate, table_calendar, flutter_slidable, flutter_svg, intl, fl_chart, shared_preferences, provider, http, uuid
+- **Dependências**: flutter_animate, table_calendar, flutter_slidable, flutter_svg, intl, fl_chart, shared_preferences, provider, http, uuid, js
 
 ---
 
@@ -467,12 +563,15 @@ MIT License - veja [LICENSE](LICENSE)
 - [x] Web MVP pronto
 - [x] Client-side persistence
 - [x] Responsive design
+- [x] Autenticação com Clerk
+- [x] Rotas protegidas
+- [x] Gerenciamento de perfil
 
 ### v1.1 (Próximo)
-- [ ] Multi-user login
 - [ ] Backend API
 - [ ] Real-time sync
 - [ ] Mobile apps native
+- [ ] Multi-tenant support
 
 ### v2.0 (Futuro)
 - [ ] Advanced analytics
