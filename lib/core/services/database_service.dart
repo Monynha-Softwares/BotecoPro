@@ -95,13 +95,13 @@ class DatabaseService {
   final Set<String> _pendingNotifications = {};
 
   // In-memory cache for frequently accessed data
-  Map<String, List<Supplier>>? _suppliersCache;
-  Map<String, List<Product>>? _productsCache;
-  Map<String, List<TableModel>>? _tablesCache;
-  Map<String, List<Order>>? _ordersCache;
-  Map<String, List<Sale>>? _salesCache;
-  Map<String, List<Recipe>>? _recipesCache;
-  Map<String, List<InternalProduction>>? _productionsCache;
+  List<Supplier>? _suppliersCache;
+  List<Product>? _productsCache;
+  List<TableModel>? _tablesCache;
+  List<Order>? _ordersCache;
+  List<Sale>? _salesCache;
+  List<Recipe>? _recipesCache;
+  List<InternalProduction>? _productionsCache;
 
   /// Get cached SharedPreferences instance (web-optimized)
   Future<SharedPreferences> get _prefsInstance async {
