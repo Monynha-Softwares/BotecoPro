@@ -61,7 +61,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
-import 'package:clerk_flutter/clerk_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'core/constants/clerk_config.dart';
@@ -99,86 +98,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: 'Boteco PRO',
       debugShowCheckedModeBanner: false,
-      home: AuthWrapper(),
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: ThemeMode.system,
+      initialRoute: '/login',
+      routes: {
+        '/login': (context) => const LoginPage(),
+        '/home': (context) => const MainNavigationScreen(),
+      },
     );
-  }
-}
-
-class AuthWrapper extends StatefulWidget {
-  const AuthWrapper({super.key});
-
-  @override
-  State<AuthWrapper> createState() => _AuthWrapperState();
-}
-
-class _AuthWrapperState extends State<AuthWrapper> {
-  bool _isInitialized = false;
-  bool _isSignedIn = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeAuth();
-  }
-
-  Future<void> _initializeAuth() async {
-    try {
-      // Obtém a chave do Clerk
-      String? envKey;
-      try {
-        if (dotenv.isInitialized) {
-          envKey = dotenv.env['CLERK_PUBLISHABLE_KEY'];
-        }
-      } catch (e) {
-        envKey = null;
-      }
-
-      final clerkKey = ClerkConfig.getPublishableKey(envKey);
-
-      // Para desenvolvimento, assume que não está autenticado inicialmente
-      // Em produção, você verificaria o estado de autenticação do Clerk
-      setState(() {
-        _isInitialized = true;
-        _isSignedIn = false; // Começa como não autenticado
-      });
-    } catch (e) {
-      debugPrint('❌ Erro ao inicializar autenticação: $e');
-      setState(() {
-        _isInitialized = true;
-        _isSignedIn = false;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!_isInitialized) {
-      // Tela de loading enquanto inicializa
-      return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const CircularProgressIndicator(),
-              const SizedBox(height: 16),
-              Text(
-                'Inicializando Boteco PRO...',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    if (_isSignedIn) {
-      return const MainNavigationScreen();
-    } else {
-      return const LoginPage();
-    }
   }
 }
 
