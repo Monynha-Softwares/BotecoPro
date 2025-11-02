@@ -99,181 +99,85 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Obtém a chave do Clerk (.env ou configuração padrão)
-    // Verifica se dotenv foi inicializado antes de acessar
-    String? envKey;
+    return const MaterialApp(
+      title: 'Boteco PRO',
+      debugShowCheckedModeBanner: false,
+      home: AuthWrapper(),
+    );
+  }
+}
+
+class AuthWrapper extends StatefulWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  bool _isInitialized = false;
+  bool _isSignedIn = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeAuth();
+  }
+
+  Future<void> _initializeAuth() async {
     try {
-      if (dotenv.isInitialized) {
-        envKey = dotenv.env['CLERK_PUBLISHABLE_KEY'];
+      // Obtém a chave do Clerk
+      String? envKey;
+      try {
+        if (dotenv.isInitialized) {
+          envKey = dotenv.env['CLERK_PUBLISHABLE_KEY'];
+        }
+      } catch (e) {
+        envKey = null;
       }
+
+      final clerkKey = ClerkConfig.getPublishableKey(envKey);
+
+      // Para desenvolvimento, assume que não está autenticado inicialmente
+      // Em produção, você verificaria o estado de autenticação do Clerk
+      setState(() {
+        _isInitialized = true;
+        _isSignedIn = false; // Começa como não autenticado
+      });
     } catch (e) {
-      // dotenv não inicializado, usar configuração padrão
-      envKey = null;
+      debugPrint('❌ Erro ao inicializar autenticação: $e');
+      setState(() {
+        _isInitialized = true;
+        _isSignedIn = false;
+      });
     }
-    
-    final clerkKey = ClerkConfig.getPublishableKey(envKey);
-    
-    // Verifica se a chave está configurada corretamente
-    final isKeyValid = clerkKey.startsWith('pk_test_') || clerkKey.startsWith('pk_live_');
-    
-    if (!isKeyValid) {
-      debugPrint('❌ ERRO: Chave Clerk inválida!');
-      debugPrint('A chave deve começar com pk_test_ ou pk_live_');
-      debugPrint('Chave atual: ${clerkKey.substring(0, 20)}...');
-      debugPrint('Configure em lib/core/constants/clerk_config.dart ou .env');
-      
-      // Retorna app com tela de erro
-      return MaterialApp(
-        title: 'Boteco PRO',
-        debugShowCheckedModeBanner: false,
-        theme: lightTheme,
-        darkTheme: darkTheme,
-        themeMode: ThemeMode.system,
-        home: Scaffold(
-          body: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Configuração Necessária',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'A chave Clerk não está configurada corretamente.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Configure sua Publishable Key do Clerk em:',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('1. lib/core/constants/clerk_config.dart'),
-                        Text('   ou'),
-                        Text('2. Arquivo .env na raiz do projeto'),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Obtenha sua chave em:',
-                    style: TextStyle(fontSize: 14),
-                  ),
-                  const SizedBox(height: 8),
-                  const SelectableText(
-                    'https://dashboard.clerk.com',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.blue,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ],
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_isInitialized) {
+      // Tela de loading enquanto inicializa
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text(
+                'Inicializando Boteco PRO...',
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
-            ),
+            ],
           ),
         ),
       );
     }
-    
-    // Tenta inicializar o Clerk com tratamento de erro
-    try {
-      return ClerkAuth(
-        config: ClerkAuthConfig(publishableKey: clerkKey),
-        child: ClerkErrorListener(
-          child: ClerkAuthBuilder(
-            signedInBuilder: (context, authState) {
-              // Quando autenticado, roteia para dashboard e habilita rotas protegidas
-              debugPrint('✅ Usuário autenticado: ${authState.user?.id ?? 'desconhecido'}');
-              return MaterialApp(
-                title: 'Boteco PRO',
-                debugShowCheckedModeBanner: false,
-                theme: lightTheme,
-                darkTheme: darkTheme,
-                themeMode: ThemeMode.system,
-                initialRoute: '/dashboard',
-                routes: {
-                  '/login': (context) => const LoginPage(),
-                  '/dashboard': (context) => const MainNavigationScreen(),
-                  '/profile': (context) => const ProfilePage(),
-                },
-              );
-            },
-            signedOutBuilder: (context, authState) {
-              // Quando deslogado, roteia para /login e restringe acesso às rotas protegidas
-              debugPrint('ℹ️ Usuário não autenticado - redirecionando para /login');
-              return MaterialApp(
-                title: 'Boteco PRO',
-                debugShowCheckedModeBanner: false,
-                theme: lightTheme,
-                darkTheme: darkTheme,
-                themeMode: ThemeMode.system,
-                initialRoute: '/login',
-                onGenerateRoute: (settings) {
-                  // Em estado signed-out, qualquer rota cai no /login
-                  return MaterialPageRoute(builder: (_) => const LoginPage());
-                },
-              );
-            },
-          ),
-        ),
-      );
-    } catch (e) {
-      debugPrint('❌ Erro ao inicializar Clerk: $e');
-      
-      // Fallback: retorna app com tela de erro
-      return MaterialApp(
-        title: 'Boteco PRO',
-        debugShowCheckedModeBanner: false,
-        theme: lightTheme,
-        darkTheme: darkTheme,
-        themeMode: ThemeMode.system,
-        home: Scaffold(
-          body: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Erro ao Inicializar',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Erro: $e',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Verifique se sua chave Clerk está correta.',
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
+
+    if (_isSignedIn) {
+      return const MainNavigationScreen();
+    } else {
+      return const LoginPage();
     }
   }
 }
