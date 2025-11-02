@@ -383,11 +383,11 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
   }
 
   Future<void> _updateItemStatus(OrderItem item, OrderStatus newStatus) async {
-    final List<OrderItem> updatedItems = _order.items.map((i) {
-      if (i.id == item.id) {
-        return i.copyWith(status: newStatus);
+    final List<OrderItem> updatedItems = _order.items.map((orderItem) {
+      if (orderItem.id == item.id) {
+        return orderItem.copyWith(status: newStatus);
       }
-      return i;
+      return orderItem;
     }).toList();
 
     final updatedOrder = _order.copyWith(items: updatedItems);

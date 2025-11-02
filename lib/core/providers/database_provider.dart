@@ -195,7 +195,7 @@ class DatabaseProvider {
     // Suppliers
     Future<List<Supplier>> getSuppliers() async {
         final rows = await _getAll('suppliers');
-        return rows.map((m) => Supplier.fromJson(m)).toList();
+        return rows.map((jsonMap) => Supplier.fromJson(jsonMap)).toList();
     }
 
     Future<void> saveSupplier(Supplier supplier) async {
@@ -209,7 +209,7 @@ class DatabaseProvider {
     // Products
     Future<List<Product>> getProducts() async {
         final rows = await _getAll('products');
-        return rows.map((m) => Product.fromJson(m)).toList();
+        return rows.map((jsonMap) => Product.fromJson(jsonMap)).toList();
     }
 
     Future<void> saveProduct(Product product) async {
@@ -223,7 +223,7 @@ class DatabaseProvider {
     // Tables (TableModel)
     Future<List<TableModel>> getTables() async {
         final rows = await _getAll('tables_model');
-        return rows.map((m) => TableModel.fromJson(m)).toList();
+        return rows.map((jsonMap) => TableModel.fromJson(jsonMap)).toList();
     }
 
     Future<void> saveTable(TableModel tableModel) async {
@@ -237,7 +237,7 @@ class DatabaseProvider {
     // Orders
     Future<List<Order>> getOrders() async {
         final rows = await _getAll('orders');
-        return rows.map((m) => Order.fromJson(m)).toList();
+        return rows.map((jsonMap) => Order.fromJson(jsonMap)).toList();
     }
 
     Future<void> saveOrder(Order order) async {
@@ -251,7 +251,7 @@ class DatabaseProvider {
     // OrderItems
     Future<List<OrderItem>> getOrderItems() async {
         final rows = await _getAll('order_items');
-        return rows.map((m) => OrderItem.fromJson(m)).toList();
+        return rows.map((jsonMap) => OrderItem.fromJson(jsonMap)).toList();
     }
 
     Future<void> saveOrderItem(OrderItem item) async {
@@ -265,7 +265,7 @@ class DatabaseProvider {
     // Recipes
     Future<List<Recipe>> getRecipes() async {
         final rows = await _getAll('recipes');
-        return rows.map((m) => Recipe.fromJson(m)).toList();
+        return rows.map((jsonMap) => Recipe.fromJson(jsonMap)).toList();
     }
 
     Future<void> saveRecipe(Recipe recipe) async {
@@ -279,7 +279,7 @@ class DatabaseProvider {
     // InternalProduction
     Future<List<InternalProduction>> getProductions() async {
         final rows = await _getAll('productions');
-        return rows.map((m) => InternalProduction.fromJson(m)).toList();
+        return rows.map((jsonMap) => InternalProduction.fromJson(jsonMap)).toList();
     }
 
     Future<void> saveProduction(InternalProduction production) async {
