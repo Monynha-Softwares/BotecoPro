@@ -84,6 +84,9 @@ class DatabaseService {
 
   // Mutex for write operations to prevent race conditions
   final Map<String, Completer<void>> _writeLocks = {};
+  
+  // Global operation lock for complex multi-entity operations like closeOrder
+  Completer<void>? _closeOrderLock;
 
   // Broadcast stream to notify UI about data changes
   final StreamController<String> _changesController =
@@ -587,55 +590,72 @@ class DatabaseService {
   }
 
   Future<void> closeOrder(String orderId) async {
-    // Fetch all required data in parallel for better performance
-    final results = await Future.wait([
-      getOrders(),
-      getProducts(),
-      getTables(),
-    ]);
+    // Acquire global lock to prevent concurrent closeOrder operations
+    while (_closeOrderLock != null) {
+      await _closeOrderLock!.future;
+    }
+    _closeOrderLock = Completer<void>();
     
-    final orders = results[0] as List<Order>;
-    final products = results[1] as List<Product>;
-    final tables = results[2] as List<TableModel>;
-    
-    final index = orders.indexWhere((e) => e.id == orderId);
-    if (index == -1) return;
-    
-    // Close the order
-    orders[index] = orders[index].copyWith(isClosed: true);
-    
-    // Update product stock
-    for (var item in orders[index].items) {
-      final productIndex = products.indexWhere((p) => p.id == item.productId);
-      if (productIndex != -1) {
-        final currentStock = products[productIndex].stockQuantity;
-        products[productIndex] = products[productIndex]
-            .copyWith(stockQuantity: currentStock - item.quantity);
+    try {
+      // Fetch all required data in parallel for better performance
+      // Including sales to avoid stale cache in addSale
+      final results = await Future.wait([
+        getOrders(),
+        getProducts(),
+        getTables(),
+        getSales(),
+      ]);
+      
+      final orders = results[0] as List<Order>;
+      final products = results[1] as List<Product>;
+      final tables = results[2] as List<TableModel>;
+      final sales = results[3] as List<Sale>;
+      
+      final index = orders.indexWhere((e) => e.id == orderId);
+      if (index == -1) return;
+      
+      // Close the order
+      orders[index] = orders[index].copyWith(isClosed: true);
+      
+      // Update product stock
+      for (var item in orders[index].items) {
+        final productIndex = products.indexWhere((p) => p.id == item.productId);
+        if (productIndex != -1) {
+          final currentStock = products[productIndex].stockQuantity;
+          products[productIndex] = products[productIndex]
+              .copyWith(stockQuantity: currentStock - item.quantity);
+        }
       }
-    }
-    
-    // Free the table
-    final tableIndex = tables.indexWhere((t) => t.id == orders[index].tableId);
-    if (tableIndex != -1) {
-      tables[tableIndex] = tables[tableIndex].copyWith(
-        status: TableStatus.free,
-        currentOrderId: null,
+      
+      // Free the table
+      final tableIndex = tables.indexWhere((t) => t.id == orders[index].tableId);
+      if (tableIndex != -1) {
+        tables[tableIndex] = tables[tableIndex].copyWith(
+          status: TableStatus.free,
+          currentOrderId: null,
+        );
+      }
+      
+      // Create sale record and add to sales list
+      final sale = Sale(
+        orderId: orderId,
+        total: orders[index].total,
       );
+      sales.add(sale);
+      
+      // Batch all saves together to minimize I/O
+      // Note: Using direct list updates to avoid race conditions
+      await Future.wait([
+        saveOrders(orders),
+        saveProducts(products),
+        saveTables(tables),
+        saveSales(sales),
+      ]);
+    } finally {
+      // Always release the lock
+      _closeOrderLock!.complete();
+      _closeOrderLock = null;
     }
-    
-    // Create sale record
-    final sale = Sale(
-      orderId: orderId,
-      total: orders[index].total,
-    );
-    
-    // Batch all saves together to minimize I/O
-    await Future.wait([
-      saveOrders(orders),
-      saveProducts(products),
-      saveTables(tables),
-      addSale(sale),
-    ]);
   }
 
   // Métodos para Vendas
