@@ -78,19 +78,85 @@ class DatabaseService {
   factory DatabaseService() => _instance;
   DatabaseService._internal();
 
+  // Cache SharedPreferences instance to avoid repeated async lookups
+  SharedPreferences? _prefs;
+  Completer<SharedPreferences>? _prefsCompleter;
+
+  // Mutex for write operations to prevent race conditions
+  final Map<String, Completer<void>> _writeLocks = {};
+
   // Broadcast stream to notify UI about data changes
   final StreamController<String> _changesController =
       StreamController<String>.broadcast();
   Stream<String> get changes => _changesController.stream;
-  void _notify(String topic) {
-    if (!_changesController.isClosed) {
-      _changesController.add(topic);
+
+  // Debounce notification to avoid excessive UI updates
+  Timer? _notifyTimer;
+  final Set<String> _pendingNotifications = {};
+
+  /// Get cached SharedPreferences instance (web-optimized)
+  Future<SharedPreferences> get _prefsInstance async {
+    if (_prefs != null) return _prefs!;
+    
+    // If already loading, wait for it
+    if (_prefsCompleter != null) {
+      return _prefsCompleter!.future;
     }
+    
+    // Start loading
+    _prefsCompleter = Completer<SharedPreferences>();
+    try {
+      _prefs = await SharedPreferences.getInstance();
+      _prefsCompleter!.complete(_prefs!);
+      return _prefs!;
+    } catch (e) {
+      _prefsCompleter!.completeError(e);
+      _prefsCompleter = null;
+      rethrow;
+    }
+  }
+
+  /// Acquire write lock for a key to prevent concurrent modifications
+  Future<void> _acquireWriteLock(String key) async {
+    while (_writeLocks.containsKey(key)) {
+      await _writeLocks[key]!.future;
+    }
+    _writeLocks[key] = Completer<void>();
+  }
+
+  /// Release write lock for a key
+  void _releaseWriteLock(String key) {
+    if (_writeLocks.containsKey(key)) {
+      _writeLocks[key]!.complete();
+      _writeLocks.remove(key);
+    }
+  }
+
+  /// Notify UI with debouncing to batch updates
+  void _notify(String topic) {
+    if (_changesController.isClosed) return;
+    
+    _pendingNotifications.add(topic);
+    
+    // Cancel existing timer and create new one
+    _notifyTimer?.cancel();
+    _notifyTimer = Timer(const Duration(milliseconds: 50), () {
+      for (final notif in _pendingNotifications) {
+        _changesController.add(notif);
+      }
+      _pendingNotifications.clear();
+    });
+  }
+
+  /// Dispose resources (call when app closes)
+  void dispose() {
+    _notifyTimer?.cancel();
+    _changesController.close();
   }
 
   // Carrega dados iniciais se necessário
   Future<void> initializeData() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _prefsInstance;
     
     // Verifica se já existem dados
     if (!prefs.containsKey(_tablesKey)) {
@@ -239,19 +305,32 @@ class DatabaseService {
 
   // Métodos para Fornecedores
   Future<List<Supplier>> getSuppliers() async {
-    final prefs = await SharedPreferences.getInstance();
-    final suppliersJson = prefs.getStringList(_suppliersKey) ?? [];
-    return suppliersJson
-        .map((e) => Supplier.fromJson(jsonDecode(e)))
-        .toList();
+    try {
+      final prefs = await _prefsInstance;
+      final suppliersJson = prefs.getStringList(_suppliersKey) ?? [];
+      return suppliersJson
+          .map((e) => Supplier.fromJson(jsonDecode(e)))
+          .toList();
+    } catch (e) {
+      print('Error loading suppliers: $e');
+      return [];
+    }
   }
 
   Future<void> saveSuppliers(List<Supplier> suppliers) async {
-    final prefs = await SharedPreferences.getInstance();
-    final suppliersJson =
-        suppliers.map((e) => jsonEncode(e.toJson())).toList();
-    await prefs.setStringList(_suppliersKey, suppliersJson);
-    _notify('suppliers');
+    await _acquireWriteLock(_suppliersKey);
+    try {
+      final prefs = await _prefsInstance;
+      final suppliersJson =
+          suppliers.map((e) => jsonEncode(e.toJson())).toList();
+      await prefs.setStringList(_suppliersKey, suppliersJson);
+      _notify('suppliers');
+    } catch (e) {
+      print('Error saving suppliers: $e');
+      rethrow;
+    } finally {
+      _releaseWriteLock(_suppliersKey);
+    }
   }
 
   Future<void> addSupplier(Supplier supplier) async {
@@ -277,16 +356,29 @@ class DatabaseService {
 
   // Métodos para Produtos
   Future<List<Product>> getProducts() async {
-    final prefs = await SharedPreferences.getInstance();
-    final productsJson = prefs.getStringList(_productsKey) ?? [];
-    return productsJson.map((e) => Product.fromJson(jsonDecode(e))).toList();
+    try {
+      final prefs = await _prefsInstance;
+      final productsJson = prefs.getStringList(_productsKey) ?? [];
+      return productsJson.map((e) => Product.fromJson(jsonDecode(e))).toList();
+    } catch (e) {
+      print('Error loading products: $e');
+      return [];
+    }
   }
 
   Future<void> saveProducts(List<Product> products) async {
-    final prefs = await SharedPreferences.getInstance();
-    final productsJson = products.map((e) => jsonEncode(e.toJson())).toList();
-    await prefs.setStringList(_productsKey, productsJson);
-    _notify('products');
+    await _acquireWriteLock(_productsKey);
+    try {
+      final prefs = await _prefsInstance;
+      final productsJson = products.map((e) => jsonEncode(e.toJson())).toList();
+      await prefs.setStringList(_productsKey, productsJson);
+      _notify('products');
+    } catch (e) {
+      print('Error saving products: $e');
+      rethrow;
+    } finally {
+      _releaseWriteLock(_productsKey);
+    }
   }
 
   Future<void> addProduct(Product product) async {
@@ -321,16 +413,29 @@ class DatabaseService {
 
   // Métodos para Mesas
   Future<List<TableModel>> getTables() async {
-    final prefs = await SharedPreferences.getInstance();
-    final tablesJson = prefs.getStringList(_tablesKey) ?? [];
-    return tablesJson.map((e) => TableModel.fromJson(jsonDecode(e))).toList();
+    try {
+      final prefs = await _prefsInstance;
+      final tablesJson = prefs.getStringList(_tablesKey) ?? [];
+      return tablesJson.map((e) => TableModel.fromJson(jsonDecode(e))).toList();
+    } catch (e) {
+      print('Error loading tables: $e');
+      return [];
+    }
   }
 
   Future<void> saveTables(List<TableModel> tables) async {
-    final prefs = await SharedPreferences.getInstance();
-    final tablesJson = tables.map((e) => jsonEncode(e.toJson())).toList();
-    await prefs.setStringList(_tablesKey, tablesJson);
-    _notify('tables');
+    await _acquireWriteLock(_tablesKey);
+    try {
+      final prefs = await _prefsInstance;
+      final tablesJson = tables.map((e) => jsonEncode(e.toJson())).toList();
+      await prefs.setStringList(_tablesKey, tablesJson);
+      _notify('tables');
+    } catch (e) {
+      print('Error saving tables: $e');
+      rethrow;
+    } finally {
+      _releaseWriteLock(_tablesKey);
+    }
   }
 
   Future<void> updateTable(TableModel table) async {
@@ -344,16 +449,29 @@ class DatabaseService {
 
   // Métodos para Pedidos
   Future<List<Order>> getOrders() async {
-    final prefs = await SharedPreferences.getInstance();
-    final ordersJson = prefs.getStringList(_ordersKey) ?? [];
-    return ordersJson.map((e) => Order.fromJson(jsonDecode(e))).toList();
+    try {
+      final prefs = await _prefsInstance;
+      final ordersJson = prefs.getStringList(_ordersKey) ?? [];
+      return ordersJson.map((e) => Order.fromJson(jsonDecode(e))).toList();
+    } catch (e) {
+      print('Error loading orders: $e');
+      return [];
+    }
   }
 
   Future<void> saveOrders(List<Order> orders) async {
-    final prefs = await SharedPreferences.getInstance();
-    final ordersJson = orders.map((e) => jsonEncode(e.toJson())).toList();
-    await prefs.setStringList(_ordersKey, ordersJson);
-    _notify('orders');
+    await _acquireWriteLock(_ordersKey);
+    try {
+      final prefs = await _prefsInstance;
+      final ordersJson = orders.map((e) => jsonEncode(e.toJson())).toList();
+      await prefs.setStringList(_ordersKey, ordersJson);
+      _notify('orders');
+    } catch (e) {
+      print('Error saving orders: $e');
+      rethrow;
+    } finally {
+      _releaseWriteLock(_ordersKey);
+    }
   }
 
   Future<void> addOrder(Order order) async {
@@ -430,16 +548,29 @@ class DatabaseService {
 
   // Métodos para Vendas
   Future<List<Sale>> getSales() async {
-    final prefs = await SharedPreferences.getInstance();
-    final salesJson = prefs.getStringList(_salesKey) ?? [];
-    return salesJson.map((e) => Sale.fromJson(jsonDecode(e))).toList();
+    try {
+      final prefs = await _prefsInstance;
+      final salesJson = prefs.getStringList(_salesKey) ?? [];
+      return salesJson.map((e) => Sale.fromJson(jsonDecode(e))).toList();
+    } catch (e) {
+      print('Error loading sales: $e');
+      return [];
+    }
   }
 
   Future<void> saveSales(List<Sale> sales) async {
-    final prefs = await SharedPreferences.getInstance();
-    final salesJson = sales.map((e) => jsonEncode(e.toJson())).toList();
-    await prefs.setStringList(_salesKey, salesJson);
-    _notify('sales');
+    await _acquireWriteLock(_salesKey);
+    try {
+      final prefs = await _prefsInstance;
+      final salesJson = sales.map((e) => jsonEncode(e.toJson())).toList();
+      await prefs.setStringList(_salesKey, salesJson);
+      _notify('sales');
+    } catch (e) {
+      print('Error saving sales: $e');
+      rethrow;
+    } finally {
+      _releaseWriteLock(_salesKey);
+    }
   }
 
   Future<void> addSale(Sale sale) async {
@@ -486,16 +617,29 @@ class DatabaseService {
   
   // Métodos para Receitas
   Future<List<Recipe>> getRecipes() async {
-    final prefs = await SharedPreferences.getInstance();
-    final recipesJson = prefs.getStringList(_recipesKey) ?? [];
-    return recipesJson.map((e) => Recipe.fromJson(jsonDecode(e))).toList();
+    try {
+      final prefs = await _prefsInstance;
+      final recipesJson = prefs.getStringList(_recipesKey) ?? [];
+      return recipesJson.map((e) => Recipe.fromJson(jsonDecode(e))).toList();
+    } catch (e) {
+      print('Error loading recipes: $e');
+      return [];
+    }
   }
 
   Future<void> saveRecipes(List<Recipe> recipes) async {
-    final prefs = await SharedPreferences.getInstance();
-    final recipesJson = recipes.map((e) => jsonEncode(e.toJson())).toList();
-    await prefs.setStringList(_recipesKey, recipesJson);
-    _notify('recipes');
+    await _acquireWriteLock(_recipesKey);
+    try {
+      final prefs = await _prefsInstance;
+      final recipesJson = recipes.map((e) => jsonEncode(e.toJson())).toList();
+      await prefs.setStringList(_recipesKey, recipesJson);
+      _notify('recipes');
+    } catch (e) {
+      print('Error saving recipes: $e');
+      rethrow;
+    } finally {
+      _releaseWriteLock(_recipesKey);
+    }
   }
 
   Future<void> addRecipe(Recipe recipe) async {
@@ -531,16 +675,29 @@ class DatabaseService {
 
   // Métodos para Produções Caseiras
   Future<List<InternalProduction>> getInternalProductions() async {
-    final prefs = await SharedPreferences.getInstance();
-    final productionsJson = prefs.getStringList(_productionsKey) ?? [];
-    return productionsJson.map((e) => InternalProduction.fromJson(jsonDecode(e))).toList();
+    try {
+      final prefs = await _prefsInstance;
+      final productionsJson = prefs.getStringList(_productionsKey) ?? [];
+      return productionsJson.map((e) => InternalProduction.fromJson(jsonDecode(e))).toList();
+    } catch (e) {
+      print('Error loading productions: $e');
+      return [];
+    }
   }
 
   Future<void> saveInternalProductions(List<InternalProduction> productions) async {
-    final prefs = await SharedPreferences.getInstance();
-    final productionsJson = productions.map((e) => jsonEncode(e.toJson())).toList();
-    await prefs.setStringList(_productionsKey, productionsJson);
-    _notify('productions');
+    await _acquireWriteLock(_productionsKey);
+    try {
+      final prefs = await _prefsInstance;
+      final productionsJson = productions.map((e) => jsonEncode(e.toJson())).toList();
+      await prefs.setStringList(_productionsKey, productionsJson);
+      _notify('productions');
+    } catch (e) {
+      print('Error saving productions: $e');
+      rethrow;
+    } finally {
+      _releaseWriteLock(_productionsKey);
+    }
   }
 
   Future<void> addInternalProduction(InternalProduction production) async {
