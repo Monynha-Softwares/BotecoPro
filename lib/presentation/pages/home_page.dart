@@ -48,10 +48,18 @@ class _HomePageState extends State<HomePage> {
   Future<void> _loadData() async {
     await _databaseService.initializeData();
     
-    final tables = await _databaseService.getTables();
-    final activeOrders = await _databaseService.getActiveOrders();
-    final todaySales = await _databaseService.getTodaySales();
-    final lowStockProducts = await _databaseService.getLowStockProducts(10);
+    // Load all data in parallel for better performance
+    final results = await Future.wait([
+      _databaseService.getTables(),
+      _databaseService.getActiveOrders(),
+      _databaseService.getTodaySales(),
+      _databaseService.getLowStockProducts(10),
+    ]);
+    
+    final tables = results[0] as List<TableModel>;
+    final activeOrders = results[1] as List<Order>;
+    final todaySales = results[2] as double;
+    final lowStockProducts = results[3] as List<Product>;
 
     if (mounted) {
       setState(() {
