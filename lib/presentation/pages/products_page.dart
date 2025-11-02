@@ -447,11 +447,11 @@ class _ProductsPageState extends State<ProductsPage> {
                     return;
                   }
                   
-                  if (!validatePrice(context, priceText)) {
+                  final price = validateAndParsePrice(context, priceText);
+                  if (price == null) {
                     return;
                   }
                   
-                  final price = parsePrice(priceText)!;
                   final stock = int.tryParse(stockText) ?? 0;
                   
                   final product = Product(
@@ -593,11 +593,10 @@ class _ProductsPageState extends State<ProductsPage> {
                     return;
                   }
                   
-                  if (!validatePrice(context, priceText)) {
+                  final price = validateAndParsePrice(context, priceText);
+                  if (price == null) {
                     return;
                   }
-                  
-                  final price = parsePrice(priceText)!;
                   
                   final updatedProduct = product.copyWith(
                     name: name,

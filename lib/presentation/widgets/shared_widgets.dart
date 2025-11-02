@@ -35,13 +35,13 @@ bool validateRequiredField(BuildContext context, String value, String fieldName)
   return true;
 }
 
-// Validação de preço
-bool validatePrice(BuildContext context, String priceText) {
+// Validação de preço com retorno do valor parseado
+double? validateAndParsePrice(BuildContext context, String priceText) {
   if (priceText.isEmpty) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Preço é obrigatório')),
     );
-    return false;
+    return null;
   }
   
   final price = parsePrice(priceText);
@@ -49,9 +49,9 @@ bool validatePrice(BuildContext context, String priceText) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Preço inválido')),
     );
-    return false;
+    return null;
   }
-  return true;
+  return price;
 }
 
 // Retorna a cor para uma categoria de produto

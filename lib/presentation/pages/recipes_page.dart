@@ -311,11 +311,10 @@ class _RecipesPageState extends State<RecipesPage> {
                     return;
                   }
                   
-                  if (!validatePrice(context, priceText)) {
+                  final price = validateAndParsePrice(context, priceText);
+                  if (price == null) {
                     return;
                   }
-                  
-                  final price = parsePrice(priceText)!;
                   
                   final recipe = Recipe(
                     name: name,
@@ -424,11 +423,10 @@ class _RecipesPageState extends State<RecipesPage> {
                     return;
                   }
                   
-                  if (!validatePrice(context, priceText)) {
+                  final price = validateAndParsePrice(context, priceText);
+                  if (price == null) {
                     return;
                   }
-                  
-                  final price = parsePrice(priceText)!;
                   
                   final updatedRecipe = recipe.copyWith(
                     name: name,
