@@ -189,7 +189,6 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
   }
 
   Widget _buildOrderItemCard(OrderItem item, int index) {
-    final delay = Duration(milliseconds: 50 * index);
     return Slidable(
       key: Key(item.id),
       endActionPane: ActionPane(
@@ -317,7 +316,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         ),
       ),
     )
-        .animate(delay: delay)
+        .animate(delay: getAnimationDelay(index))
         .fadeIn(duration: const Duration(milliseconds: 300))
         .moveX(begin: 30, duration: const Duration(milliseconds: 300));
   }

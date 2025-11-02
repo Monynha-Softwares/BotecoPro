@@ -142,6 +142,20 @@ List<DropdownMenuItem<RecipeType>> buildRecipeTypeDropdownItems() {
   ];
 }
 
+// Calcula o delay de animação para itens em lista
+Duration getAnimationDelay(int index, {int milliseconds = 50}) {
+  return Duration(milliseconds: milliseconds * index);
+}
+
+// Extension para adicionar animação de card padrão
+extension CardAnimationExtension on Widget {
+  Widget animateCard(int index) {
+    return animate(delay: getAnimationDelay(index))
+        .fadeIn(duration: const Duration(milliseconds: 300))
+        .moveY(begin: 20, duration: const Duration(milliseconds: 300));
+  }
+}
+
 // AppBar customizada para o app
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;

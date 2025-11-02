@@ -85,7 +85,6 @@ class _SuppliersPageState extends State<SuppliersPage> {
   }
 
   Widget _buildSupplierCard(Supplier supplier, int index) {
-    final delay = Duration(milliseconds: 50 * index);
     return Card(
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 12),
@@ -225,10 +224,7 @@ class _SuppliersPageState extends State<SuppliersPage> {
           ],
         ),
       ),
-    )
-        .animate(delay: delay)
-        .fadeIn(duration: const Duration(milliseconds: 300))
-        .moveY(begin: 20, duration: const Duration(milliseconds: 300));
+    ).animateCard(index);
   }
 
   void _showAddSupplierDialog() {

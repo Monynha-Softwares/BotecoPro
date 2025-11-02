@@ -141,7 +141,6 @@ class _ProductsPageState extends State<ProductsPage> {
   }
 
   Widget _buildProductCard(Product product, int index) {
-    final delay = Duration(milliseconds: 50 * index);
     // Encontrar o fornecedor (se existir)
     final supplier = product.supplierId != null
         ? _suppliers.firstWhere(
@@ -312,10 +311,7 @@ class _ProductsPageState extends State<ProductsPage> {
           ],
         ),
       ),
-    )
-        .animate(delay: delay)
-        .fadeIn(duration: const Duration(milliseconds: 300))
-        .moveY(begin: 20, duration: const Duration(milliseconds: 300));
+    ).animateCard(index);
   }
 
 

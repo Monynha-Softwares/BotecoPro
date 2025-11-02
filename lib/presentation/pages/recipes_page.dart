@@ -88,7 +88,6 @@ class _RecipesPageState extends State<RecipesPage> {
   }
 
   Widget _buildRecipeCard(Recipe recipe, int index) {
-    final delay = Duration(milliseconds: 50 * index);
     return Card(
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 12),
@@ -230,10 +229,7 @@ class _RecipesPageState extends State<RecipesPage> {
           ),
         ),
       ),
-    )
-        .animate(delay: delay)
-        .fadeIn(duration: const Duration(milliseconds: 300))
-        .moveY(begin: 20, duration: const Duration(milliseconds: 300));
+    ).animateCard(index);
   }
 
   void _showAddRecipeDialog() {
