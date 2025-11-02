@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/clerk_service.dart';
 
 /// AuthProvider - Gerenciador de Estado de Autenticação
 ///
@@ -140,10 +141,10 @@ class AuthProvider extends ChangeNotifier {
 
     AuthUser? _user;
     bool _initialized = false;
+    final ClerkService _clerkService = ClerkService();
 
-    // Toggle this to true and implement Firebase code to switch to Firebase auth.
-    // (Left false by default so app remains functional without Firebase packages)
-    final bool useFirebase = false;
+    // Use Clerk authentication (web only)
+    final bool useClerk = kIsWeb;
 
     AuthUser? get user => _user;
     bool get isSignedIn => _user != null;
@@ -151,35 +152,63 @@ class AuthProvider extends ChangeNotifier {
 
     /// Initialize provider (load persisted user if any).
     Future<void> initialize() async {
-        final prefs = await SharedPreferences.getInstance();
-        final raw = prefs.getString(_authUserKey);
-        if (raw != null) {
-            try {
-                final Map<String, dynamic> json = jsonDecode(raw);
-                _user = AuthUser.fromJson(json);
-            } catch (_) {
-                _user = null;
+        if (useClerk) {
+            // Initialize Clerk service for web
+            await _clerkService.initialize();
+            
+            // Listen to Clerk auth state changes
+            _clerkService.authStateChanges.listen((clerkUser) {
+                if (clerkUser != null) {
+                    _user = AuthUser(
+                        id: clerkUser['id'] as String? ?? '',
+                        email: clerkUser['emailAddress'] as String?,
+                        name: '${clerkUser['firstName'] ?? ''} ${clerkUser['lastName'] ?? ''}'.trim(),
+                        photoUrl: clerkUser['imageUrl'] as String?,
+                    );
+                } else {
+                    _user = null;
+                }
+                notifyListeners();
+            });
+            
+            // Get initial user state
+            if (_clerkService.isSignedIn && _clerkService.currentUser != null) {
+                final clerkUser = _clerkService.currentUser!;
+                _user = AuthUser(
+                    id: clerkUser['id'] as String? ?? '',
+                    email: clerkUser['emailAddress'] as String?,
+                    name: '${clerkUser['firstName'] ?? ''} ${clerkUser['lastName'] ?? ''}'.trim(),
+                    photoUrl: clerkUser['imageUrl'] as String?,
+                );
+            }
+        } else {
+            // Fallback: Load from SharedPreferences
+            final prefs = await SharedPreferences.getInstance();
+            final raw = prefs.getString(_authUserKey);
+            if (raw != null) {
+                try {
+                    final Map<String, dynamic> json = jsonDecode(raw);
+                    _user = AuthUser.fromJson(json);
+                } catch (_) {
+                    _user = null;
+                }
             }
         }
+        
         _initialized = true;
         notifyListeners();
     }
 
     /// Sign in with email/password.
     ///
-    /// Future implementation using Firebase is shown in file comments.
-    /// Current fallback persists a minimal user to SharedPreferences.
+    /// For Clerk (web), opens the Clerk sign-in modal.
+    /// For fallback, persists a minimal user to SharedPreferences.
     Future<AuthUser?> signInWithEmail(String email, String password) async {
-        if (useFirebase) {
-            // TODO: Replace with FirebaseAuth implementation.
-            // final userCredential = await FirebaseAuth.instance
-            //     .signInWithEmailAndPassword(email: email, password: password);
-            // final fbUser = userCredential.user;
-            // _user = _authUserFromFirebaseUser(fbUser);
-            // await _persistUser();
-            // notifyListeners();
-            // return _user;
-            throw UnimplementedError('Firebase integration not enabled.');
+        if (useClerk) {
+            // Open Clerk sign-in modal
+            await _clerkService.openSignIn();
+            // User will be updated via auth state listener
+            return null;
         }
 
         // Fallback behavior: create a lightweight user and persist.
@@ -192,15 +221,11 @@ class AuthProvider extends ChangeNotifier {
 
     /// Register with email/password.
     Future<AuthUser?> signUpWithEmail(String email, String password) async {
-        if (useFirebase) {
-            // TODO: Replace with FirebaseAuth implementation.
-            // final userCredential = await FirebaseAuth.instance
-            //     .createUserWithEmailAndPassword(email: email, password: password);
-            // _user = _authUserFromFirebaseUser(userCredential.user);
-            // await _persistUser();
-            // notifyListeners();
-            // return _user;
-            throw UnimplementedError('Firebase integration not enabled.');
+        if (useClerk) {
+            // Open Clerk sign-up modal
+            await _clerkService.openSignUp();
+            // User will be updated via auth state listener
+            return null;
         }
 
         // Fallback: behave like sign-in for local-only mode.
@@ -209,21 +234,10 @@ class AuthProvider extends ChangeNotifier {
 
     /// Sign in with Google (placeholder).
     Future<AuthUser?> signInWithGoogle() async {
-        if (useFirebase) {
-            // TODO: Replace with Google Sign-In + Firebase credential flow.
-            // final googleUser = await GoogleSignIn().signIn();
-            // final googleAuth = await googleUser!.authentication;
-            // final credential = GoogleAuthProvider.credential(
-            //   accessToken: googleAuth.accessToken,
-            //   idToken: googleAuth.idToken,
-            // );
-            // final userCredential =
-            //     await FirebaseAuth.instance.signInWithCredential(credential);
-            // _user = _authUserFromFirebaseUser(userCredential.user);
-            // await _persistUser();
-            // notifyListeners();
-            // return _user;
-            throw UnimplementedError('Firebase integration not enabled.');
+        if (useClerk) {
+            // Clerk handles OAuth providers in its modals
+            await _clerkService.openSignIn();
+            return null;
         }
 
         // Fallback: not supported without Firebase; throw to make developer aware.
@@ -232,9 +246,9 @@ class AuthProvider extends ChangeNotifier {
 
     /// Send password reset (placeholder).
     Future<void> sendPasswordReset(String email) async {
-        if (useFirebase) {
-            // TODO: Replace with FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-            throw UnimplementedError('Firebase integration not enabled.');
+        if (useClerk) {
+            // Clerk handles password reset in its UI
+            return;
         }
 
         // Fallback: no-op for local-only mode.
@@ -243,16 +257,24 @@ class AuthProvider extends ChangeNotifier {
 
     /// Sign out current user.
     Future<void> signOut() async {
-        if (useFirebase) {
-            // TODO: Replace with FirebaseAuth sign out flows.
-            // await FirebaseAuth.instance.signOut();
-            throw UnimplementedError('Firebase integration not enabled.');
+        if (useClerk) {
+            await _clerkService.signOut();
+            _user = null;
+            notifyListeners();
+            return;
         }
 
         _user = null;
         final prefs = await SharedPreferences.getInstance();
         await prefs.remove(_authUserKey);
         notifyListeners();
+    }
+
+    /// Open user profile (Clerk only)
+    Future<void> openUserProfile() async {
+        if (useClerk) {
+            await _clerkService.openUserProfile();
+        }
     }
 
     Future<void> _persistUser() async {

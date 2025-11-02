@@ -61,10 +61,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
+import 'core/providers/auth_provider.dart';
 import 'presentation/pages/home_page.dart';
+import 'presentation/pages/login_page.dart';
 import 'presentation/pages/production_page.dart';
 import 'presentation/pages/products_page.dart';
+import 'presentation/pages/profile_page.dart';
 import 'presentation/pages/recipes_page.dart';
 import 'presentation/pages/tables_page.dart';
 import 'theme.dart';
@@ -77,7 +81,14 @@ void main() async {
   await initializeDateFormatting('pt_BR', null);
   Intl.defaultLocale = 'pt_BR';
 
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -91,7 +102,45 @@ class MyApp extends StatelessWidget {
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: ThemeMode.system,
-      home: const SplashScreen(),
+      home: const AuthenticationWrapper(),
+    );
+  }
+}
+
+/// Authentication wrapper that checks auth state and routes accordingly
+class AuthenticationWrapper extends StatefulWidget {
+  const AuthenticationWrapper({super.key});
+
+  @override
+  State<AuthenticationWrapper> createState() => _AuthenticationWrapperState();
+}
+
+class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
+  @override
+  void initState() {
+    super.initState();
+    // Initialize auth provider
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthProvider>().initialize();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        // Show loading while initializing
+        if (!authProvider.initialized) {
+          return const SplashScreen();
+        }
+
+        // Route based on authentication state
+        if (authProvider.isSignedIn) {
+          return const MainNavigationScreen();
+        } else {
+          return const LoginPage();
+        }
+      },
     );
   }
 }
@@ -194,6 +243,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       NavigationTab.products: const ProductsPage(),
       NavigationTab.recipes: const RecipesPage(),
       NavigationTab.production: const ProductionPage(),
+      NavigationTab.profile: const ProfilePage(),
     };
   }
 
@@ -259,6 +309,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   icon: Icon(Icons.production_quantity_limits_outlined),
                   selectedIcon: Icon(Icons.production_quantity_limits),
                   label: Text('Produção'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.person_outlined),
+                  selectedIcon: Icon(Icons.person),
+                  label: Text('Perfil'),
                 ),
               ],
             ),

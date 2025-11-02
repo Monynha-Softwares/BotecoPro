@@ -2,10 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../main.dart';
-// TODO: Descomentar quando implementar autenticação
-// import '../../core/providers/auth_provider.dart';
-// import 'package:provider/provider.dart';
+import 'package:provider/provider.dart';
+import '../../core/providers/auth_provider.dart';
 import 'signup_page.dart';
 
 /// LoginPage - Tela de login do aplicativo
@@ -53,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  // TODO: Implementar login real com AuthProvider
+  // Login with Clerk
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -63,52 +61,46 @@ class _LoginPageState extends State<LoginPage> {
       _isLoading = true;
     });
 
-    // TODO: Substituir por lógica real de autenticação
-    // Exemplo:
-    // try {
-    //   final authProvider = context.read<AuthProvider>();
-    //   await authProvider.signInWithEmail(
-    //     _emailController.text.trim(),
-    //     _passwordController.text,
-    //   );
-    //   
-    //   if (mounted) {
-    //     Navigator.of(context).pushReplacement(
-    //       MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
-    //     );
-    //   }
-    // } catch (e) {
-    //   if (mounted) {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       SnackBar(content: Text('Erro ao fazer login: $e')),
-    //     );
-    //   }
-    // } finally {
-    //   if (mounted) {
-    //     setState(() {
-    //       _isLoading = false;
-    //     });
-    //   }
-    // }
-
-    // TEMPORÁRIO: Bypass de autenticação para desenvolvimento
-    await Future.delayed(const Duration(seconds: 1));
-    
-    if (mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+    try {
+      final authProvider = context.read<AuthProvider>();
+      
+      // Open Clerk sign-in modal (for web)
+      await authProvider.signInWithEmail(
+        _emailController.text.trim(),
+        _passwordController.text,
       );
+      
+      // Note: Clerk handles the authentication flow via modal
+      // The user will be automatically redirected when signed in
+      // via the AuthenticationWrapper in main.dart
+      
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao fazer login: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
-  // TODO: Implementar login com Google
+  // Login with Google via Clerk
   Future<void> _handleGoogleLogin() async {
-    // Implementação futura
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Login com Google será implementado em breve'),
-      ),
-    );
+    try {
+      final authProvider = context.read<AuthProvider>();
+      await authProvider.signInWithGoogle();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro: $e')),
+        );
+      }
+    }
   }
 
   @override

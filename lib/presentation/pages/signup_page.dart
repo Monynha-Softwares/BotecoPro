@@ -2,9 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-// TODO: Descomentar quando implementar autenticação
-// import '../../core/providers/auth_provider.dart';
-// import 'package:provider/provider.dart';
+import 'package:provider/provider.dart';
+import '../../core/providers/auth_provider.dart';
 
 /// SignupPage - Tela de cadastro do aplicativo
 ///
@@ -57,7 +56,7 @@ class _SignupPageState extends State<SignupPage> {
     super.dispose();
   }
 
-  // TODO: Implementar cadastro real com AuthProvider
+  // Sign up with Clerk
   Future<void> _handleSignup() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -77,53 +76,30 @@ class _SignupPageState extends State<SignupPage> {
       _isLoading = true;
     });
 
-    // TODO: Substituir por lógica real de cadastro
-    // Exemplo:
-    // try {
-    //   final authProvider = context.read<AuthProvider>();
-    //   await authProvider.registerWithEmail(
-    //     name: _nameController.text.trim(),
-    //     email: _emailController.text.trim(),
-    //     password: _passwordController.text,
-    //   );
-    //   
-    //   if (mounted) {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       const SnackBar(
-    //         content: Text('Cadastro realizado com sucesso!'),
-    //         backgroundColor: Colors.green,
-    //       ),
-    //     );
-    //     Navigator.of(context).pop();
-    //   }
-    // } catch (e) {
-    //   if (mounted) {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       SnackBar(content: Text('Erro ao cadastrar: $e')),
-    //     );
-    //   }
-    // } finally {
-    //   if (mounted) {
-    //     setState(() {
-    //       _isLoading = false;
-    //     });
-    //   }
-    // }
-
-    // TEMPORÁRIO: Simulação de cadastro para desenvolvimento
-    await Future.delayed(const Duration(seconds: 1));
-    
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Cadastro será implementado em breve!'),
-          backgroundColor: Colors.blue,
-        ),
+    try {
+      final authProvider = context.read<AuthProvider>();
+      
+      // Open Clerk sign-up modal (for web)
+      await authProvider.signUpWithEmail(
+        _emailController.text.trim(),
+        _passwordController.text,
       );
-      setState(() {
-        _isLoading = false;
-      });
-      Navigator.of(context).pop();
+      
+      // Note: Clerk handles the signup flow via modal
+      // The user will be automatically redirected when signed in
+      
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao cadastrar: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
