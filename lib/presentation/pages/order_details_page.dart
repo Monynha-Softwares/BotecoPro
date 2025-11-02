@@ -33,14 +33,11 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       _isLoading = true;
     });
 
-    // Load products and order in parallel
-    final results = await Future.wait([
+    // Load products and order in parallel using Dart 3.0 record types
+    final (products, freshOrder) = await (
       _databaseService.getProducts(),
       _getUpdatedOrder(),
-    ]);
-    
-    final products = results[0] as List<Product>;
-    final freshOrder = results[1] as Order?;
+    ).wait;
 
     if (mounted) {
       setState(() {
