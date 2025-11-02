@@ -216,6 +216,12 @@ Clerk JS SDK (window.Clerk)
 ✅ Session tokens managed by Clerk
 ✅ HTTPS required for production (Clerk requirement)
 
+⚠️ **Important for Production:**
+- The test key in `web/index.html` is for development only
+- Before deploying to production, replace with your production publishable key
+- Consider using environment variable injection during build process
+- Clerk publishable keys are safe for client-side use but should still be managed properly
+
 ## Browser Support
 
 - Chrome/Chromium ✅

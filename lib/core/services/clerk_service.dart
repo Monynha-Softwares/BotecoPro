@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:js' as js;
 import 'dart:html' as html;
+import 'package:flutter/foundation.dart';
 
 /// ClerkService - Interface with Clerk JavaScript SDK
 ///
@@ -21,7 +22,7 @@ import 'dart:html' as html;
 /// 
 /// if (clerkService.isSignedIn) {
 ///   final user = clerkService.currentUser;
-///   print('Signed in as: ${user?['emailAddress']}');
+///   debugPrint('Signed in as: ${user?['emailAddress']}');
 /// }
 /// ```
 class ClerkService {
@@ -65,12 +66,12 @@ class ClerkService {
         _setupAuthListener();
         
         _initialized = true;
-        print('ClerkService: Initialized successfully');
+        debugPrint('ClerkService: Initialized successfully');
       } else {
-        print('ClerkService: Clerk SDK not found');
+        debugPrint('ClerkService: Clerk SDK not found');
       }
     } catch (e) {
-      print('ClerkService: Initialization error: $e');
+      debugPrint('ClerkService: Initialization error: $e');
     }
   }
 
@@ -91,7 +92,7 @@ class ClerkService {
       await Future.delayed(const Duration(milliseconds: 100));
       attempts++;
     }
-    print('ClerkService: Timeout waiting for Clerk to load');
+    debugPrint('ClerkService: Timeout waiting for Clerk to load');
   }
 
   /// Set up listener for auth state changes via JavaScript
@@ -113,7 +114,7 @@ class ClerkService {
         }
       ''']);
     } catch (e) {
-      print('ClerkService: Error setting up auth listener: $e');
+      debugPrint('ClerkService: Error setting up auth listener: $e');
     }
   }
 
@@ -129,7 +130,7 @@ class ClerkService {
         _authStateController.add(null);
       }
     } catch (e) {
-      print('ClerkService: Error updating user: $e');
+      debugPrint('ClerkService: Error updating user: $e');
       _currentUser = null;
       _authStateController.add(null);
     }
@@ -146,7 +147,7 @@ class ClerkService {
         return js.context.callMethod('eval', ['window.Clerk?.$method']);
       }
     } catch (e) {
-      print('ClerkService: Error calling $method: $e');
+      debugPrint('ClerkService: Error calling $method: $e');
       return null;
     }
   }
@@ -157,7 +158,10 @@ class ClerkService {
     
     try {
       final jsonString = js.context['JSON'].callMethod('stringify', [jsObject]);
-      return html.window.localStorage[jsonString] as Map<String, dynamic>? ?? {};
+      // Parse the JSON string to Map
+      return Map<String, dynamic>.from(
+        js.context['JSON'].callMethod('parse', [jsonString])
+      );
     } catch (e) {
       // Fallback: extract basic properties
       return {
@@ -190,7 +194,7 @@ class ClerkService {
     try {
       js.context.callMethod('eval', ['window.Clerk?.openSignIn()']);
     } catch (e) {
-      print('ClerkService: Error opening sign in: $e');
+      debugPrint('ClerkService: Error opening sign in: $e');
     }
   }
 
@@ -199,7 +203,7 @@ class ClerkService {
     try {
       js.context.callMethod('eval', ['window.Clerk?.openSignUp()']);
     } catch (e) {
-      print('ClerkService: Error opening sign up: $e');
+      debugPrint('ClerkService: Error opening sign up: $e');
     }
   }
 
@@ -208,7 +212,7 @@ class ClerkService {
     try {
       js.context.callMethod('eval', ['window.Clerk?.openUserProfile()']);
     } catch (e) {
-      print('ClerkService: Error opening user profile: $e');
+      debugPrint('ClerkService: Error opening user profile: $e');
     }
   }
 
@@ -219,7 +223,7 @@ class ClerkService {
       _currentUser = null;
       _authStateController.add(null);
     } catch (e) {
-      print('ClerkService: Error signing out: $e');
+      debugPrint('ClerkService: Error signing out: $e');
     }
   }
 
@@ -235,7 +239,7 @@ class ClerkService {
         }
       ''']);
     } catch (e) {
-      print('ClerkService: Error mounting component: $e');
+      debugPrint('ClerkService: Error mounting component: $e');
     }
   }
 
