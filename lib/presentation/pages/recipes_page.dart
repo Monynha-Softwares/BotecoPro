@@ -39,14 +39,11 @@ class _RecipesPageState extends State<RecipesPage> {
       _isLoading = true;
     });
 
-    // Load products and recipes in parallel
-    final results = await Future.wait([
+    // Load products and recipes in parallel using Dart 3.0 record types
+    final (products, recipes) = await (
       _databaseService.getProducts(),
-      _databaseService.getRecipes(),
-    ]);
-    
-    final products = results[0] as List<Product>;
-    final recipes = results[1] as List<Recipe>;
+      _databaseService.getRecipes()
+    ).wait;
 
     if (mounted) {
       setState(() {
