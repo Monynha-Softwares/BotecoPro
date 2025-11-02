@@ -706,7 +706,7 @@ class DatabaseService {
     // More efficient filtering with early exit
     double total = 0;
     for (var sale in sales) {
-      if (sale.timestamp.isAfter(startOfDay) && sale.timestamp.isBefore(endOfDay)) {
+      if (!sale.timestamp.isBefore(startOfDay) && sale.timestamp.isBefore(endOfDay)) {
         total += sale.total;
       }
     }
