@@ -39,8 +39,14 @@ class _RecipesPageState extends State<RecipesPage> {
       _isLoading = true;
     });
 
-    final products = await _databaseService.getProducts();
-    final recipes = await _databaseService.getRecipes();
+    // Load products and recipes in parallel
+    final results = await Future.wait([
+      _databaseService.getProducts(),
+      _databaseService.getRecipes(),
+    ]);
+    
+    final products = results[0] as List<Product>;
+    final recipes = results[1] as List<Recipe>;
 
     if (mounted) {
       setState(() {

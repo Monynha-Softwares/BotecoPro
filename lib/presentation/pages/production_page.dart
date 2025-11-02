@@ -40,9 +40,16 @@ class _ProductionPageState extends State<ProductionPage> {
       _isLoading = true;
     });
 
-    final products = await _databaseService.getProducts();
-    final recipes = await _databaseService.getRecipes();
-    final productions = await _databaseService.getInternalProductions();
+    // Load all data in parallel
+    final results = await Future.wait([
+      _databaseService.getProducts(),
+      _databaseService.getRecipes(),
+      _databaseService.getInternalProductions(),
+    ]);
+    
+    final products = results[0] as List<Product>;
+    final recipes = results[1] as List<Recipe>;
+    final productions = results[2] as List<InternalProduction>;
 
     if (mounted) {
       setState(() {

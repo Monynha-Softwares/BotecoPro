@@ -33,8 +33,14 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       _isLoading = true;
     });
 
-    final products = await _databaseService.getProducts();
-    final freshOrder = await _getUpdatedOrder();
+    // Load products and order in parallel
+    final results = await Future.wait([
+      _databaseService.getProducts(),
+      _getUpdatedOrder(),
+    ]);
+    
+    final products = results[0] as List<Product>;
+    final freshOrder = results[1] as Order?;
 
     if (mounted) {
       setState(() {

@@ -187,6 +187,17 @@ class DatabaseService {
     }
   }
 
+  /// Clear all in-memory caches (useful for memory management)
+  void clearCache() {
+    _suppliersCache = null;
+    _productsCache = null;
+    _tablesCache = null;
+    _ordersCache = null;
+    _salesCache = null;
+    _recipesCache = null;
+    _productionsCache = null;
+  }
+
   /// Dispose resources (call when app closes)
   void dispose() {
     _notifyTimer?.cancel();
