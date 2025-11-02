@@ -13,10 +13,10 @@ class BottomNavigation extends StatelessWidget {
   final Function(NavigationTab) onTabSelected;
 
   const BottomNavigation({
-    Key? key,
+    super.key,
     required this.currentTab,
     required this.onTabSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

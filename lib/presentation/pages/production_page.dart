@@ -5,7 +5,7 @@ import '../widgets/shared_widgets.dart';
 import '../../core/models/data_models.dart';
 
 class ProductionPage extends StatefulWidget {
-  const ProductionPage({Key? key}) : super(key: key);
+  const ProductionPage({super.key});
 
   @override
   State<ProductionPage> createState() => _ProductionPageState();

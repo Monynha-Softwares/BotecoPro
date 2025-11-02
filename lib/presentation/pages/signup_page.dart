@@ -31,7 +31,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 ///
 /// OBSERVAÇÃO: Atualmente apenas mostra interface para desenvolvimento
 class SignupPage extends StatefulWidget {
-  const SignupPage({Key? key}) : super(key: key);
+  const SignupPage({super.key});
 
   @override
   State<SignupPage> createState() => _SignupPageState();

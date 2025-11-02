@@ -11,7 +11,7 @@ import 'package:intl/intl.dart';
 class HomePage extends StatefulWidget {
   final Function(NavigationTab) onTabSelected;
 
-  const HomePage({Key? key, required this.onTabSelected}) : super(key: key);
+  const HomePage({super.key, required this.onTabSelected});
 
   @override
   State<HomePage> createState() => _HomePageState();

@@ -55,6 +55,8 @@
 /// - [ ] Criar views para relatórios complexos
 /// - [ ] Implementar soft delete (não deletar, marcar como inativo)
 ///
+library;
+
 // Future SQLite provider implementation using `sqlite3`.
 // This provider stores each entity as a JSON blob in a simple table per entity.
 // It mirrors the async CRUD patterns used by the SharedPreferences DatabaseService.
@@ -188,14 +190,6 @@ class DatabaseProvider {
             final raw = row['data'] as String;
             return jsonDecode(raw) as Map<String, dynamic>;
         }).toList();
-    }
-
-    Future<Map<String, dynamic>?> _getById(String table, String id) async {
-        if (_db == null) throw StateError('Database not initialized');
-        final result = _db!.select('SELECT data FROM $table WHERE id = ?;', [id]);
-        if (result.isEmpty) return null;
-        final raw = result.first['data'] as String;
-        return jsonDecode(raw) as Map<String, dynamic>;
     }
 
     // Suppliers

@@ -54,6 +54,8 @@
 /// - provider: Gerenciamento de estado (preparado)
 /// - intl: Formatação de datas e moeda (pt_BR)
 ///
+library;
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -170,7 +172,7 @@ class _SplashScreenState extends State<SplashScreen> {
 }
 
 class MainNavigationScreen extends StatefulWidget {
-  const MainNavigationScreen({Key? key}) : super(key: key);
+  const MainNavigationScreen({super.key});
 
   @override
   State<MainNavigationScreen> createState() => _MainNavigationScreenState();
@@ -221,31 +223,31 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   color: Theme.of(context).colorScheme.primary,
                 ),
               ),
-              destinations: [
+              destinations: const [
                 NavigationRailDestination(
-                  icon: const Icon(Icons.home_outlined),
-                  selectedIcon: const Icon(Icons.home),
-                  label: const Text('Início'),
+                  icon: Icon(Icons.home_outlined),
+                  selectedIcon: Icon(Icons.home),
+                  label: Text('Início'),
                 ),
                 NavigationRailDestination(
-                  icon: const Icon(Icons.table_bar_outlined),
-                  selectedIcon: const Icon(Icons.table_bar),
-                  label: const Text('Mesas'),
+                  icon: Icon(Icons.table_bar_outlined),
+                  selectedIcon: Icon(Icons.table_bar),
+                  label: Text('Mesas'),
                 ),
                 NavigationRailDestination(
-                  icon: const Icon(Icons.inventory_2_outlined),
-                  selectedIcon: const Icon(Icons.inventory_2),
-                  label: const Text('Produtos'),
+                  icon: Icon(Icons.inventory_2_outlined),
+                  selectedIcon: Icon(Icons.inventory_2),
+                  label: Text('Produtos'),
                 ),
                 NavigationRailDestination(
-                  icon: const Icon(Icons.menu_book_outlined),
-                  selectedIcon: const Icon(Icons.menu_book),
-                  label: const Text('Receitas'),
+                  icon: Icon(Icons.menu_book_outlined),
+                  selectedIcon: Icon(Icons.menu_book),
+                  label: Text('Receitas'),
                 ),
                 NavigationRailDestination(
-                  icon: const Icon(Icons.production_quantity_limits_outlined),
-                  selectedIcon: const Icon(Icons.production_quantity_limits),
-                  label: const Text('Produção'),
+                  icon: Icon(Icons.production_quantity_limits_outlined),
+                  selectedIcon: Icon(Icons.production_quantity_limits),
+                  label: Text('Produção'),
                 ),
               ],
             ),

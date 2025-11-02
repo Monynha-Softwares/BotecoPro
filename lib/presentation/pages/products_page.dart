@@ -5,7 +5,7 @@ import '../widgets/shared_widgets.dart';
 import '../../core/models/data_models.dart';
 
 class ProductsPage extends StatefulWidget {
-  const ProductsPage({Key? key}) : super(key: key);
+  const ProductsPage({super.key});
 
   @override
   State<ProductsPage> createState() => _ProductsPageState();

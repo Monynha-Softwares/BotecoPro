@@ -6,7 +6,7 @@ import '../../core/models/data_models.dart';
 import 'order_details_page.dart';
 
 class TablesPage extends StatefulWidget {
-  const TablesPage({Key? key}) : super(key: key);
+  const TablesPage({super.key});
 
   @override
   State<TablesPage> createState() => _TablesPageState();

@@ -54,6 +54,8 @@
 /// - delete*(): Remove entidade por ID
 /// - save*(): Salva lista completa de entidades
 ///
+library;
+
 
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';

@@ -5,7 +5,7 @@ import '../widgets/shared_widgets.dart';
 import '../../core/models/data_models.dart';
 
 class RecipesPage extends StatefulWidget {
-  const RecipesPage({Key? key}) : super(key: key);
+  const RecipesPage({super.key});
 
   @override
   State<RecipesPage> createState() => _RecipesPageState();
@@ -256,11 +256,11 @@ class _RecipesPageState extends State<RecipesPage> {
                     decoration: const InputDecoration(
                       labelText: 'Tipo*',
                     ),
-                    items: [
+                    items: const [
                       DropdownMenuItem(
                         value: RecipeType.food,
                         child: Row(
-                          children: const [
+                          children: [
                             Icon(Icons.restaurant, size: 20),
                             SizedBox(width: 8),
                             Text('Comida'),
@@ -270,7 +270,7 @@ class _RecipesPageState extends State<RecipesPage> {
                       DropdownMenuItem(
                         value: RecipeType.drink,
                         child: Row(
-                          children: const [
+                          children: [
                             Icon(Icons.local_bar, size: 20),
                             SizedBox(width: 8),
                             Text('Bebida'),
@@ -404,11 +404,11 @@ class _RecipesPageState extends State<RecipesPage> {
                     decoration: const InputDecoration(
                       labelText: 'Tipo*',
                     ),
-                    items: [
+                    items: const [
                       DropdownMenuItem(
                         value: RecipeType.food,
                         child: Row(
-                          children: const [
+                          children: [
                             Icon(Icons.restaurant, size: 20),
                             SizedBox(width: 8),
                             Text('Comida'),
@@ -418,7 +418,7 @@ class _RecipesPageState extends State<RecipesPage> {
                       DropdownMenuItem(
                         value: RecipeType.drink,
                         child: Row(
-                          children: const [
+                          children: [
                             Icon(Icons.local_bar, size: 20),
                             SizedBox(width: 8),
                             Text('Bebida'),

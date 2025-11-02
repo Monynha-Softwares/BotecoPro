@@ -26,11 +26,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showBackButton;
 
   const CustomAppBar({
-    Key? key,
+    super.key,
     required this.title,
     this.actions,
     this.showBackButton = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -71,12 +71,12 @@ class MenuCard extends StatelessWidget {
   final Color? backgroundColor;
 
   const MenuCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.icon,
     required this.onTap,
     this.backgroundColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -138,12 +138,12 @@ class StatusCard extends StatelessWidget {
   final Color? color;
 
   const StatusCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.value,
     required this.icon,
     this.color,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -203,7 +203,7 @@ class StatusCard extends StatelessWidget {
 class StatusBadge extends StatelessWidget {
   final OrderStatus status;
 
-  const StatusBadge({Key? key, required this.status}) : super(key: key);
+  const StatusBadge({super.key, required this.status});
 
   @override
   Widget build(BuildContext context) {
@@ -276,12 +276,12 @@ class QuantitySelector extends StatelessWidget {
   final int max;
 
   const QuantitySelector({
-    Key? key,
+    super.key,
     required this.quantity,
     required this.onChanged,
     this.min = 1,
     this.max = 99,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -339,10 +339,10 @@ class CategoryFilter extends StatelessWidget {
   final ValueChanged<ProductCategory?> onCategorySelected;
 
   const CategoryFilter({
-    Key? key,
+    super.key,
     required this.selectedCategory,
     required this.onCategorySelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -352,11 +352,11 @@ class CategoryFilter extends StatelessWidget {
       child: Row(
         children: [
           FilterChip(
-            label: Row(
+            label: const Row(
               children: [
-                const Icon(Icons.filter_alt_off, size: 16),
-                const SizedBox(width: 4),
-                const Text('Todos'),
+                Icon(Icons.filter_alt_off, size: 16),
+                SizedBox(width: 4),
+                Text('Todos'),
               ],
             ),
             selected: selectedCategory == null,
@@ -374,11 +374,11 @@ class CategoryFilter extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           FilterChip(
-            label: Row(
+            label: const Row(
               children: [
-                const Icon(Icons.local_bar, size: 16),
-                const SizedBox(width: 4),
-                const Text('Bebidas'),
+                Icon(Icons.local_bar, size: 16),
+                SizedBox(width: 4),
+                Text('Bebidas'),
               ],
             ),
             selected: selectedCategory == ProductCategory.drink,
@@ -397,11 +397,11 @@ class CategoryFilter extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           FilterChip(
-            label: Row(
+            label: const Row(
               children: [
-                const Icon(Icons.restaurant, size: 16),
-                const SizedBox(width: 4),
-                const Text('Comidas'),
+                Icon(Icons.restaurant, size: 16),
+                SizedBox(width: 4),
+                Text('Comidas'),
               ],
             ),
             selected: selectedCategory == ProductCategory.food,
@@ -420,11 +420,11 @@ class CategoryFilter extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           FilterChip(
-            label: Row(
+            label: const Row(
               children: [
-                const Icon(Icons.category, size: 16),
-                const SizedBox(width: 4),
-                const Text('Outros'),
+                Icon(Icons.category, size: 16),
+                SizedBox(width: 4),
+                Text('Outros'),
               ],
             ),
             selected: selectedCategory == ProductCategory.other,
@@ -456,13 +456,13 @@ class ConfirmationDialog extends StatelessWidget {
   final VoidCallback onConfirm;
 
   const ConfirmationDialog({
-    Key? key,
+    super.key,
     required this.title,
     required this.content,
     this.confirmText = 'Confirmar',
     this.cancelText = 'Cancelar',
     required this.onConfirm,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -503,12 +503,12 @@ class EmptyStateCard extends StatelessWidget {
   final VoidCallback? onAction;
 
   const EmptyStateCard({
-    Key? key,
+    super.key,
     required this.message,
     required this.icon,
     this.actionText,
     this.onAction,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -563,13 +563,13 @@ class ActionButton extends StatelessWidget {
   final Color? foregroundColor;
 
   const ActionButton({
-    Key? key,
+    super.key,
     required this.icon,
     required this.label,
     required this.onPressed,
     this.backgroundColor,
     this.foregroundColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

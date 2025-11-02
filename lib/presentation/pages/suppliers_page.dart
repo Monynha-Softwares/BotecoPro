@@ -5,7 +5,7 @@ import '../widgets/shared_widgets.dart';
 import '../../core/models/data_models.dart';
 
 class SuppliersPage extends StatefulWidget {
-  const SuppliersPage({Key? key}) : super(key: key);
+  const SuppliersPage({super.key});
 
   @override
   State<SuppliersPage> createState() => _SuppliersPageState();
