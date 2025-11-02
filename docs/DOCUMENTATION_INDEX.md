@@ -39,12 +39,12 @@ Start here → [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) (20 min read)
 |------|---------|-----------|----------|
 | **[README.md](./README.md)** | 📖 Project overview & quick start | 10 min | All |
 | **[QUICK_SUMMARY.md](./QUICK_SUMMARY.md)** | 📋 Audit results & recommendations | 5 min | Managers |
-| **[WEB_AUDIT_AND_DEPLOYMENT.md](./WEB_AUDIT_AND_DEPLOYMENT.md)** | 🔍 Detailed technical audit | 30 min | Developers |
 | **[FIREBASE_DEPLOYMENT_GUIDE.md](./FIREBASE_DEPLOYMENT_GUIDE.md)** | 🚀 Deployment step-by-step | 15 min | DevOps |
 | **[WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md)** | 🏗️ System architecture & design | 20 min | Architects |
 | **[COMMANDS.md](./COMMANDS.md)** | ⚡ Command reference & quick tips | 5 min | Developers |
 | **[CHANGELOG.md](./CHANGELOG.md)** | 📝 Version history & changes | 15 min | All |
-| **[AUDIT_REPORT.txt](./AUDIT_REPORT.txt)** | 🎯 ASCII audit summary | 3 min | All |
+| **[AGENTS.md](../AGENTS.md)** | 🤖 AI Agent guidelines & architecture | 10 min | AI Agents |
+| **[AI_RULES.md](../AI_RULES.md)** | 🎯 AI collaboration & project partners | 8 min | AI Assistants |
 
 ---
 
@@ -60,18 +60,19 @@ Start here → [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) (20 min read)
 ### Path 2: "I need to understand everything" (60 minutes)
 1. [README.md](./README.md) - Overview (10 min)
 2. [QUICK_SUMMARY.md](./QUICK_SUMMARY.md) - Audit results (5 min)
-3. [WEB_AUDIT_AND_DEPLOYMENT.md](./WEB_AUDIT_AND_DEPLOYMENT.md) - Technical details (30 min)
-4. [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) - Architecture (15 min)
+3. [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) - Architecture (20 min)
+4. [FIREBASE_DEPLOYMENT_GUIDE.md](./FIREBASE_DEPLOYMENT_GUIDE.md) - Deployment (15 min)
+5. [CHANGELOG.md](./CHANGELOG.md) - Changes (15 min)
 
 **Result**: Complete understanding ✅
 
-### Path 3: "I'm the developer" (90 minutes)
+### Path 3: "I'm the developer" (75 minutes)
 1. [README.md](./README.md) - Project overview (10 min)
-2. [WEB_AUDIT_AND_DEPLOYMENT.md](./WEB_AUDIT_AND_DEPLOYMENT.md) - What changed (30 min)
-3. [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) - How it works (20 min)
+2. [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) - How it works (20 min)
+3. [AGENTS.md](../AGENTS.md) - Development guidelines (10 min)
 4. [COMMANDS.md](./COMMANDS.md) - Useful commands (5 min)
 5. [CHANGELOG.md](./CHANGELOG.md) - All changes (15 min)
-6. Setup local environment (10 min)
+6. Setup local environment (15 min)
 
 **Result**: Ready to develop ✅
 
@@ -116,22 +117,6 @@ Start here → [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) (20 min read)
 - ✅ Tech stack
 
 **Best for:** Managers, decision-makers, quick overview
-
----
-
-### [WEB_AUDIT_AND_DEPLOYMENT.md](./WEB_AUDIT_AND_DEPLOYMENT.md)
-**Technical audit report** - Deep technical analysis
-
-**Contains:**
-- ✅ Problem breakdown (before/after)
-- ✅ Detailed code changes
-- ✅ Build statistics
-- ✅ Deployment options
-- ✅ Security considerations
-- ✅ Performance analysis
-- ✅ Complete checklist
-
-**Best for:** Developers, architects, technical decision-makers
 
 ---
 
@@ -198,19 +183,33 @@ Start here → [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) (20 min read)
 
 ---
 
-### [AUDIT_REPORT.txt](./AUDIT_REPORT.txt)
-**Visual audit summary** - Pretty ASCII art overview
+### [AGENTS.md](../AGENTS.md)
+**AI Agent guidelines** - Architecture and development for AI assistants
 
 **Contains:**
-- ✅ Audit summary (visual)
-- ✅ Key achievements
-- ✅ Build statistics
-- ✅ Validation results
-- ✅ Deployment readiness
-- ✅ Quality metrics
-- ✅ Quick commands
+- ✅ System architecture overview
+- ✅ Development commands and workflows
+- ✅ Code patterns and conventions
+- ✅ Database service implementation
+- ✅ State management patterns
+- ✅ Testing and validation procedures
 
-**Best for:** Quick visual overview, printing
+**Best for:** AI agents working on the codebase
+
+---
+
+### [AI_RULES.md](../AI_RULES.md)
+**AI collaboration framework** - Project partners and component guidelines
+
+**Contains:**
+- ✅ Project partner definitions
+- ✅ Component partner responsibilities
+- ✅ AI collaboration protocols
+- ✅ Code review guidelines
+- ✅ Documentation standards
+- ✅ Quality assurance procedures
+
+**Best for:** AI assistants collaborating on development
 
 ---
 
@@ -254,10 +253,11 @@ BotecoPro/
 │   ├── DOCUMENTATION_INDEX.md            # This file
 │   ├── QUICK_SUMMARY.md                  # Executive summary
 │   ├── WEB_ARCHITECTURE.md               # Technical architecture
-│   ├── WEB_AUDIT_AND_DEPLOYMENT.md       # Audit report
 │   ├── FIREBASE_DEPLOYMENT_GUIDE.md      # Deployment guide
 │   ├── CHANGELOG.md                      # Version history
-│   └── AUDIT_REPORT.txt                  # Visual summary
+│   ├── COMMANDS.md                       # Quick commands
+│   ├── FILE_STRUCTURE_UPDATE.md          # File structure updates
+│   └── AUDIT_REPORT.txt                  # Legacy audit report
 │
 ├── web/                                  # 🌐 Web platform files
 │   ├── index.html                        # HTML entry point
@@ -283,6 +283,8 @@ BotecoPro/
 ├── analysis_options.yaml                 # Lint configuration
 ├── README.md                             # Project README
 ├── COMMANDS.md                           # Quick commands
+├── AGENTS.md                             # AI Agent guidelines
+├── AI_RULES.md                           # AI collaboration rules
 └── Dockerfile                            # Docker configuration
 ```
 
@@ -361,7 +363,7 @@ The authentication system is implemented across multiple layers:
 
 **Architecture?**
 → [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) (System design)
-→ [WEB_AUDIT_AND_DEPLOYMENT.md](./WEB_AUDIT_AND_DEPLOYMENT.md) (Technical details)
+→ [AGENTS.md](../AGENTS.md) (Development guidelines)
 
 **What changed?**
 → [CHANGELOG.md](./CHANGELOG.md) (All changes)
@@ -369,12 +371,13 @@ The authentication system is implemented across multiple layers:
 
 **How to develop?**
 → [README.md](./README.md) (Setup & structure)
+→ [AGENTS.md](../AGENTS.md) (AI development)
 → [COMMANDS.md](./COMMANDS.md) (Dev commands)
 → [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) (How it works)
 
-**Performance?**
-→ [WEB_AUDIT_AND_DEPLOYMENT.md](./WEB_AUDIT_AND_DEPLOYMENT.md) (Benchmarks)
-→ [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) (Optimization)
+**AI Collaboration?**
+→ [AI_RULES.md](../AI_RULES.md) (Collaboration guidelines)
+→ [AGENTS.md](../AGENTS.md) (Development standards)
 
 **Cost?**
 → [FIREBASE_DEPLOYMENT_GUIDE.md](./FIREBASE_DEPLOYMENT_GUIDE.md) (Firebase pricing)
@@ -424,14 +427,14 @@ The authentication system is implemented across multiple layers:
 |----------|----------|--------|----------------|--------------|
 | README.md | 20+ | All | Many | 10 min |
 | QUICK_SUMMARY.md | 15 | Key | Some | 5 min |
-| WEB_AUDIT_AND_DEPLOYMENT.md | 25 | Detailed | Many | 30 min |
 | FIREBASE_DEPLOYMENT_GUIDE.md | 12 | Deploy | Many | 15 min |
 | WEB_ARCHITECTURE.md | 18 | Technical | Some | 20 min |
 | COMMANDS.md | 15 | Commands | All | 5 min |
 | CHANGELOG.md | 12 | Changes | Some | 15 min |
-| AUDIT_REPORT.txt | 1 | Overview | None | 3 min |
+| AGENTS.md | 15 | Architecture | Many | 10 min |
+| AI_RULES.md | 12 | Guidelines | Some | 8 min |
 
-**Total**: 118 sections, 1000+ lines of documentation
+**Total**: 119 sections, 950+ lines of documentation
 
 ---
 
@@ -443,7 +446,8 @@ The authentication system is implemented across multiple layers:
 - [ ] I have the deployment steps from [FIREBASE_DEPLOYMENT_GUIDE.md](./FIREBASE_DEPLOYMENT_GUIDE.md)
 - [ ] I have useful commands in [COMMANDS.md](./COMMANDS.md)
 - [ ] I know what changed in [CHANGELOG.md](./CHANGELOG.md)
-- [ ] I've reviewed [AUDIT_REPORT.txt](./AUDIT_REPORT.txt)
+- [ ] I understand AI development guidelines from [AGENTS.md](../AGENTS.md)
+- [ ] I understand AI collaboration rules from [AI_RULES.md](../AI_RULES.md)
 - [ ] I'm ready to deploy/develop
 
 **If all checked**: You're ready to go! ✅
@@ -465,11 +469,12 @@ The authentication system is implemented across multiple layers:
 4. Use [COMMANDS.md](./COMMANDS.md) for development
 
 ### To Contribute:
-1. Read [CHANGELOG.md](./CHANGELOG.md) for context
-2. Review [WEB_AUDIT_AND_DEPLOYMENT.md](./WEB_AUDIT_AND_DEPLOYMENT.md) for technical details
-3. Read [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) for system design
-4. Make improvements
-5. Submit PR
+1. Read [AGENTS.md](../AGENTS.md) for development guidelines
+2. Read [AI_RULES.md](../AI_RULES.md) for collaboration standards
+3. Read [CHANGELOG.md](./CHANGELOG.md) for recent changes
+4. Read [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) for system design
+5. Make improvements following AI guidelines
+6. Submit PR
 
 ---
 
@@ -478,6 +483,10 @@ The authentication system is implemented across multiple layers:
 **General questions?** → Read [README.md](./README.md)
 
 **Technical questions?** → Read [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md)
+
+**AI Development?** → Read [AGENTS.md](../AGENTS.md)
+
+**AI Collaboration?** → Read [AI_RULES.md](../AI_RULES.md)
 
 **Deployment help?** → Read [FIREBASE_DEPLOYMENT_GUIDE.md](./FIREBASE_DEPLOYMENT_GUIDE.md)
 
@@ -489,20 +498,20 @@ The authentication system is implemented across multiple layers:
 
 **Duration**: ~2 hours for complete understanding
 
-1. **Quick Overview** (5 min)
-   → [AUDIT_REPORT.txt](./AUDIT_REPORT.txt)
-
-2. **Executive Summary** (5 min)
+1. **Executive Summary** (5 min)
    → [QUICK_SUMMARY.md](./QUICK_SUMMARY.md)
 
-3. **Project Details** (10 min)
+2. **Project Details** (10 min)
    → [README.md](./README.md)
 
-4. **Technical Architecture** (20 min)
+3. **Technical Architecture** (20 min)
    → [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md)
 
-5. **Detailed Audit** (30 min)
-   → [WEB_AUDIT_AND_DEPLOYMENT.md](./WEB_AUDIT_AND_DEPLOYMENT.md)
+4. **AI Development Guidelines** (10 min)
+   → [AGENTS.md](../AGENTS.md)
+
+5. **AI Collaboration Rules** (8 min)
+   → [AI_RULES.md](../AI_RULES.md)
 
 6. **Deployment Guide** (15 min)
    → [FIREBASE_DEPLOYMENT_GUIDE.md](./FIREBASE_DEPLOYMENT_GUIDE.md)
@@ -520,9 +529,9 @@ The authentication system is implemented across multiple layers:
 
 ---
 
-**Last Updated**: 22 Octobre 2025
-**Status**: ✅ Complete & Ready
-**Version**: 1.0.0-web-mvp
+**Last Updated**: 2 November 2025
+**Status**: ✅ Complete & Updated
+**Version**: 1.1.0-web-mvp
 
 ---
 

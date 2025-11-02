@@ -1,16 +1,16 @@
 # ⚡ COMMANDES RAPIDES - BotecoPro
 
-## 🚀 DÉMARRER
+## � WSL Environment Setup (Recommended)
 
 ```bash
-# Setup initial
-cd /workspaces/BotecoPro
-flutter pub get
+# If using WSL on Windows, run Flutter commands from WSL
+wsl bash -lc "cd /mnt/c/Users/$(whoami)/Desktop/Monynha\ Sotwares/Codebase/BotecoPro && flutter --version"
 
-# Lancer localement (web)
-flutter run -d web
+# Setup Flutter in WSL
+wsl bash -lc "export PATH=\$PATH:\$HOME/flutter/bin && flutter pub get"
 
-# Ouvrir http://localhost:8080 dans le navigateur
+# Run web app in WSL
+wsl bash -lc "cd /mnt/c/Users/$(whoami)/Desktop/Monynha\ Sotwares/Codebase/BotecoPro && flutter run -d web"
 ```
 
 ---
