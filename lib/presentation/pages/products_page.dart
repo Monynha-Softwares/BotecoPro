@@ -19,20 +19,20 @@ class _ProductsPageState extends State<ProductsPage> {
   List<Supplier> _suppliers = [];
   bool _isLoading = true;
   ProductCategory? _selectedCategory;
-  StreamSubscription<String>? _dbSub;
+  StreamSubscription<String>? _databaseChangesSubscription;
   
   @override
   void initState() {
     super.initState();
     _loadData();
-    _dbSub = _databaseService.changes.listen((_) {
+    _databaseChangesSubscription = _databaseService.changes.listen((_) {
       if (mounted) _loadData();
     });
   }
 
   @override
   void dispose() {
-    _dbSub?.cancel();
+    _databaseChangesSubscription?.cancel();
     super.dispose();
   }
 
@@ -61,7 +61,7 @@ class _ProductsPageState extends State<ProductsPage> {
     if (category == null) {
       return products;
     }
-    return products.where((p) => p.category == category).toList();
+    return products.where((product) => product.category == category).toList();
   }
 
   @override

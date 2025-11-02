@@ -17,20 +17,20 @@ class _RecipesPageState extends State<RecipesPage> {
   bool _isLoading = true;
   List<Recipe> _recipes = [];
   List<Product> _products = [];
-  StreamSubscription<String>? _dbSub;
+  StreamSubscription<String>? _databaseChangesSubscription;
 
   @override
   void initState() {
     super.initState();
     _loadData();
-    _dbSub = _databaseService.changes.listen((_) {
+    _databaseChangesSubscription = _databaseService.changes.listen((_) {
       if (mounted) _loadData();
     });
   }
 
   @override
   void dispose() {
-    _dbSub?.cancel();
+    _databaseChangesSubscription?.cancel();
     super.dispose();
   }
 

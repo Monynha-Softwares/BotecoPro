@@ -16,20 +16,20 @@ class _SuppliersPageState extends State<SuppliersPage> {
   final DatabaseService _databaseService = DatabaseService();
   List<Supplier> _suppliers = [];
   bool _isLoading = true;
-  StreamSubscription<String>? _dbSub;
+  StreamSubscription<String>? _databaseChangesSubscription;
 
   @override
   void initState() {
     super.initState();
     _loadSuppliers();
-    _dbSub = _databaseService.changes.listen((_) {
+    _databaseChangesSubscription = _databaseService.changes.listen((_) {
       if (mounted) _loadSuppliers();
     });
   }
 
   @override
   void dispose() {
-    _dbSub?.cancel();
+    _databaseChangesSubscription?.cancel();
     super.dispose();
   }
 

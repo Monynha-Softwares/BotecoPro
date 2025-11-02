@@ -17,20 +17,20 @@ class _TablesPageState extends State<TablesPage> {
   final DatabaseService _databaseService = DatabaseService();
   List<TableModel> _tables = [];
   bool _isLoading = true;
-  StreamSubscription<String>? _dbSub;
+  StreamSubscription<String>? _databaseChangesSubscription;
 
   @override
   void initState() {
     super.initState();
     _loadTables();
-    _dbSub = _databaseService.changes.listen((_) {
+    _databaseChangesSubscription = _databaseService.changes.listen((_) {
       if (mounted) _loadTables();
     });
   }
 
   @override
   void dispose() {
-    _dbSub?.cancel();
+    _databaseChangesSubscription?.cancel();
     super.dispose();
   }
 
