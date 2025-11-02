@@ -18,20 +18,20 @@ class _ProductionPageState extends State<ProductionPage> {
   List<InternalProduction> _productions = [];
   List<Product> _products = [];
   List<Recipe> _recipes = [];
-  StreamSubscription<String>? _dbSub;
+  StreamSubscription<String>? _databaseChangesSubscription;
 
   @override
   void initState() {
     super.initState();
     _loadData();
-    _dbSub = _databaseService.changes.listen((_) {
+    _databaseChangesSubscription = _databaseService.changes.listen((_) {
       if (mounted) _loadData();
     });
   }
 
   @override
   void dispose() {
-    _dbSub?.cancel();
+    _databaseChangesSubscription?.cancel();
     super.dispose();
   }
 

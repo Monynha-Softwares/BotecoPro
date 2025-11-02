@@ -421,7 +421,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
 
   Future<void> _removeItem(OrderItem item) async {
     // Remover o item da lista
-    final List<OrderItem> updatedItems = _order.items.where((i) => i.id != item.id).toList();
+    final List<OrderItem> updatedItems = _order.items.where((orderItem) => orderItem.id != item.id).toList();
     final updatedOrder = _order.copyWith(items: updatedItems);
     await _databaseService.updateOrder(updatedOrder);
 
@@ -446,7 +446,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         builder: (context, setState) {
           List<Product> filteredProducts = _products;
           if (selectedCategory != null) {
-            filteredProducts = _products.where((p) => p.category == selectedCategory).toList();
+            filteredProducts = _products.where((product) => product.category == selectedCategory).toList();
           }
           
           return Container(

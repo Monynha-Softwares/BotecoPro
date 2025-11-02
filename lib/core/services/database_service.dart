@@ -79,8 +79,8 @@ class DatabaseService {
   DatabaseService._internal();
 
   // Cache SharedPreferences instance to avoid repeated async lookups
-  SharedPreferences? _prefs;
-  Completer<SharedPreferences>? _prefsCompleter;
+  SharedPreferences? _sharedPreferences;
+  Completer<SharedPreferences>? _sharedPreferencesCompleter;
 
   // Mutex for write operations to prevent race conditions
   final Map<String, Completer<void>> _writeLocks = {};
@@ -108,22 +108,22 @@ class DatabaseService {
 
   /// Get cached SharedPreferences instance (web-optimized)
   Future<SharedPreferences> get _prefsInstance async {
-    if (_prefs != null) return _prefs!;
+    if (_sharedPreferences != null) return _sharedPreferences!;
     
     // If already loading, wait for it
-    if (_prefsCompleter != null) {
-      return _prefsCompleter!.future;
+    if (_sharedPreferencesCompleter != null) {
+      return _sharedPreferencesCompleter!.future;
     }
     
     // Start loading
-    _prefsCompleter = Completer<SharedPreferences>();
+    _sharedPreferencesCompleter = Completer<SharedPreferences>();
     try {
-      _prefs = await SharedPreferences.getInstance();
-      _prefsCompleter!.complete(_prefs!);
-      return _prefs!;
-    } catch (e) {
-      _prefsCompleter!.completeError(e);
-      _prefsCompleter = null;
+      _sharedPreferences = await SharedPreferences.getInstance();
+      _sharedPreferencesCompleter!.complete(_sharedPreferences!);
+      return _sharedPreferences!;
+    } catch (error) {
+      _sharedPreferencesCompleter!.completeError(error);
+      _sharedPreferencesCompleter = null;
       rethrow;
     }
   }
@@ -367,14 +367,14 @@ class DatabaseService {
       final prefs = await _prefsInstance;
       final suppliersJson = prefs.getStringList(_suppliersKey) ?? [];
       final suppliers = suppliersJson
-          .map((e) => Supplier.fromJson(jsonDecode(e)))
+          .map((jsonString) => Supplier.fromJson(jsonDecode(jsonString)))
           .toList();
       
       // Cache the result
       _suppliersCache = {_suppliersKey: suppliers};
       return suppliers;
-    } catch (e) {
-      print('Error loading suppliers: $e');
+    } catch (error) {
+      print('Error loading suppliers: $error');
       return [];
     }
   }
@@ -384,11 +384,11 @@ class DatabaseService {
     try {
       final prefs = await _prefsInstance;
       final suppliersJson =
-          suppliers.map((e) => jsonEncode(e.toJson())).toList();
+          suppliers.map((supplier) => jsonEncode(supplier.toJson())).toList();
       await prefs.setStringList(_suppliersKey, suppliersJson);
       _notify('suppliers');
-    } catch (e) {
-      print('Error saving suppliers: $e');
+    } catch (error) {
+      print('Error saving suppliers: $error');
       rethrow;
     } finally {
       _releaseWriteLock(_suppliersKey);
@@ -403,7 +403,7 @@ class DatabaseService {
 
   Future<void> updateSupplier(Supplier supplier) async {
     final suppliers = await getSuppliers();
-    final index = suppliers.indexWhere((e) => e.id == supplier.id);
+    final index = suppliers.indexWhere((existingSupplier) => existingSupplier.id == supplier.id);
     if (index != -1) {
       suppliers[index] = supplier;
       await saveSuppliers(suppliers);
@@ -412,7 +412,7 @@ class DatabaseService {
 
   Future<void> deleteSupplier(String id) async {
     final suppliers = await getSuppliers();
-    suppliers.removeWhere((e) => e.id == id);
+    suppliers.removeWhere((supplier) => supplier.id == id);
     await saveSuppliers(suppliers);
   }
 
@@ -426,13 +426,13 @@ class DatabaseService {
     try {
       final prefs = await _prefsInstance;
       final productsJson = prefs.getStringList(_productsKey) ?? [];
-      final products = productsJson.map((e) => Product.fromJson(jsonDecode(e))).toList();
+      final products = productsJson.map((jsonString) => Product.fromJson(jsonDecode(jsonString))).toList();
       
       // Cache the result
       _productsCache = {_productsKey: products};
       return products;
-    } catch (e) {
-      print('Error loading products: $e');
+    } catch (error) {
+      print('Error loading products: $error');
       return [];
     }
   }
@@ -441,11 +441,11 @@ class DatabaseService {
     await _acquireWriteLock(_productsKey);
     try {
       final prefs = await _prefsInstance;
-      final productsJson = products.map((e) => jsonEncode(e.toJson())).toList();
+      final productsJson = products.map((product) => jsonEncode(product.toJson())).toList();
       await prefs.setStringList(_productsKey, productsJson);
       _notify('products');
-    } catch (e) {
-      print('Error saving products: $e');
+    } catch (error) {
+      print('Error saving products: $error');
       rethrow;
     } finally {
       _releaseWriteLock(_productsKey);
@@ -460,7 +460,7 @@ class DatabaseService {
 
   Future<void> updateProduct(Product product) async {
     final products = await getProducts();
-    final index = products.indexWhere((e) => e.id == product.id);
+    final index = products.indexWhere((existingProduct) => existingProduct.id == product.id);
     if (index != -1) {
       products[index] = product;
       await saveProducts(products);
@@ -469,13 +469,13 @@ class DatabaseService {
 
   Future<void> deleteProduct(String id) async {
     final products = await getProducts();
-    products.removeWhere((e) => e.id == id);
+    products.removeWhere((product) => product.id == id);
     await saveProducts(products);
   }
 
   Future<void> updateProductStock(String id, int newQuantity) async {
     final products = await getProducts();
-    final index = products.indexWhere((e) => e.id == id);
+    final index = products.indexWhere((product) => product.id == id);
     if (index != -1) {
       products[index] = products[index].copyWith(stockQuantity: newQuantity);
       await saveProducts(products);
@@ -492,13 +492,13 @@ class DatabaseService {
     try {
       final prefs = await _prefsInstance;
       final tablesJson = prefs.getStringList(_tablesKey) ?? [];
-      final tables = tablesJson.map((e) => TableModel.fromJson(jsonDecode(e))).toList();
+      final tables = tablesJson.map((jsonString) => TableModel.fromJson(jsonDecode(jsonString))).toList();
       
       // Cache the result
       _tablesCache = {_tablesKey: tables};
       return tables;
-    } catch (e) {
-      print('Error loading tables: $e');
+    } catch (error) {
+      print('Error loading tables: $error');
       return [];
     }
   }
@@ -507,11 +507,11 @@ class DatabaseService {
     await _acquireWriteLock(_tablesKey);
     try {
       final prefs = await _prefsInstance;
-      final tablesJson = tables.map((e) => jsonEncode(e.toJson())).toList();
+      final tablesJson = tables.map((table) => jsonEncode(table.toJson())).toList();
       await prefs.setStringList(_tablesKey, tablesJson);
       _notify('tables');
-    } catch (e) {
-      print('Error saving tables: $e');
+    } catch (error) {
+      print('Error saving tables: $error');
       rethrow;
     } finally {
       _releaseWriteLock(_tablesKey);
@@ -520,7 +520,7 @@ class DatabaseService {
 
   Future<void> updateTable(TableModel table) async {
     final tables = await getTables();
-    final index = tables.indexWhere((e) => e.id == table.id);
+    final index = tables.indexWhere((existingTable) => existingTable.id == table.id);
     if (index != -1) {
       tables[index] = table;
       await saveTables(tables);
@@ -537,13 +537,13 @@ class DatabaseService {
     try {
       final prefs = await _prefsInstance;
       final ordersJson = prefs.getStringList(_ordersKey) ?? [];
-      final orders = ordersJson.map((e) => Order.fromJson(jsonDecode(e))).toList();
+      final orders = ordersJson.map((jsonString) => Order.fromJson(jsonDecode(jsonString))).toList();
       
       // Cache the result
       _ordersCache = {_ordersKey: orders};
       return orders;
-    } catch (e) {
-      print('Error loading orders: $e');
+    } catch (error) {
+      print('Error loading orders: $error');
       return [];
     }
   }
@@ -552,11 +552,11 @@ class DatabaseService {
     await _acquireWriteLock(_ordersKey);
     try {
       final prefs = await _prefsInstance;
-      final ordersJson = orders.map((e) => jsonEncode(e.toJson())).toList();
+      final ordersJson = orders.map((order) => jsonEncode(order.toJson())).toList();
       await prefs.setStringList(_ordersKey, ordersJson);
       _notify('orders');
-    } catch (e) {
-      print('Error saving orders: $e');
+    } catch (error) {
+      print('Error saving orders: $error');
       rethrow;
     } finally {
       _releaseWriteLock(_ordersKey);
@@ -582,7 +582,7 @@ class DatabaseService {
 
   Future<void> updateOrder(Order order) async {
     final orders = await getOrders();
-    final index = orders.indexWhere((e) => e.id == order.id);
+    final index = orders.indexWhere((existingOrder) => existingOrder.id == order.id);
     if (index != -1) {
       orders[index] = order;
       await saveOrders(orders);
@@ -611,7 +611,7 @@ class DatabaseService {
       final tables = results[2] as List<TableModel>;
       final sales = results[3] as List<Sale>;
       
-      final index = orders.indexWhere((e) => e.id == orderId);
+      final index = orders.indexWhere((order) => order.id == orderId);
       if (index == -1) return;
       
       // Close the order
@@ -619,7 +619,7 @@ class DatabaseService {
       
       // Update product stock
       for (var item in orders[index].items) {
-        final productIndex = products.indexWhere((p) => p.id == item.productId);
+        final productIndex = products.indexWhere((product) => product.id == item.productId);
         if (productIndex != -1) {
           final currentStock = products[productIndex].stockQuantity;
           products[productIndex] = products[productIndex]
@@ -628,7 +628,7 @@ class DatabaseService {
       }
       
       // Free the table
-      final tableIndex = tables.indexWhere((t) => t.id == orders[index].tableId);
+      final tableIndex = tables.indexWhere((table) => table.id == orders[index].tableId);
       if (tableIndex != -1) {
         tables[tableIndex] = tables[tableIndex].copyWith(
           status: TableStatus.free,
@@ -668,13 +668,13 @@ class DatabaseService {
     try {
       final prefs = await _prefsInstance;
       final salesJson = prefs.getStringList(_salesKey) ?? [];
-      final sales = salesJson.map((e) => Sale.fromJson(jsonDecode(e))).toList();
+      final sales = salesJson.map((jsonString) => Sale.fromJson(jsonDecode(jsonString))).toList();
       
       // Cache the result
       _salesCache = {_salesKey: sales};
       return sales;
-    } catch (e) {
-      print('Error loading sales: $e');
+    } catch (error) {
+      print('Error loading sales: $error');
       return [];
     }
   }
@@ -683,11 +683,11 @@ class DatabaseService {
     await _acquireWriteLock(_salesKey);
     try {
       final prefs = await _prefsInstance;
-      final salesJson = sales.map((e) => jsonEncode(e.toJson())).toList();
+      final salesJson = sales.map((sale) => jsonEncode(sale.toJson())).toList();
       await prefs.setStringList(_salesKey, salesJson);
       _notify('sales');
-    } catch (e) {
-      print('Error saving sales: $e');
+    } catch (error) {
+      print('Error saving sales: $error');
       rethrow;
     } finally {
       _releaseWriteLock(_salesKey);
@@ -748,13 +748,13 @@ class DatabaseService {
     try {
       final prefs = await _prefsInstance;
       final recipesJson = prefs.getStringList(_recipesKey) ?? [];
-      final recipes = recipesJson.map((e) => Recipe.fromJson(jsonDecode(e))).toList();
+      final recipes = recipesJson.map((jsonString) => Recipe.fromJson(jsonDecode(jsonString))).toList();
       
       // Cache the result
       _recipesCache = {_recipesKey: recipes};
       return recipes;
-    } catch (e) {
-      print('Error loading recipes: $e');
+    } catch (error) {
+      print('Error loading recipes: $error');
       return [];
     }
   }
@@ -763,11 +763,11 @@ class DatabaseService {
     await _acquireWriteLock(_recipesKey);
     try {
       final prefs = await _prefsInstance;
-      final recipesJson = recipes.map((e) => jsonEncode(e.toJson())).toList();
+      final recipesJson = recipes.map((recipe) => jsonEncode(recipe.toJson())).toList();
       await prefs.setStringList(_recipesKey, recipesJson);
       _notify('recipes');
-    } catch (e) {
-      print('Error saving recipes: $e');
+    } catch (error) {
+      print('Error saving recipes: $error');
       rethrow;
     } finally {
       _releaseWriteLock(_recipesKey);
@@ -782,7 +782,7 @@ class DatabaseService {
 
   Future<void> updateRecipe(Recipe recipe) async {
     final recipes = await getRecipes();
-    final index = recipes.indexWhere((e) => e.id == recipe.id);
+    final index = recipes.indexWhere((existingRecipe) => existingRecipe.id == recipe.id);
     if (index != -1) {
       recipes[index] = recipe;
       await saveRecipes(recipes);
@@ -791,13 +791,13 @@ class DatabaseService {
 
   Future<void> deleteRecipe(String id) async {
     final recipes = await getRecipes();
-    recipes.removeWhere((e) => e.id == id);
+    recipes.removeWhere((recipe) => recipe.id == id);
     await saveRecipes(recipes);
   }
 
   Future<void> addRecipeIngredient(String recipeId, RecipeIngredient ingredient) async {
     final recipes = await getRecipes();
-    final index = recipes.indexWhere((e) => e.id == recipeId);
+    final index = recipes.indexWhere((recipe) => recipe.id == recipeId);
     if (index != -1) {
       final ingredients = [...recipes[index].ingredients, ingredient];
       recipes[index] = recipes[index].copyWith(ingredients: ingredients);
@@ -815,13 +815,13 @@ class DatabaseService {
     try {
       final prefs = await _prefsInstance;
       final productionsJson = prefs.getStringList(_productionsKey) ?? [];
-      final productions = productionsJson.map((e) => InternalProduction.fromJson(jsonDecode(e))).toList();
+      final productions = productionsJson.map((jsonString) => InternalProduction.fromJson(jsonDecode(jsonString))).toList();
       
       // Cache the result
       _productionsCache = {_productionsKey: productions};
       return productions;
-    } catch (e) {
-      print('Error loading productions: $e');
+    } catch (error) {
+      print('Error loading productions: $error');
       return [];
     }
   }
@@ -830,11 +830,11 @@ class DatabaseService {
     await _acquireWriteLock(_productionsKey);
     try {
       final prefs = await _prefsInstance;
-      final productionsJson = productions.map((e) => jsonEncode(e.toJson())).toList();
+      final productionsJson = productions.map((production) => jsonEncode(production.toJson())).toList();
       await prefs.setStringList(_productionsKey, productionsJson);
       _notify('productions');
-    } catch (e) {
-      print('Error saving productions: $e');
+    } catch (error) {
+      print('Error saving productions: $error');
       rethrow;
     } finally {
       _releaseWriteLock(_productionsKey);
@@ -849,7 +849,7 @@ class DatabaseService {
 
   Future<void> updateInternalProduction(InternalProduction production) async {
     final productions = await getInternalProductions();
-    final index = productions.indexWhere((e) => e.id == production.id);
+    final index = productions.indexWhere((existingProduction) => existingProduction.id == production.id);
     if (index != -1) {
       productions[index] = production;
       await saveInternalProductions(productions);
@@ -858,13 +858,13 @@ class DatabaseService {
 
   Future<void> deleteInternalProduction(String id) async {
     final productions = await getInternalProductions();
-    productions.removeWhere((e) => e.id == id);
+    productions.removeWhere((production) => production.id == id);
     await saveInternalProductions(productions);
   }
 
   Future<void> addProductionIngredient(String productionId, ProductionIngredient ingredient) async {
     final productions = await getInternalProductions();
-    final index = productions.indexWhere((e) => e.id == productionId);
+    final index = productions.indexWhere((production) => production.id == productionId);
     if (index != -1) {
       final ingredients = [...productions[index].ingredients, ingredient];
       productions[index] = productions[index].copyWith(ingredients: ingredients);

@@ -25,14 +25,14 @@ class _HomePageState extends State<HomePage> {
   int _lowStockProductsCount = 0;
   List<TableModel> _tables = [];
   List<Order> _activeOrders = [];
-  StreamSubscription<String>? _dbSub;
+  StreamSubscription<String>? _databaseChangesSubscription;
 
   @override
   void initState() {
     super.initState();
     _loadData();
     // Listen to database changes to auto-refresh KPIs and lists
-    _dbSub = _databaseService.changes.listen((_) {
+    _databaseChangesSubscription = _databaseService.changes.listen((_) {
       if (mounted) {
         _loadData();
       }
@@ -41,7 +41,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
-    _dbSub?.cancel();
+    _databaseChangesSubscription?.cancel();
     super.dispose();
   }
 
@@ -72,8 +72,8 @@ class _HomePageState extends State<HomePage> {
     _loadData();
   }
 
-  String _capitalize(String s) =>
-    s.isNotEmpty ? s[0].toUpperCase() + s.substring(1) : s;
+  String _capitalize(String text) =>
+    text.isNotEmpty ? text[0].toUpperCase() + text.substring(1) : text;
 
   @override
   Widget build(BuildContext context) {
@@ -130,8 +130,8 @@ class _HomePageState extends State<HomePage> {
       greeting = 'Boa noite';
     }
     // pattern corrigido: o 'de' entre aspas simples é literal
-    final fmt = DateFormat("EEEE, d 'de' MMMM", 'pt_BR');
-    final dataText = _capitalize(fmt.format(now));
+    final dateFormat = DateFormat("EEEE, d 'de' MMMM", 'pt_BR');
+    final dataText = _capitalize(dateFormat.format(now));
 
     return Container(
       width: double.infinity,
