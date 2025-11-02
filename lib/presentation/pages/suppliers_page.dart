@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'dart:async';
 import '../../core/services/database_service.dart';
 import '../widgets/shared_widgets.dart';
 import '../../core/models/data_models.dart';
 
 class SuppliersPage extends StatefulWidget {
-  const SuppliersPage({Key? key}) : super(key: key);
+  const SuppliersPage({super.key});
 
   @override
   State<SuppliersPage> createState() => _SuppliersPageState();
@@ -15,11 +16,21 @@ class _SuppliersPageState extends State<SuppliersPage> {
   final DatabaseService _databaseService = DatabaseService();
   List<Supplier> _suppliers = [];
   bool _isLoading = true;
+  StreamSubscription<String>? _databaseChangesSubscription;
 
   @override
   void initState() {
     super.initState();
     _loadSuppliers();
+    _databaseChangesSubscription = _databaseService.changes.listen((_) {
+      if (mounted) _loadSuppliers();
+    });
+  }
+
+  @override
+  void dispose() {
+    _databaseChangesSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadSuppliers() async {
@@ -74,7 +85,6 @@ class _SuppliersPageState extends State<SuppliersPage> {
   }
 
   Widget _buildSupplierCard(Supplier supplier, int index) {
-    final delay = Duration(milliseconds: 50 * index);
     return Card(
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 12),
@@ -214,10 +224,7 @@ class _SuppliersPageState extends State<SuppliersPage> {
           ],
         ),
       ),
-    )
-        .animate(delay: delay)
-        .fadeIn(duration: const Duration(milliseconds: 300))
-        .moveY(begin: 20, duration: const Duration(milliseconds: 300));
+    ).animateCard(index);
   }
 
   void _showAddSupplierDialog() {
@@ -285,17 +292,11 @@ class _SuppliersPageState extends State<SuppliersPage> {
               final address = addressController.text.trim();
               final notes = notesController.text.trim();
 
-              if (name.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Nome do fornecedor é obrigatório')),
-                );
+              if (!validateRequiredField(context, name, 'Nome do fornecedor')) {
                 return;
               }
 
-              if (contact.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Contato é obrigatório')),
-                );
+              if (!validateRequiredField(context, contact, 'Contato')) {
                 return;
               }
 
@@ -393,17 +394,11 @@ class _SuppliersPageState extends State<SuppliersPage> {
               final address = addressController.text.trim();
               final notes = notesController.text.trim();
 
-              if (name.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Nome do fornecedor é obrigatório')),
-                );
+              if (!validateRequiredField(context, name, 'Nome do fornecedor')) {
                 return;
               }
 
-              if (contact.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Contato é obrigatório')),
-                );
+              if (!validateRequiredField(context, contact, 'Contato')) {
                 return;
               }
 

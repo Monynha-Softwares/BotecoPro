@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'dart:async';
 import '../../core/services/database_service.dart';
 import '../widgets/shared_widgets.dart';
 import '../../core/models/data_models.dart';
 
 class ProductionPage extends StatefulWidget {
-  const ProductionPage({Key? key}) : super(key: key);
+  const ProductionPage({super.key});
 
   @override
   State<ProductionPage> createState() => _ProductionPageState();
@@ -17,11 +18,21 @@ class _ProductionPageState extends State<ProductionPage> {
   List<InternalProduction> _productions = [];
   List<Product> _products = [];
   List<Recipe> _recipes = [];
+  StreamSubscription<String>? _databaseChangesSubscription;
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    _databaseChangesSubscription = _databaseService.changes.listen((_) {
+      if (mounted) _loadData();
+    });
+  }
+
+  @override
+  void dispose() {
+    _databaseChangesSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadData() async {
@@ -29,9 +40,12 @@ class _ProductionPageState extends State<ProductionPage> {
       _isLoading = true;
     });
 
-    final products = await _databaseService.getProducts();
-    final recipes = await _databaseService.getRecipes();
-    final productions = await _databaseService.getInternalProductions();
+    // Load all data in parallel using Dart 3.0 record pattern matching
+    final (products, recipes, productions) = await (
+      _databaseService.getProducts(),
+      _databaseService.getRecipes(),
+      _databaseService.getInternalProductions()
+    ).wait;
 
     if (mounted) {
       setState(() {
@@ -80,7 +94,6 @@ class _ProductionPageState extends State<ProductionPage> {
   }
 
   Widget _buildProductionCard(InternalProduction production, int index) {
-    final delay = Duration(milliseconds: 50 * index);
     final isFinalized = production.status == ProductionStatus.finalized;
     final statusColor = isFinalized ? Colors.green : Colors.blue;
     final statusText = isFinalized ? 'Finalizada' : 'Em Andamento';
@@ -276,10 +289,7 @@ class _ProductionPageState extends State<ProductionPage> {
           ),
         ),
       ),
-    )
-        .animate(delay: delay)
-        .fadeIn(duration: const Duration(milliseconds: 300))
-        .moveY(begin: 20, duration: const Duration(milliseconds: 300));
+    ).animateCard(index);
   }
 
   void _showAddProductionDialog() {

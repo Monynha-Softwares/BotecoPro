@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'dart:async';
 import '../../core/services/database_service.dart';
 import '../widgets/shared_widgets.dart';
 import '../../core/models/data_models.dart';
 import 'order_details_page.dart';
 
 class TablesPage extends StatefulWidget {
-  const TablesPage({Key? key}) : super(key: key);
+  const TablesPage({super.key});
 
   @override
   State<TablesPage> createState() => _TablesPageState();
@@ -16,11 +17,21 @@ class _TablesPageState extends State<TablesPage> {
   final DatabaseService _databaseService = DatabaseService();
   List<TableModel> _tables = [];
   bool _isLoading = true;
+  StreamSubscription<String>? _databaseChangesSubscription;
 
   @override
   void initState() {
     super.initState();
     _loadTables();
+    _databaseChangesSubscription = _databaseService.changes.listen((_) {
+      if (mounted) _loadTables();
+    });
+  }
+
+  @override
+  void dispose() {
+    _databaseChangesSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadTables() async {

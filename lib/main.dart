@@ -54,13 +54,19 @@
 /// - provider: Gerenciamento de estado (preparado)
 /// - intl: Formatação de datas e moeda (pt_BR)
 ///
+library;
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import 'core/constants/clerk_config.dart';
 import 'presentation/pages/home_page.dart';
+import 'presentation/pages/login_page.dart';
+import 'presentation/pages/profile_page.dart';
 import 'presentation/pages/production_page.dart';
 import 'presentation/pages/products_page.dart';
 import 'presentation/pages/recipes_page.dart';
@@ -74,6 +80,15 @@ void main() async {
   // Inicializa a localização para português brasileiro
   await initializeDateFormatting('pt_BR', null);
   Intl.defaultLocale = 'pt_BR';
+  
+  // Carrega variáveis de ambiente (opcional - se .env existir)
+  try {
+    await dotenv.load(fileName: ".env");
+    debugPrint('✅ .env carregado com sucesso');
+  } catch (e) {
+    // .env não existe - usar configuração padrão
+    debugPrint('⚠️ .env não encontrado, usando configuração padrão');
+  }
 
   runApp(const MyApp());
 }
@@ -89,88 +104,17 @@ class MyApp extends StatelessWidget {
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: ThemeMode.system,
-      home: const SplashScreen(),
-    );
-  }
-}
-
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
-
-  @override
-  State<SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-  @override
-  void initState() {
-    super.initState();
-    _navigateToHome();
-  }
-
-  Future<void> _navigateToHome() async {
-    await Future.delayed(const Duration(seconds: 2));
-    if (mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.sports_bar,
-              size: 80,
-              color: Theme.of(context).colorScheme.onPrimary,
-            )
-                .animate(
-                    onPlay: (controller) => controller.repeat(reverse: true))
-                .scale(
-                    duration: const Duration(seconds: 1),
-                    curve: Curves.easeInOut),
-            const SizedBox(height: 24),
-            Text(
-              'Boteco PRO',
-              style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onPrimary,
-                  ),
-            ).animate().fadeIn(
-                duration: const Duration(milliseconds: 800),
-                curve: Curves.easeIn),
-            const SizedBox(height: 8),
-            Text(
-              'Gestão completa para seu bar',
-              style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onPrimary
-                        .withOpacity(0.8),
-                  ),
-            ).animate().fadeIn(
-                delay: const Duration(milliseconds: 400),
-                duration: const Duration(milliseconds: 800)),
-            const SizedBox(height: 48),
-            CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(
-                  Theme.of(context).colorScheme.onPrimary),
-            ),
-          ],
-        ),
-      ),
+      initialRoute: '/login',
+      routes: {
+        '/login': (context) => const LoginPage(),
+        '/home': (context) => const MainNavigationScreen(),
+      },
     );
   }
 }
 
 class MainNavigationScreen extends StatefulWidget {
-  const MainNavigationScreen({Key? key}) : super(key: key);
+  const MainNavigationScreen({super.key});
 
   @override
   State<MainNavigationScreen> createState() => _MainNavigationScreenState();
@@ -180,23 +124,35 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   NavigationTab _currentTab = NavigationTab.home;
 
   late final Map<NavigationTab, Widget> _screens;
+  // Key to access HomePage state for manual reload when switching tabs
+  final GlobalKey _homeKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
     _screens = {
-      NavigationTab.home: HomePage(onTabSelected: _selectTab),
+      NavigationTab.home: HomePage(key: _homeKey, onTabSelected: _selectTab),
       NavigationTab.tables: const TablesPage(),
       NavigationTab.products: const ProductsPage(),
       NavigationTab.recipes: const RecipesPage(),
       NavigationTab.production: const ProductionPage(),
+      NavigationTab.profile: const ProfilePage(),
     };
   }
 
   void _selectTab(NavigationTab tab) {
-    setState(() {
-      _currentTab = tab;
-    });
+    if (tab == NavigationTab.home) {
+      // Trigger a reload on Home if available
+      final state = _homeKey.currentState;
+      try {
+        // Call `reload()` on _HomePageState via dynamic access
+        // ignore: avoid_dynamic_calls
+        (state as dynamic)?.reload?.call();
+      } catch (_) {
+        // no-op if method not available
+      }
+    }
+    setState(() => _currentTab = tab);
   }
 
   @override
@@ -221,31 +177,36 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   color: Theme.of(context).colorScheme.primary,
                 ),
               ),
-              destinations: [
+              destinations: const [
                 NavigationRailDestination(
-                  icon: const Icon(Icons.home_outlined),
-                  selectedIcon: const Icon(Icons.home),
-                  label: const Text('Início'),
+                  icon: Icon(Icons.home_outlined),
+                  selectedIcon: Icon(Icons.home),
+                  label: Text('Início'),
                 ),
                 NavigationRailDestination(
-                  icon: const Icon(Icons.table_bar_outlined),
-                  selectedIcon: const Icon(Icons.table_bar),
-                  label: const Text('Mesas'),
+                  icon: Icon(Icons.table_bar_outlined),
+                  selectedIcon: Icon(Icons.table_bar),
+                  label: Text('Mesas'),
                 ),
                 NavigationRailDestination(
-                  icon: const Icon(Icons.inventory_2_outlined),
-                  selectedIcon: const Icon(Icons.inventory_2),
-                  label: const Text('Produtos'),
+                  icon: Icon(Icons.inventory_2_outlined),
+                  selectedIcon: Icon(Icons.inventory_2),
+                  label: Text('Produtos'),
                 ),
                 NavigationRailDestination(
-                  icon: const Icon(Icons.menu_book_outlined),
-                  selectedIcon: const Icon(Icons.menu_book),
-                  label: const Text('Receitas'),
+                  icon: Icon(Icons.menu_book_outlined),
+                  selectedIcon: Icon(Icons.menu_book),
+                  label: Text('Receitas'),
                 ),
                 NavigationRailDestination(
-                  icon: const Icon(Icons.production_quantity_limits_outlined),
-                  selectedIcon: const Icon(Icons.production_quantity_limits),
-                  label: const Text('Produção'),
+                  icon: Icon(Icons.production_quantity_limits_outlined),
+                  selectedIcon: Icon(Icons.production_quantity_limits),
+                  label: Text('Produção'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.person_outline),
+                  selectedIcon: Icon(Icons.person),
+                  label: Text('Perfil'),
                 ),
               ],
             ),

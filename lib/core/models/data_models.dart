@@ -483,7 +483,7 @@ class Recipe {
       'type': type.index,
       'price': price,
       'instructions': instructions,
-      'ingredients': ingredients.map((i) => i.toJson()).toList(),
+      'ingredients': ingredients.map((ingredient) => ingredient.toJson()).toList(),
     };
   }
 
@@ -495,7 +495,7 @@ class Recipe {
       price: json['price'].toDouble(),
       instructions: json['instructions'] ?? '',
       ingredients: (json['ingredients'] as List?)
-          ?.map((i) => RecipeIngredient.fromJson(i))
+          ?.map((ingredientJson) => RecipeIngredient.fromJson(ingredientJson))
           .toList() ?? [],
     );
   }
@@ -618,7 +618,7 @@ class InternalProduction {
       'createdAt': createdAt.toIso8601String(),
       'finalizedAt': finalizedAt?.toIso8601String(),
       'status': status.index,
-      'ingredients': ingredients.map((i) => i.toJson()).toList(),
+      'ingredients': ingredients.map((ingredient) => ingredient.toJson()).toList(),
     };
   }
 
@@ -636,7 +636,7 @@ class InternalProduction {
           : null,
       status: ProductionStatus.values[json['status']],
       ingredients: (json['ingredients'] as List?)
-          ?.map((i) => ProductionIngredient.fromJson(i))
+          ?.map((ingredientJson) => ProductionIngredient.fromJson(ingredientJson))
           .toList() ?? [],
     );
   }

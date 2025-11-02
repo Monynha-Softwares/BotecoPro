@@ -8,7 +8,7 @@ import '../../core/models/data_models.dart';
 class OrderDetailsPage extends StatefulWidget {
   final Order order;
 
-  const OrderDetailsPage({Key? key, required this.order}) : super(key: key);
+  const OrderDetailsPage({super.key, required this.order});
 
   @override
   State<OrderDetailsPage> createState() => _OrderDetailsPageState();
@@ -33,8 +33,11 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       _isLoading = true;
     });
 
-    final products = await _databaseService.getProducts();
-    final freshOrder = await _getUpdatedOrder();
+    // Load products and order in parallel using Dart 3.0 record types
+    final (products, freshOrder) = await (
+      _databaseService.getProducts(),
+      _getUpdatedOrder(),
+    ).wait;
 
     if (mounted) {
       setState(() {
@@ -189,7 +192,6 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
   }
 
   Widget _buildOrderItemCard(OrderItem item, int index) {
-    final delay = Duration(milliseconds: 50 * index);
     return Slidable(
       key: Key(item.id),
       endActionPane: ActionPane(
@@ -317,7 +319,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         ),
       ),
     )
-        .animate(delay: delay)
+        .animate(delay: getAnimationDelay(index))
         .fadeIn(duration: const Duration(milliseconds: 300))
         .moveX(begin: 30, duration: const Duration(milliseconds: 300));
   }
@@ -381,11 +383,11 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
   }
 
   Future<void> _updateItemStatus(OrderItem item, OrderStatus newStatus) async {
-    final List<OrderItem> updatedItems = _order.items.map((i) {
-      if (i.id == item.id) {
-        return i.copyWith(status: newStatus);
+    final List<OrderItem> updatedItems = _order.items.map((orderItem) {
+      if (orderItem.id == item.id) {
+        return orderItem.copyWith(status: newStatus);
       }
-      return i;
+      return orderItem;
     }).toList();
 
     final updatedOrder = _order.copyWith(items: updatedItems);
@@ -419,7 +421,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
 
   Future<void> _removeItem(OrderItem item) async {
     // Remover o item da lista
-    final List<OrderItem> updatedItems = _order.items.where((i) => i.id != item.id).toList();
+    final List<OrderItem> updatedItems = _order.items.where((orderItem) => orderItem.id != item.id).toList();
     final updatedOrder = _order.copyWith(items: updatedItems);
     await _databaseService.updateOrder(updatedOrder);
 
@@ -444,7 +446,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         builder: (context, setState) {
           List<Product> filteredProducts = _products;
           if (selectedCategory != null) {
-            filteredProducts = _products.where((p) => p.category == selectedCategory).toList();
+            filteredProducts = _products.where((product) => product.category == selectedCategory).toList();
           }
           
           return Container(
@@ -613,7 +615,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Preço unitário:'),
+                    const Text('Preço unitário:'),
                     Text(
                       formatCurrency(product.price),
                       style: const TextStyle(fontWeight: FontWeight.bold),
@@ -825,11 +827,11 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                   ),
-                  items: [
+                  items: const [
                     DropdownMenuItem(
                       value: PaymentMethod.cash,
                       child: Row(
-                        children: const [
+                        children: [
                           Icon(Icons.money),
                           SizedBox(width: 8),
                           Text('Dinheiro'),
@@ -839,7 +841,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                     DropdownMenuItem(
                       value: PaymentMethod.credit,
                       child: Row(
-                        children: const [
+                        children: [
                           Icon(Icons.credit_card),
                           SizedBox(width: 8),
                           Text('Cartão de Crédito'),
@@ -849,7 +851,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                     DropdownMenuItem(
                       value: PaymentMethod.debit,
                       child: Row(
-                        children: const [
+                        children: [
                           Icon(Icons.credit_card),
                           SizedBox(width: 8),
                           Text('Cartão de Débito'),
@@ -859,7 +861,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                     DropdownMenuItem(
                       value: PaymentMethod.pix,
                       child: Row(
-                        children: const [
+                        children: [
                           Icon(Icons.qr_code),
                           SizedBox(width: 8),
                           Text('PIX'),

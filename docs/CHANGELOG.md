@@ -1,8 +1,44 @@
 # 📝 CHANGELOG - BotecoPro Web MVP Audit
 
-**Date**: 22 Octobre 2025  
-**Version**: 1.0.0-web-mvp  
-**Status**: ✅ Production Ready  
+**Date**: 2 November 2025
+**Version**: 1.1.0-web-mvp
+**Status**: ✅ Production Ready with AI Documentation
+
+---
+
+## 📋 Recent Changes (v1.1.0)
+
+### Core Application Updates
+
+| Fichier | Changement | Status |
+|---------|-----------|--------|
+| `lib/core/services/database_service.dart` | 🚀 Performance optimization with caching, write locks, debouncing | ✅ |
+| `lib/presentation/pages/*.dart` | 🔄 Reactive UI updates via StreamSubscription | ✅ |
+| `lib/main.dart` | 🎯 Added GlobalKey for HomePage reload on tab switch | ✅ |
+
+### Documentation Updates
+
+| Fichier | Changement | Status |
+|---------|-----------|--------|
+| `docs/DOCUMENTATION_INDEX.md` | 📝 Updated index, removed old reports, added new AI docs | ✅ |
+| `README.md` | 🔗 Updated documentation links and references | ✅ |
+| `docs/WEB_ARCHITECTURE.md` | 📖 Updated with current DatabaseService implementation | ✅ |
+| `AGENTS.md` | 🆕 Created AI agent development guidelines | ✅ |
+| `AI_RULES.md` | 🆕 Created AI collaboration and component partner rules | ✅ |
+
+### Files Deleted (Old Reports)
+
+| Fichier | Raison |
+|---------|--------|
+| `docs/WEB_AUDIT_AND_DEPLOYMENT.md` | Old audit report, replaced by current docs |
+| `docs/AUDIT_REPORT.txt` | Legacy ASCII report, consolidated into summary |
+
+### New Files Created
+
+| Fichier | Purpose |
+|---------|---------|
+| `AGENTS.md` | 🤖 AI agent guidelines and architecture reference |
+| `AI_RULES.md` | 🎯 AI collaboration protocols and component partnerships |
 
 ---
 
@@ -413,7 +449,7 @@ See related documentation:
 ---
 
 **Changelog Status**: ✅ Complete  
-**Last Updated**: 22 Octobre 2025  
+**Last Updated**: 2 November 2025  
 **Ready for Production**: YES ✅
 
 🎉 **BotecoPro MVP is ready to go live!**

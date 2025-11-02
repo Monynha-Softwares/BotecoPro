@@ -141,8 +141,14 @@ class AuthProvider extends ChangeNotifier {
     AuthUser? _user;
     bool _initialized = false;
 
-    // Toggle this to true and implement Firebase code to switch to Firebase auth.
+    // MIGRAÇÃO CLERK: Use esta flag para habilitar autenticação Clerk
+    // O fluxo de autenticação agora é gerenciado pelo ClerkAuth no main.dart
+    final bool useClerk = true;
+
+    // DEPRECIADO: Toggle this to true and implement Firebase code to switch to Firebase auth.
     // (Left false by default so app remains functional without Firebase packages)
+    // NOTA: Com a migração para Clerk, este flag está obsoleto
+    @Deprecated('Use useClerk para autenticação Clerk')
     final bool useFirebase = false;
 
     AuthUser? get user => _user;

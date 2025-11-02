@@ -55,6 +55,8 @@
 /// - [ ] Criar views para relatórios complexos
 /// - [ ] Implementar soft delete (não deletar, marcar como inativo)
 ///
+library;
+
 // Future SQLite provider implementation using `sqlite3`.
 // This provider stores each entity as a JSON blob in a simple table per entity.
 // It mirrors the async CRUD patterns used by the SharedPreferences DatabaseService.
@@ -68,7 +70,10 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path_provider/path_provider.dart';
+// NOTA: path_provider removido para compatibilidade web
+// Se precisar usar DatabaseProvider, adicione path_provider de volta
+// e use apenas em plataformas mobile/desktop
+// import 'package:path_provider/path_provider.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 import '../models/data_models.dart';
@@ -79,29 +84,35 @@ class DatabaseProvider {
     static final DatabaseProvider instance = DatabaseProvider._internal();
     factory DatabaseProvider() => instance;
 
-    Database? _db;
-    String _dbFileName = 'botecopro.sqlite';
+    Database? _database;
+    String _databaseFileName = 'botecopro.sqlite';
 
     Future<void> init({String? dbFileName}) async {
-        if (dbFileName != null) _dbFileName = dbFileName;
-        if (_db != null) return;
+        if (dbFileName != null) _databaseFileName = dbFileName;
+        if (_database != null) return;
 
-        final dir = await getApplicationDocumentsDirectory();
-        final path = '${dir.path}/$_dbFileName';
+        // NOTA: Desabilitado para web - path_provider não funciona na web
+        // Para usar este provider, execute em mobile/desktop e adicione path_provider
+        throw UnsupportedError(
+          'DatabaseProvider não é suportado na web. Use DatabaseService com SharedPreferences.'
+        );
+        
+        // final dir = await getApplicationDocumentsDirectory();
+        // final path = '${dir.path}/$_databaseFileName';
 
         // Ensure directory exists
-        await Directory(dir.path).create(recursive: true);
+        // await Directory(dir.path).create(recursive: true);
 
         // Open DB (synchronous under the hood, but wrapped in Future for API consistency)
-        _db = sqlite3.open(path);
+        _database = sqlite3.open(path);
 
         _createTablesIfNotExists();
     }
 
     void _createTablesIfNotExists() {
-        if (_db == null) return;
+        if (_database == null) return;
         // Simple schema: id TEXT PRIMARY KEY, data TEXT (JSON), updated_at TEXT
-        _db!.execute('''
+        _database!.execute('''
             CREATE TABLE IF NOT EXISTS suppliers (
                 id TEXT PRIMARY KEY,
                 data TEXT NOT NULL,
@@ -109,7 +120,7 @@ class DatabaseProvider {
             );
         ''');
 
-        _db!.execute('''
+        _database!.execute('''
             CREATE TABLE IF NOT EXISTS products (
                 id TEXT PRIMARY KEY,
                 data TEXT NOT NULL,
@@ -117,7 +128,7 @@ class DatabaseProvider {
             );
         ''');
 
-        _db!.execute('''
+        _database!.execute('''
             CREATE TABLE IF NOT EXISTS tables_model (
                 id TEXT PRIMARY KEY,
                 data TEXT NOT NULL,
@@ -125,7 +136,7 @@ class DatabaseProvider {
             );
         ''');
 
-        _db!.execute('''
+        _database!.execute('''
             CREATE TABLE IF NOT EXISTS orders (
                 id TEXT PRIMARY KEY,
                 data TEXT NOT NULL,
@@ -133,7 +144,7 @@ class DatabaseProvider {
             );
         ''');
 
-        _db!.execute('''
+        _database!.execute('''
             CREATE TABLE IF NOT EXISTS order_items (
                 id TEXT PRIMARY KEY,
                 data TEXT NOT NULL,
@@ -141,7 +152,7 @@ class DatabaseProvider {
             );
         ''');
 
-        _db!.execute('''
+        _database!.execute('''
             CREATE TABLE IF NOT EXISTS recipes (
                 id TEXT PRIMARY KEY,
                 data TEXT NOT NULL,
@@ -149,7 +160,7 @@ class DatabaseProvider {
             );
         ''');
 
-        _db!.execute('''
+        _database!.execute('''
             CREATE TABLE IF NOT EXISTS productions (
                 id TEXT PRIMARY KEY,
                 data TEXT NOT NULL,
@@ -159,8 +170,8 @@ class DatabaseProvider {
     }
 
     Future<void> close() async {
-        _db?.dispose();
-        _db = null;
+        _database?.dispose();
+        _database = null;
     }
 
     // Generic helpers
@@ -170,7 +181,7 @@ class DatabaseProvider {
         final encoded = jsonEncode(json);
         final now = DateTime.now().toIso8601String();
         // Use INSERT OR REPLACE for upsert
-        _db!.execute(
+        _database!.execute(
             'INSERT OR REPLACE INTO $table (id, data, updated_at) VALUES (?, ?, ?);',
             [id, encoded, now],
         );
@@ -178,30 +189,22 @@ class DatabaseProvider {
 
     Future<void> _delete(String table, String id) async {
         if (_db == null) throw StateError('Database not initialized');
-        _db!.execute('DELETE FROM $table WHERE id = ?;', [id]);
+        _database!.execute('DELETE FROM $table WHERE id = ?;', [id]);
     }
 
     Future<List<Map<String, dynamic>>> _getAll(String table) async {
         if (_db == null) throw StateError('Database not initialized');
-        final result = _db!.select('SELECT data FROM $table;');
+        final result = _database!.select('SELECT data FROM $table;');
         return result.map((row) {
             final raw = row['data'] as String;
             return jsonDecode(raw) as Map<String, dynamic>;
         }).toList();
     }
 
-    Future<Map<String, dynamic>?> _getById(String table, String id) async {
-        if (_db == null) throw StateError('Database not initialized');
-        final result = _db!.select('SELECT data FROM $table WHERE id = ?;', [id]);
-        if (result.isEmpty) return null;
-        final raw = result.first['data'] as String;
-        return jsonDecode(raw) as Map<String, dynamic>;
-    }
-
     // Suppliers
     Future<List<Supplier>> getSuppliers() async {
         final rows = await _getAll('suppliers');
-        return rows.map((m) => Supplier.fromJson(m)).toList();
+        return rows.map((jsonMap) => Supplier.fromJson(jsonMap)).toList();
     }
 
     Future<void> saveSupplier(Supplier supplier) async {
@@ -215,7 +218,7 @@ class DatabaseProvider {
     // Products
     Future<List<Product>> getProducts() async {
         final rows = await _getAll('products');
-        return rows.map((m) => Product.fromJson(m)).toList();
+        return rows.map((jsonMap) => Product.fromJson(jsonMap)).toList();
     }
 
     Future<void> saveProduct(Product product) async {
@@ -229,7 +232,7 @@ class DatabaseProvider {
     // Tables (TableModel)
     Future<List<TableModel>> getTables() async {
         final rows = await _getAll('tables_model');
-        return rows.map((m) => TableModel.fromJson(m)).toList();
+        return rows.map((jsonMap) => TableModel.fromJson(jsonMap)).toList();
     }
 
     Future<void> saveTable(TableModel tableModel) async {
@@ -243,7 +246,7 @@ class DatabaseProvider {
     // Orders
     Future<List<Order>> getOrders() async {
         final rows = await _getAll('orders');
-        return rows.map((m) => Order.fromJson(m)).toList();
+        return rows.map((jsonMap) => Order.fromJson(jsonMap)).toList();
     }
 
     Future<void> saveOrder(Order order) async {
@@ -257,7 +260,7 @@ class DatabaseProvider {
     // OrderItems
     Future<List<OrderItem>> getOrderItems() async {
         final rows = await _getAll('order_items');
-        return rows.map((m) => OrderItem.fromJson(m)).toList();
+        return rows.map((jsonMap) => OrderItem.fromJson(jsonMap)).toList();
     }
 
     Future<void> saveOrderItem(OrderItem item) async {
@@ -271,7 +274,7 @@ class DatabaseProvider {
     // Recipes
     Future<List<Recipe>> getRecipes() async {
         final rows = await _getAll('recipes');
-        return rows.map((m) => Recipe.fromJson(m)).toList();
+        return rows.map((jsonMap) => Recipe.fromJson(jsonMap)).toList();
     }
 
     Future<void> saveRecipe(Recipe recipe) async {
@@ -285,7 +288,7 @@ class DatabaseProvider {
     // InternalProduction
     Future<List<InternalProduction>> getProductions() async {
         final rows = await _getAll('productions');
-        return rows.map((m) => InternalProduction.fromJson(m)).toList();
+        return rows.map((jsonMap) => InternalProduction.fromJson(jsonMap)).toList();
     }
 
     Future<void> saveProduction(InternalProduction production) async {
@@ -299,12 +302,12 @@ class DatabaseProvider {
     // Utility: clear all tables (useful for testing/migrations)
     Future<void> clearAll() async {
         if (_db == null) throw StateError('Database not initialized');
-        _db!.execute('DELETE FROM suppliers;');
-        _db!.execute('DELETE FROM products;');
-        _db!.execute('DELETE FROM tables_model;');
-        _db!.execute('DELETE FROM orders;');
-        _db!.execute('DELETE FROM order_items;');
-        _db!.execute('DELETE FROM recipes;');
-        _db!.execute('DELETE FROM productions;');
+        _database!.execute('DELETE FROM suppliers;');
+        _database!.execute('DELETE FROM products;');
+        _database!.execute('DELETE FROM tables_model;');
+        _database!.execute('DELETE FROM orders;');
+        _database!.execute('DELETE FROM order_items;');
+        _database!.execute('DELETE FROM recipes;');
+        _database!.execute('DELETE FROM productions;');
     }
 }

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'dart:async';
 import '../../core/services/database_service.dart';
 import '../widgets/shared_widgets.dart';
 import '../../core/models/data_models.dart';
 
 class ProductsPage extends StatefulWidget {
-  const ProductsPage({Key? key}) : super(key: key);
+  const ProductsPage({super.key});
 
   @override
   State<ProductsPage> createState() => _ProductsPageState();
@@ -18,11 +19,21 @@ class _ProductsPageState extends State<ProductsPage> {
   List<Supplier> _suppliers = [];
   bool _isLoading = true;
   ProductCategory? _selectedCategory;
+  StreamSubscription<String>? _databaseChangesSubscription;
   
   @override
   void initState() {
     super.initState();
     _loadData();
+    _databaseChangesSubscription = _databaseService.changes.listen((_) {
+      if (mounted) _loadData();
+    });
+  }
+
+  @override
+  void dispose() {
+    _databaseChangesSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadData() async {
@@ -30,8 +41,11 @@ class _ProductsPageState extends State<ProductsPage> {
       _isLoading = true;
     });
 
-    final products = await _databaseService.getProducts();
-    final suppliers = await _databaseService.getSuppliers();
+    // Load products and suppliers in parallel
+    final (products, suppliers) = await (
+      _databaseService.getProducts(),
+      _databaseService.getSuppliers(),
+    ).wait;
 
     if (mounted) {
       setState(() {
@@ -47,7 +61,7 @@ class _ProductsPageState extends State<ProductsPage> {
     if (category == null) {
       return products;
     }
-    return products.where((p) => p.category == category).toList();
+    return products.where((product) => product.category == category).toList();
   }
 
   @override
@@ -130,7 +144,6 @@ class _ProductsPageState extends State<ProductsPage> {
   }
 
   Widget _buildProductCard(Product product, int index) {
-    final delay = Duration(milliseconds: 50 * index);
     // Encontrar o fornecedor (se existir)
     final supplier = product.supplierId != null
         ? _suppliers.firstWhere(
@@ -154,12 +167,12 @@ class _ProductsPageState extends State<ProductsPage> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: _getCategoryColor(product.category).withOpacity(0.2),
+                    color: getProductCategoryColor(product.category).withOpacity(0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
-                    _getCategoryIcon(product.category),
-                    color: _getCategoryColor(product.category),
+                    getProductCategoryIcon(product.category),
+                    color: getProductCategoryColor(product.category),
                     size: 32,
                   ),
                 ),
@@ -301,33 +314,10 @@ class _ProductsPageState extends State<ProductsPage> {
           ],
         ),
       ),
-    )
-        .animate(delay: delay)
-        .fadeIn(duration: const Duration(milliseconds: 300))
-        .moveY(begin: 20, duration: const Duration(milliseconds: 300));
+    ).animateCard(index);
   }
 
-  Color _getCategoryColor(ProductCategory category) {
-    switch (category) {
-      case ProductCategory.drink:
-        return Colors.blue;
-      case ProductCategory.food:
-        return Colors.orange;
-      case ProductCategory.other:
-        return Colors.purple;
-    }
-  }
 
-  IconData _getCategoryIcon(ProductCategory category) {
-    switch (category) {
-      case ProductCategory.drink:
-        return Icons.local_bar;
-      case ProductCategory.food:
-        return Icons.restaurant;
-      case ProductCategory.other:
-        return Icons.category;
-    }
-  }
 
   void _showAddProductDialog() {
     final TextEditingController nameController = TextEditingController();
@@ -363,36 +353,7 @@ class _ProductsPageState extends State<ProductsPage> {
                     decoration: const InputDecoration(
                       labelText: 'Categoria*',
                     ),
-                    items: ProductCategory.values.map((category) {
-                      String label;
-                      IconData icon;
-                      
-                      switch (category) {
-                        case ProductCategory.drink:
-                          label = 'Bebida';
-                          icon = Icons.local_bar;
-                          break;
-                        case ProductCategory.food:
-                          label = 'Comida';
-                          icon = Icons.restaurant;
-                          break;
-                        case ProductCategory.other:
-                          label = 'Outro';
-                          icon = Icons.category;
-                          break;
-                      }
-                      
-                      return DropdownMenuItem(
-                        value: category,
-                        child: Row(
-                          children: [
-                            Icon(icon, size: 20),
-                            const SizedBox(width: 8),
-                            Text(label),
-                          ],
-                        ),
-                      );
-                    }).toList(),
+                    items: buildProductCategoryDropdownItems(),
                     onChanged: (value) {
                       if (value != null) {
                         setState(() {
@@ -485,25 +446,12 @@ class _ProductsPageState extends State<ProductsPage> {
                   final description = descriptionController.text.trim();
                   final unit = unitController.text.trim();
                   
-                  if (name.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Nome do produto é obrigatório')),
-                    );
+                  if (!validateRequiredField(context, name, 'Nome do produto')) {
                     return;
                   }
                   
-                  if (priceText.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Preço é obrigatório')),
-                    );
-                    return;
-                  }
-                  
-                  final price = double.tryParse(priceText.replaceAll(',', '.'));
-                  if (price == null || price <= 0) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Preço inválido')),
-                    );
+                  final price = validateAndParsePrice(context, priceText);
+                  if (price == null) {
                     return;
                   }
                   
@@ -572,36 +520,7 @@ class _ProductsPageState extends State<ProductsPage> {
                     decoration: const InputDecoration(
                       labelText: 'Categoria*',
                     ),
-                    items: ProductCategory.values.map((category) {
-                      String label;
-                      IconData icon;
-                      
-                      switch (category) {
-                        case ProductCategory.drink:
-                          label = 'Bebida';
-                          icon = Icons.local_bar;
-                          break;
-                        case ProductCategory.food:
-                          label = 'Comida';
-                          icon = Icons.restaurant;
-                          break;
-                        case ProductCategory.other:
-                          label = 'Outro';
-                          icon = Icons.category;
-                          break;
-                      }
-                      
-                      return DropdownMenuItem(
-                        value: category,
-                        child: Row(
-                          children: [
-                            Icon(icon, size: 20),
-                            const SizedBox(width: 8),
-                            Text(label),
-                          ],
-                        ),
-                      );
-                    }).toList(),
+                    items: buildProductCategoryDropdownItems(),
                     onChanged: (value) {
                       if (value != null) {
                         setState(() {
@@ -673,25 +592,12 @@ class _ProductsPageState extends State<ProductsPage> {
                   final description = descriptionController.text.trim();
                   final unit = unitController.text.trim();
                   
-                  if (name.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Nome do produto é obrigatório')),
-                    );
+                  if (!validateRequiredField(context, name, 'Nome do produto')) {
                     return;
                   }
                   
-                  if (priceText.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Preço é obrigatório')),
-                    );
-                    return;
-                  }
-                  
-                  final price = double.tryParse(priceText.replaceAll(',', '.'));
-                  if (price == null || price <= 0) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Preço inválido')),
-                    );
+                  final price = validateAndParsePrice(context, priceText);
+                  if (price == null) {
                     return;
                   }
                   

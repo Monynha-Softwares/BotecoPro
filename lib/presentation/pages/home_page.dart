@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/services/database_service.dart';
 import '../widgets/shared_widgets.dart';
@@ -11,7 +12,7 @@ import 'package:intl/intl.dart';
 class HomePage extends StatefulWidget {
   final Function(NavigationTab) onTabSelected;
 
-  const HomePage({Key? key, required this.onTabSelected}) : super(key: key);
+  const HomePage({super.key, required this.onTabSelected});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -24,20 +25,36 @@ class _HomePageState extends State<HomePage> {
   int _lowStockProductsCount = 0;
   List<TableModel> _tables = [];
   List<Order> _activeOrders = [];
+  StreamSubscription<String>? _databaseChangesSubscription;
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    // Listen to database changes to auto-refresh KPIs and lists
+    _databaseChangesSubscription = _databaseService.changes.listen((_) {
+      if (mounted) {
+        _loadData();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _databaseChangesSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadData() async {
     await _databaseService.initializeData();
     
-    final tables = await _databaseService.getTables();
-    final activeOrders = await _databaseService.getActiveOrders();
-    final todaySales = await _databaseService.getTodaySales();
-    final lowStockProducts = await _databaseService.getLowStockProducts(10);
+    // Load all data in parallel for better performance using Dart 3 record types
+    final (tables, activeOrders, todaySales, lowStockProducts) = await (
+      _databaseService.getTables(),
+      _databaseService.getActiveOrders(),
+      _databaseService.getTodaySales(),
+      _databaseService.getLowStockProducts(10)
+    ).wait;
 
     if (mounted) {
       setState(() {
@@ -50,8 +67,13 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  String _capitalize(String s) =>
-    s.isNotEmpty ? s[0].toUpperCase() + s.substring(1) : s;
+  // Exposed for parent to trigger a manual refresh when switching tabs
+  void reload() {
+    _loadData();
+  }
+
+  String _capitalize(String text) =>
+    text.isNotEmpty ? text[0].toUpperCase() + text.substring(1) : text;
 
   @override
   Widget build(BuildContext context) {
@@ -108,8 +130,8 @@ class _HomePageState extends State<HomePage> {
       greeting = 'Boa noite';
     }
     // pattern corrigido: o 'de' entre aspas simples é literal
-    final fmt = DateFormat("EEEE, d 'de' MMMM", 'pt_BR');
-    final dataText = _capitalize(fmt.format(now));
+    final dateFormat = DateFormat("EEEE, d 'de' MMMM", 'pt_BR');
+    final dataText = _capitalize(dateFormat.format(now));
 
     return Container(
       width: double.infinity,

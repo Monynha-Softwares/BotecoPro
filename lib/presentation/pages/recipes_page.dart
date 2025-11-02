@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'dart:async';
 import '../../core/services/database_service.dart';
 import '../widgets/shared_widgets.dart';
 import '../../core/models/data_models.dart';
 
 class RecipesPage extends StatefulWidget {
-  const RecipesPage({Key? key}) : super(key: key);
+  const RecipesPage({super.key});
 
   @override
   State<RecipesPage> createState() => _RecipesPageState();
@@ -16,11 +17,21 @@ class _RecipesPageState extends State<RecipesPage> {
   bool _isLoading = true;
   List<Recipe> _recipes = [];
   List<Product> _products = [];
+  StreamSubscription<String>? _databaseChangesSubscription;
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    _databaseChangesSubscription = _databaseService.changes.listen((_) {
+      if (mounted) _loadData();
+    });
+  }
+
+  @override
+  void dispose() {
+    _databaseChangesSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadData() async {
@@ -28,8 +39,11 @@ class _RecipesPageState extends State<RecipesPage> {
       _isLoading = true;
     });
 
-    final products = await _databaseService.getProducts();
-    final recipes = await _databaseService.getRecipes();
+    // Load products and recipes in parallel using Dart 3.0 record types
+    final (products, recipes) = await (
+      _databaseService.getProducts(),
+      _databaseService.getRecipes()
+    ).wait;
 
     if (mounted) {
       setState(() {
@@ -77,7 +91,6 @@ class _RecipesPageState extends State<RecipesPage> {
   }
 
   Widget _buildRecipeCard(Recipe recipe, int index) {
-    final delay = Duration(milliseconds: 50 * index);
     return Card(
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 12),
@@ -100,7 +113,7 @@ class _RecipesPageState extends State<RecipesPage> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
-                      recipe.type == RecipeType.food ? Icons.restaurant : Icons.local_bar,
+                      getRecipeTypeIcon(recipe.type),
                       color: Theme.of(context).colorScheme.secondary,
                       size: 30,
                     ),
@@ -126,7 +139,7 @@ class _RecipesPageState extends State<RecipesPage> {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              recipe.type == RecipeType.food ? 'Comida' : 'Bebida',
+                              getRecipeTypeLabel(recipe.type),
                               style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                                     color: Theme.of(context).colorScheme.onSurface.withAlpha(204),
                                   ),
@@ -219,10 +232,7 @@ class _RecipesPageState extends State<RecipesPage> {
           ),
         ),
       ),
-    )
-        .animate(delay: delay)
-        .fadeIn(duration: const Duration(milliseconds: 300))
-        .moveY(begin: 20, duration: const Duration(milliseconds: 300));
+    ).animateCard(index);
   }
 
   void _showAddRecipeDialog() {
@@ -256,28 +266,7 @@ class _RecipesPageState extends State<RecipesPage> {
                     decoration: const InputDecoration(
                       labelText: 'Tipo*',
                     ),
-                    items: [
-                      DropdownMenuItem(
-                        value: RecipeType.food,
-                        child: Row(
-                          children: const [
-                            Icon(Icons.restaurant, size: 20),
-                            SizedBox(width: 8),
-                            Text('Comida'),
-                          ],
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: RecipeType.drink,
-                        child: Row(
-                          children: const [
-                            Icon(Icons.local_bar, size: 20),
-                            SizedBox(width: 8),
-                            Text('Bebida'),
-                          ],
-                        ),
-                      ),
-                    ],
+                    items: buildRecipeTypeDropdownItems(),
                     onChanged: (value) {
                       if (value != null) {
                         setState(() {
@@ -321,25 +310,12 @@ class _RecipesPageState extends State<RecipesPage> {
                   final priceText = priceController.text.trim();
                   final instructions = instructionsController.text.trim();
                   
-                  if (name.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Nome da receita é obrigatório')),
-                    );
+                  if (!validateRequiredField(context, name, 'Nome da receita')) {
                     return;
                   }
                   
-                  if (priceText.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Preço é obrigatório')),
-                    );
-                    return;
-                  }
-                  
-                  final price = double.tryParse(priceText.replaceAll(',', '.'));
-                  if (price == null || price <= 0) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Preço inválido')),
-                    );
+                  final price = validateAndParsePrice(context, priceText);
+                  if (price == null) {
                     return;
                   }
                   
@@ -404,28 +380,7 @@ class _RecipesPageState extends State<RecipesPage> {
                     decoration: const InputDecoration(
                       labelText: 'Tipo*',
                     ),
-                    items: [
-                      DropdownMenuItem(
-                        value: RecipeType.food,
-                        child: Row(
-                          children: const [
-                            Icon(Icons.restaurant, size: 20),
-                            SizedBox(width: 8),
-                            Text('Comida'),
-                          ],
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: RecipeType.drink,
-                        child: Row(
-                          children: const [
-                            Icon(Icons.local_bar, size: 20),
-                            SizedBox(width: 8),
-                            Text('Bebida'),
-                          ],
-                        ),
-                      ),
-                    ],
+                    items: buildRecipeTypeDropdownItems(),
                     onChanged: (value) {
                       if (value != null) {
                         setState(() {
@@ -467,25 +422,12 @@ class _RecipesPageState extends State<RecipesPage> {
                   final priceText = priceController.text.trim();
                   final instructions = instructionsController.text.trim();
                   
-                  if (name.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Nome da receita é obrigatório')),
-                    );
+                  if (!validateRequiredField(context, name, 'Nome da receita')) {
                     return;
                   }
                   
-                  if (priceText.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Preço é obrigatório')),
-                    );
-                    return;
-                  }
-                  
-                  final price = double.tryParse(priceText.replaceAll(',', '.'));
-                  if (price == null || price <= 0) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Preço inválido')),
-                    );
+                  final price = validateAndParsePrice(context, priceText);
+                  if (price == null) {
                     return;
                   }
                   
@@ -705,12 +647,12 @@ class _RecipesPageState extends State<RecipesPage> {
             Row(
               children: [
                 Icon(
-                  recipe.type == RecipeType.food ? Icons.restaurant : Icons.local_bar,
+                  getRecipeTypeIcon(recipe.type),
                   color: Theme.of(context).colorScheme.secondary,
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  recipe.type == RecipeType.food ? 'Comida' : 'Bebida',
+                  getRecipeTypeLabel(recipe.type),
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),

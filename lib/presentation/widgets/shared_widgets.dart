@@ -19,6 +19,143 @@ String formatDate(DateTime dateTime) {
   return DateFormat('dd/MM/yyyy', 'pt_BR').format(dateTime);
 }
 
+// Parse de preço com tratamento de vírgula
+double? parsePrice(String priceText) {
+  return double.tryParse(priceText.replaceAll(',', '.'));
+}
+
+// Validação de campo obrigatório com mensagem de erro
+bool validateRequiredField(BuildContext context, String value, String fieldName) {
+  if (value.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('$fieldName é obrigatório')),
+    );
+    return false;
+  }
+  return true;
+}
+
+// Validação de preço com retorno do valor parseado
+double? validateAndParsePrice(BuildContext context, String priceText) {
+  if (priceText.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Preço é obrigatório')),
+    );
+    return null;
+  }
+  
+  final price = parsePrice(priceText);
+  if (price == null || price <= 0) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Preço inválido')),
+    );
+    return null;
+  }
+  return price;
+}
+
+// Retorna a cor para uma categoria de produto
+Color getProductCategoryColor(ProductCategory category) {
+  switch (category) {
+    case ProductCategory.drink:
+      return Colors.blue;
+    case ProductCategory.food:
+      return Colors.orange;
+    case ProductCategory.other:
+      return Colors.purple;
+  }
+}
+
+// Retorna o ícone para uma categoria de produto
+IconData getProductCategoryIcon(ProductCategory category) {
+  switch (category) {
+    case ProductCategory.drink:
+      return Icons.local_bar;
+    case ProductCategory.food:
+      return Icons.restaurant;
+    case ProductCategory.other:
+      return Icons.category;
+  }
+}
+
+// Retorna o label para uma categoria de produto
+String getProductCategoryLabel(ProductCategory category) {
+  switch (category) {
+    case ProductCategory.drink:
+      return 'Bebida';
+    case ProductCategory.food:
+      return 'Comida';
+    case ProductCategory.other:
+      return 'Outro';
+  }
+}
+
+// Retorna o ícone para um tipo de receita
+IconData getRecipeTypeIcon(RecipeType type) {
+  return type == RecipeType.food ? Icons.restaurant : Icons.local_bar;
+}
+
+// Retorna o label para um tipo de receita
+String getRecipeTypeLabel(RecipeType type) {
+  return type == RecipeType.food ? 'Comida' : 'Bebida';
+}
+
+// Constrói itens de dropdown para ProductCategory
+List<DropdownMenuItem<ProductCategory>> buildProductCategoryDropdownItems() {
+  return ProductCategory.values.map((category) {
+    return DropdownMenuItem(
+      value: category,
+      child: Row(
+        children: [
+          Icon(getProductCategoryIcon(category), size: 20),
+          const SizedBox(width: 8),
+          Text(getProductCategoryLabel(category)),
+        ],
+      ),
+    );
+  }).toList();
+}
+
+// Constrói itens de dropdown para RecipeType
+List<DropdownMenuItem<RecipeType>> buildRecipeTypeDropdownItems() {
+  return [
+    DropdownMenuItem(
+      value: RecipeType.food,
+      child: Row(
+        children: [
+          Icon(getRecipeTypeIcon(RecipeType.food), size: 20),
+          const SizedBox(width: 8),
+          Text(getRecipeTypeLabel(RecipeType.food)),
+        ],
+      ),
+    ),
+    DropdownMenuItem(
+      value: RecipeType.drink,
+      child: Row(
+        children: [
+          Icon(getRecipeTypeIcon(RecipeType.drink), size: 20),
+          const SizedBox(width: 8),
+          Text(getRecipeTypeLabel(RecipeType.drink)),
+        ],
+      ),
+    ),
+  ];
+}
+
+// Calcula o delay de animação para itens em lista
+Duration getAnimationDelay(int index, {int milliseconds = 50}) {
+  return Duration(milliseconds: milliseconds * index);
+}
+
+// Extension para adicionar animação de card padrão
+extension CardAnimationExtension on Widget {
+  Widget animateCard(int index) {
+    return animate(delay: getAnimationDelay(index))
+        .fadeIn(duration: const Duration(milliseconds: 300))
+        .moveY(begin: 20, duration: const Duration(milliseconds: 300));
+  }
+}
+
 // AppBar customizada para o app
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -26,11 +163,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showBackButton;
 
   const CustomAppBar({
-    Key? key,
+    super.key,
     required this.title,
     this.actions,
     this.showBackButton = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -71,12 +208,12 @@ class MenuCard extends StatelessWidget {
   final Color? backgroundColor;
 
   const MenuCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.icon,
     required this.onTap,
     this.backgroundColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -138,12 +275,12 @@ class StatusCard extends StatelessWidget {
   final Color? color;
 
   const StatusCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.value,
     required this.icon,
     this.color,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -203,7 +340,7 @@ class StatusCard extends StatelessWidget {
 class StatusBadge extends StatelessWidget {
   final OrderStatus status;
 
-  const StatusBadge({Key? key, required this.status}) : super(key: key);
+  const StatusBadge({super.key, required this.status});
 
   @override
   Widget build(BuildContext context) {
@@ -276,12 +413,12 @@ class QuantitySelector extends StatelessWidget {
   final int max;
 
   const QuantitySelector({
-    Key? key,
+    super.key,
     required this.quantity,
     required this.onChanged,
     this.min = 1,
     this.max = 99,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -339,10 +476,10 @@ class CategoryFilter extends StatelessWidget {
   final ValueChanged<ProductCategory?> onCategorySelected;
 
   const CategoryFilter({
-    Key? key,
+    super.key,
     required this.selectedCategory,
     required this.onCategorySelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -352,11 +489,11 @@ class CategoryFilter extends StatelessWidget {
       child: Row(
         children: [
           FilterChip(
-            label: Row(
+            label: const Row(
               children: [
-                const Icon(Icons.filter_alt_off, size: 16),
-                const SizedBox(width: 4),
-                const Text('Todos'),
+                Icon(Icons.filter_alt_off, size: 16),
+                SizedBox(width: 4),
+                Text('Todos'),
               ],
             ),
             selected: selectedCategory == null,
@@ -374,11 +511,11 @@ class CategoryFilter extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           FilterChip(
-            label: Row(
+            label: const Row(
               children: [
-                const Icon(Icons.local_bar, size: 16),
-                const SizedBox(width: 4),
-                const Text('Bebidas'),
+                Icon(Icons.local_bar, size: 16),
+                SizedBox(width: 4),
+                Text('Bebidas'),
               ],
             ),
             selected: selectedCategory == ProductCategory.drink,
@@ -397,11 +534,11 @@ class CategoryFilter extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           FilterChip(
-            label: Row(
+            label: const Row(
               children: [
-                const Icon(Icons.restaurant, size: 16),
-                const SizedBox(width: 4),
-                const Text('Comidas'),
+                Icon(Icons.restaurant, size: 16),
+                SizedBox(width: 4),
+                Text('Comidas'),
               ],
             ),
             selected: selectedCategory == ProductCategory.food,
@@ -420,11 +557,11 @@ class CategoryFilter extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           FilterChip(
-            label: Row(
+            label: const Row(
               children: [
-                const Icon(Icons.category, size: 16),
-                const SizedBox(width: 4),
-                const Text('Outros'),
+                Icon(Icons.category, size: 16),
+                SizedBox(width: 4),
+                Text('Outros'),
               ],
             ),
             selected: selectedCategory == ProductCategory.other,
@@ -456,13 +593,13 @@ class ConfirmationDialog extends StatelessWidget {
   final VoidCallback onConfirm;
 
   const ConfirmationDialog({
-    Key? key,
+    super.key,
     required this.title,
     required this.content,
     this.confirmText = 'Confirmar',
     this.cancelText = 'Cancelar',
     required this.onConfirm,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -503,12 +640,12 @@ class EmptyStateCard extends StatelessWidget {
   final VoidCallback? onAction;
 
   const EmptyStateCard({
-    Key? key,
+    super.key,
     required this.message,
     required this.icon,
     this.actionText,
     this.onAction,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -563,13 +700,13 @@ class ActionButton extends StatelessWidget {
   final Color? foregroundColor;
 
   const ActionButton({
-    Key? key,
+    super.key,
     required this.icon,
     required this.label,
     required this.onPressed,
     this.backgroundColor,
     this.foregroundColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

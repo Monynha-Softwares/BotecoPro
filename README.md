@@ -1,13 +1,16 @@
-# 🍺 BotecoPro - Gestão Completa para Seu Bar
+# [🍺 BotecoPro - Gestão Completa para Seu Bar](https://botecopro.monynha.com)
 
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
 ![Platform](https://img.shields.io/badge/Platform-Web%20%7C%20Mobile%20%7C%20Desktop-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-blue?logo=flutter)
+![Auth](https://img.shields.io/badge/Auth-Clerk-5469D4?logo=clerk)
 
-> **MVP Demo Web - Sem necessidade de login ou backend!**
+> **Aplicação Flutter Web com Autenticação Clerk**
 
-Aplicação completa em Flutter para gerenciar operações de bar: mesas, pedidos, produtos, receitas e produção interna. Todas as dados são armazenadas **client-side** com persistência automática.
+Aplicação completa em Flutter para gerenciar operações de bar: mesas, pedidos, produtos, receitas e produção interna. Autenticação segura via **Clerk** e persistência client-side.
+
+> ⚠️ **Atenção**: Para rodar localmente, você precisa configurar uma chave Clerk (gratuita). Veja [seção de Autenticação](#-autenticação).
 
 ---
 
@@ -15,6 +18,7 @@ Aplicação completa em Flutter para gerenciar operações de bar: mesas, pedido
 
 ### ✅ Funcionalidades Implementadas
 
+- **🔐 Autenticação Clerk** - Login, signup, recuperação de senha
 - **📊 Dashboard** - KPIs em tempo real (mesas ativas, vendas, estoque baixo)
 - **🪑 Gerenciamento de Mesas** - Criar, editar, gerenciar status
 - **📦 Catálogo de Produtos** - Inventário com preço, estoque, categoria
@@ -31,7 +35,9 @@ Aplicação completa em Flutter para gerenciar operações de bar: mesas, pedido
 
 ### Online Demo
 
-**🎉 [Acesse o MVP agora (Firebase Hosting)](https://botecoproXXXX.web.app)**
+**🎉 [Acesse o MVP agora](https://botecopro.monynha.com)**
+
+*Provided by **[Monynha Online](https://monynha.online)***
 
 _Sem instalação, sem login, pronto para usar!_
 
@@ -55,19 +61,107 @@ cd BotecoPro
 # Baixe dependências
 flutter pub get
 
-# Rode em web (default)
-flutter run -d web
+# Configure autenticação Clerk (obrigatório)
+# Veja seção "🔐 Autenticação" abaixo
+```
 
-# Ou compile para produção
+#### Desenvolvimento (Hot Reload)
+```bash
+# Opção 1: Rodar com Chrome (recomendado)
+flutter run -d chrome
+
+# Opção 2: Rodar em qualquer navegador na porta 8080
+flutter run -d web-server --web-port=8080
+# Acesse: http://localhost:8080
+
+# Opção 3: Especificar porta customizada
+flutter run -d chrome --web-port=3000
+```
+
+#### Build de Produção
+```bash
+# Compilar para produção
 flutter build web --release
 
-# Serve build/web em http://localhost:8080
+# Servir build localmente - escolha uma opção:
+
+# Python (geralmente já instalado)
 cd build/web && python3 -m http.server 8080
+
+# Node.js
+npx http-server build/web -p 8080
+
+# PHP
+cd build/web && php -S localhost:8080
+
+# Acesse: http://localhost:8080
 ```
 
 ---
 
-## 📱 Plataformas
+## � Autenticação
+
+O BotecoPro usa **[Clerk](https://clerk.com)** para autenticação robusta e pronta para produção.
+
+### Configuração Inicial (Obrigatório)
+
+#### 1. Obter Chave do Clerk
+
+1. Acesse [dashboard.clerk.com](https://dashboard.clerk.com)
+2. Crie um novo projeto ou selecione existente
+3. Vá para **API Keys**
+4. Copie a **Publishable Key** (formato: `pk_test_...` para desenvolvimento)
+
+#### 2. Configurar no Projeto
+
+**Opção A: Via arquivo de configuração (desenvolvimento)**
+
+Edite `lib/core/constants/clerk_config.dart`:
+
+```dart
+static const String publishableKey = 'pk_test_SUA_CHAVE_AQUI';
+```
+
+**Opção B: Via .env (recomendado para produção)**
+
+```bash
+# 1. Copiar template
+cp .env.example .env
+
+# 2. Editar .env e adicionar sua chave
+CLERK_PUBLISHABLE_KEY=pk_test_SUA_CHAVE_AQUI
+```
+
+⚠️ **Importante**: O arquivo `.env` já está no `.gitignore` para segurança.
+
+### Funcionalidades de Autenticação
+
+✅ **Login com email/senha**  
+✅ **Registro de novos usuários**  
+✅ **Recuperação de senha**  
+✅ **Verificação de email**  
+✅ **Persistência de sessão**  
+✅ **UI responsiva e acessível**  
+🔄 **Login social** (Google, GitHub, etc.) - disponível via configuração Clerk
+
+### Fluxo de Uso
+
+```dart
+// Usuário não autenticado:
+// → App exibe tela ClerkAuthentication (login/signup)
+// → Após login: redireciona para MainNavigationScreen
+
+// Fazer logout (em qualquer página):
+await Clerk.instance.signOut();
+```
+
+### Documentação Adicional
+
+📖 **Implementação detalhada**: [docs/CLERK_IMPLEMENTATION.md](./docs/CLERK_IMPLEMENTATION.md)
+
+---
+
+## �📱 Plataformas
 
 ### ✅ Web (MVP)
 ```bash
@@ -295,9 +389,12 @@ firebase deploy
 
 | Documento | Descrição |
 |-----------|-----------|
-| [WEB_AUDIT_AND_DEPLOYMENT.md](./WEB_AUDIT_AND_DEPLOYMENT.md) | Audit completo, problemas & soluções |
-| [FIREBASE_DEPLOYMENT_GUIDE.md](./FIREBASE_DEPLOYMENT_GUIDE.md) | Deploy passo-a-passo Firebase |
-| [WEB_ARCHITECTURE.md](./WEB_ARCHITECTURE.md) | Arquitetura técnica detalhada |
+| [AGENTS.md](./AGENTS.md) | Diretrizes para agentes de IA e arquitetura |
+| [AI_RULES.md](./AI_RULES.md) | Regras de colaboração e parceiros de componentes |
+| [CLERK_IMPLEMENTATION.md](./docs/CLERK_IMPLEMENTATION.md) | 🔐 Implementação completa Clerk Auth |
+| [FIREBASE_DEPLOYMENT_GUIDE.md](./docs/FIREBASE_DEPLOYMENT_GUIDE.md) | Deploy passo-a-passo Firebase |
+| [WEB_ARCHITECTURE.md](./docs/WEB_ARCHITECTURE.md) | Arquitetura técnica detalhada |
+| [DOCUMENTATION_INDEX.md](./docs/DOCUMENTATION_INDEX.md) | Índice completo da documentação |
 
 ---
 
@@ -382,17 +479,17 @@ flutter test integration_test/
 ## 🔐 Segurança & Limitações
 
 ### MVP (Atual)
-- ✅ **Sem Backend** - Tudo client-side
-- ✅ **Sem Autenticação** - Dados públicos
-- ✅ **localStorage** - Acessível via DevTools
-- ✅ **Sem HTTPS Obrigatório** - Firebase auto-HTTPS
+- ✅ **Autenticação Clerk** - Login/signup seguro com Clerk
+- ✅ **Persistência de Sessão** - Token gerenciado pelo Clerk
+- ✅ **localStorage** - Dados de aplicação armazenados localmente
+- ✅ **HTTPS** - Firebase Hosting com SSL automático
 
 ### Upgrades Futuros
-- 🚧 Autenticação (Firebase Auth, OAuth)
-- 🚧 Backend API (NodeJS, Python, Go)
-- 🚧 Multi-tenant database
-- 🚧 Encriptação data (client-side)
-- 🚧 Real-time sync (WebSockets)
+- 🚧 **Backend API** - NodeJS, Python ou Go
+- 🚧 **Multi-tenant database** - PostgreSQL/MongoDB
+- 🚧 **Roles & Permissions** - Gerente, Garçom, etc.
+- 🚧 **Real-time sync** - WebSockets ou Firebase Realtime
+- 🚧 **Encriptação** - Dados sensíveis criptografados
 
 ---
 
@@ -413,7 +510,7 @@ flutter test integration_test/
 
 ```bash
 # Fork & Clone
-git clone https://github.com/seu-usuario/BotecoPro.git
+git clone https://github.com/Monynha-Softwares/BotecoPro.git
 
 # Create branch
 git checkout -b feature/amazing-feature
@@ -433,13 +530,13 @@ git push origin feature/amazing-feature
 
 MIT License - veja [LICENSE](LICENSE)
 
----
+---    
 
 ## 💬 Suporte
 
-- **Issues**: [GitHub Issues](https://github.com/seu-usuario/BotecoPro/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/seu-usuario/BotecoPro/discussions)
-- **Email**: support@botecoproapp.com
+- **Issues**: [GitHub Issues](https://github.com/Monynha-Softwares/BotecoPro/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Monynha-Softwares/BotecoPro/discussions)
+- **Email**: hello@monynha.com
 
 ---
 
@@ -451,7 +548,7 @@ MIT License - veja [LICENSE](LICENSE)
 - **Persistência**: localStorage (IndexedDB)
 - **UI**: Material Design 3
 - **Localização**: Portuguese (Brazil)
-- **Deployment**: Firebase Hosting, Netlify, AWS S3, VPS
+- **Deployment**: Firebase Hosting, Coolify, AWS S3, VPS
 - **Dependências**: flutter_animate, table_calendar, flutter_slidable, flutter_svg, intl, fl_chart, shared_preferences, provider, http, uuid
 
 ---
@@ -491,19 +588,21 @@ MIT License - veja [LICENSE](LICENSE)
 │  │ 3 Mesas     │  │ R$ 245.50    │ │
 │  │ Ativas      │  │ Vendas Hoje  │ │
 │  └─────────────┘  └──────────────┘ │
-│                                     │
-│  📋 Operações                       │
+│                                    │
+│  📋 Operações                     |
 │  [Mesas] [Produtos] [Receitas]     │
 │  [Produção] [Fornecedores]         │
-│                                     │
-└─────────────────────────────────────┘
+│                                    │
+└────────────────────────────────────┘
 ```
 
 ---
 
 ## 🎉 Créditos
 
-Desenvolvido com ❤️ para gerentes de bar em todo Brasil.
+Desenvolvido com ❤️ por [![Monynha Softwares](https://img.shields.io/badge/Monynha%20Softwares-8A2BE2?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Monynha-Softwares)
+
+ para gerentes de bar em todo Brasil.
 
 ---
 
@@ -517,3 +616,4 @@ Desenvolvido com ❤️ para gerentes de bar em todo Brasil.
 ---
 
 **BotecoPro MVP - Porque gerenciar bar nunca foi tão fácil!** 🍻
+

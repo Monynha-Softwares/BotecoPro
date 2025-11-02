@@ -20,8 +20,10 @@
 │  │  ┌────────────────────────────────────────────────┐  │   │
 │  │  │      Business Logic & State                   │  │   │
 │  │  │  - Models (Supplier, Product, Order, etc.)    │  │   │
-│  │  │  - DatabaseService (Singleton)               │  │   │
-│  │  │  - CRUD Operations                           │  │   │
+│  │  │  - DatabaseService (Singleton + Optimized)   │  │   │
+│  │  │  - CRUD Operations with Caching              │  │   │
+│  │  │  - Write Locks & Debouncing                   │  │   │
+│  │  │  - Reactive Streams for UI Updates            │  │   │
 │  │  └────────────────────────────────────────────────┘  │   │
 │  │                                                      │   │
 │  │  ┌────────────────────────────────────────────────┐  │   │

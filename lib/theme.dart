@@ -8,22 +8,22 @@ const Color botecoBrown = Color(0xFF4F3222);
 
 ThemeData get lightTheme => ThemeData(
       useMaterial3: true,
-      colorScheme: ColorScheme.light(
+      colorScheme: const ColorScheme.light(
         primary: botecoWine,
         secondary: botecoMustard,
         tertiary: botecoBrown,
-        surface: const Color(0xFFF5F5F5),
-        error: const Color(0xFFD32F2F),
+        surface: Color(0xFFF5F5F5),
+        error: Color(0xFFD32F2F),
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onTertiary: Colors.white,
-        onSurface: const Color(0xFF1E1E1E),
+        onSurface: Color(0xFF1E1E1E),
         onError: Colors.white,
-        outline: const Color(0xFFBDBDBD),
+        outline: Color(0xFFBDBDBD),
       ),
       brightness: Brightness.light,
       scaffoldBackgroundColor: botecoBeige.withOpacity(0.15),
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
         backgroundColor: botecoWine,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -49,7 +49,7 @@ ThemeData get lightTheme => ThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         clipBehavior: Clip.antiAlias,
       ),
-      textTheme: TextTheme(
+      textTheme: const TextTheme(
         displayLarge: TextStyle(
           fontSize: 57.0,
           fontWeight: FontWeight.normal,
@@ -157,7 +157,7 @@ ThemeData get darkTheme => ThemeData(
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: TextStyle(
+        titleTextStyle: const TextStyle(
           fontSize: 20.0,
           fontWeight: FontWeight.bold,
           color: Colors.white,
@@ -178,7 +178,7 @@ ThemeData get darkTheme => ThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         clipBehavior: Clip.antiAlias,
       ),
-      textTheme: TextTheme(
+      textTheme: const TextTheme(
         displayLarge: TextStyle(
           fontSize: 57.0,
           fontWeight: FontWeight.normal,
