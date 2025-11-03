@@ -24,7 +24,7 @@ WORKDIR /app
 
 # Get dependencies and build the web app
 RUN flutter pub get
-RUN flutter build web
+RUN flutter build web --release
 
 # Stage 2: Serve the static website with nginx
 FROM nginx:alpine
@@ -36,4 +36,5 @@ COPY --from=build /app/build/web /usr/share/nginx/html
 EXPOSE 80
 
 # Start nginx
-# CMD ["nginx", "-g", "daemon off;"]
+
+CMD ["nginx", "-g", "daemon off;"]
