@@ -61,28 +61,38 @@ class SupabaseDatabaseService {
 
   /// Initialize Supabase connection
   /// Must be called before any other method
-  /// URL and ANON_KEY should be in .env or passed as parameters
+  /// Note: Supabase.initialize() should already be called in main.dart
+  /// This method just sets up the client reference
   Future<void> initialize({String? url, String? anonKey}) async {
     if (_initialized) return;
 
     try {
-      // If not provided, attempt to read from environment or .env
-      final supabaseUrl = url ?? const String.fromEnvironment('SUPABASE_URL');
-      final supabaseAnonKey = anonKey ?? const String.fromEnvironment('SUPABASE_ANON_KEY');
+      // Check if Supabase is already initialized (should be from main.dart)
+      try {
+        _client = Supabase.instance.client;
+        _initialized = true;
+        return;
+      } catch (e) {
+        // If not initialized, we need credentials
+        final supabaseUrl = url ?? const String.fromEnvironment('SUPABASE_URL');
+        final supabaseAnonKey = anonKey ?? const String.fromEnvironment('SUPABASE_ANON_KEY');
 
-      if (supabaseUrl.isEmpty || supabaseAnonKey.isEmpty) {
-        throw Exception(
-          'Supabase credentials missing. Set SUPABASE_URL and SUPABASE_ANON_KEY in .env or pass to initialize()',
+        if (supabaseUrl.isEmpty || supabaseAnonKey.isEmpty) {
+          throw Exception(
+            'Supabase credentials missing. Ensure Supabase is initialized in main.dart, '
+            'or set SUPABASE_URL and SUPABASE_ANON_KEY in .env',
+          );
+        }
+
+        // Only initialize if not already done
+        await Supabase.initialize(
+          url: supabaseUrl,
+          anonKey: supabaseAnonKey,
         );
+
+        _client = Supabase.instance.client;
+        _initialized = true;
       }
-
-      await Supabase.initialize(
-        url: supabaseUrl,
-        anonKey: supabaseAnonKey,
-      );
-
-      _client = Supabase.instance.client;
-      _initialized = true;
     } catch (error) {
       print('Error initializing Supabase: $error');
       rethrow;
