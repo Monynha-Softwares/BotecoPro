@@ -69,6 +69,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void initState() {
+    super.initState();
     // Listen to auth state changes
     _authStateSubscription = supabase.auth.onAuthStateChange.listen(
       (data) {
@@ -87,7 +88,6 @@ class _LoginPageState extends State<LoginPage> {
         }
       },
     );
-    super.initState();
   }
 
   @override

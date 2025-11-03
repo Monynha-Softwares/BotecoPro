@@ -114,8 +114,8 @@ void main() async {
   runApp(const MyApp());
 }
 
-// Global Supabase client instance
-final supabase = Supabase.instance.client;
+// Global Supabase client instance - lazy getter to ensure initialization happens first
+SupabaseClient get supabase => Supabase.instance.client;
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
