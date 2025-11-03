@@ -15,13 +15,3 @@ class ProfilePage extends StatelessWidget {
     return const AccountPage();
   }
 }
-
-            },
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// Fim do arquivo
