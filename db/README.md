@@ -18,6 +18,9 @@ This folder tracks SQL migrations applied to the remote Boteco database (Supabas
   - 8 bar tables (Mesa 1-6, Balcão 1-2)
   - 1 recipe (Caipirinha with ingredients: cachaça, limão, açúcar)
   - 1 internal production record (preparing 10 caipirinhas)
+- 0004_helper_functions.sql
+  - Created `decrement_product_stock(product_id, quantity)` function for safe stock updates
+  - Used by SupabaseDatabaseService.closeOrder() to atomically decrement inventory
 
 ## Using in VS Code with MCP
 
@@ -30,3 +33,72 @@ This folder tracks SQL migrations applied to the remote Boteco database (Supabas
 - RLS is currently disabled for simplicity while modeling. Before production, enable RLS and add policies.
 - UUIDs use `gen_random_uuid()` (pgcrypto extension). If needed, ensure the extension is available in your project.
 - Generated column: `order_items.total` is computed from quantity × unit_price.
+
+## Using Supabase in the Flutter app
+
+The app includes `SupabaseDatabaseService` (`lib/core/services/supabase_database_service.dart`) that mirrors the `DatabaseService` API but persists to Supabase instead of SharedPreferences.
+
+### Setup steps
+
+1. **Get Supabase credentials**:
+   - Create project at https://app.supabase.com
+   - Navigate to Settings > API
+   - Copy Project URL and anon/public key
+
+2. **Configure environment**:
+   ```bash
+   # Add to .env
+   SUPABASE_URL=https://your-project.supabase.co
+   SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+   ```
+
+3. **Run with Supabase**:
+   ```powershell
+   # Compile with USE_SUPABASE flag
+   flutter run -d web --dart-define=USE_SUPABASE=true
+   ```
+
+4. **Integrate in code** (example):
+   ```dart
+   import 'package:boteco_pro/core/config/database_config.dart';
+   import 'package:boteco_pro/core/services/database_service.dart';
+   import 'package:boteco_pro/core/services/supabase_database_service.dart';
+
+   // In main() or service initialization
+   final dbService = DatabaseConfig.useSupabase
+       ? SupabaseDatabaseService()
+       : DatabaseService();
+
+   if (DatabaseConfig.useSupabase) {
+     await (dbService as SupabaseDatabaseService).initialize(
+       url: DatabaseConfig.supabaseUrl,
+       anonKey: DatabaseConfig.supabaseAnonKey,
+     );
+   }
+
+   // Use identical API
+   final products = await dbService.getProducts();
+   await dbService.addOrder(order);
+   ```
+
+### Benefits of Supabase
+
+- ✅ Multi-device sync (data persists server-side)
+- ✅ Complex queries (JOINs, aggregations via PostgREST)
+- ✅ Real-time subscriptions (optional)
+- ✅ Automatic backups
+- ✅ Row-level security for multi-tenant apps
+
+### Limitations
+
+- ❌ Requires internet connection
+- ❌ Network latency (vs instant local access)
+- ❌ Usage-based pricing after free tier (500MB DB, 2GB egress/month)
+
+### Current state
+
+- All migrations applied to remote Supabase project
+- Demo data seeded (3 suppliers, 13 products, 8 tables, recipes, productions)
+- RLS enabled with permissive authenticated policies
+- Helper functions created for stock management
+
