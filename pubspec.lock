@@ -81,22 +81,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.4"
-  clerk_auth:
-    dependency: "direct main"
-    description:
-      name: clerk_auth
-      sha256: "20b60861ce3708cc69d35c939a4449dbc2cb727a28813f38dd84311e765816ee"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.12-beta"
-  clerk_flutter:
-    dependency: "direct main"
-    description:
-      name: clerk_flutter
-      sha256: "0cf2c25f762c4b899f8fdb110863680909ca33cc5d2f097142a8c52d4b43fc64"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.12-beta"
   cli_util:
     dependency: transitive
     description:
@@ -145,22 +129,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.8"
-  diacritic:
-    dependency: transitive
-    description:
-      name: diacritic
-      sha256: "12981945ec38931748836cd76f2b38773118d0baef3c68404bdfde9566147876"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.6"
-  email_validator:
-    dependency: transitive
-    description:
-      name: email_validator
-      sha256: b19aa5d92fdd76fbc65112060c94d45ba855105a28bb6e462de7ff03b12fa1fb
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.0"
   equatable:
     dependency: transitive
     description:
@@ -278,11 +246,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.0"
-  flutter_localizations:
-    dependency: transitive
-    description: flutter
-    source: sdk
-    version: "0.0.0"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -374,7 +337,7 @@ packages:
     source: hosted
     version: "4.5.4"
   image_picker:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: image_picker
       sha256: "736eb56a911cf24d1859315ad09ddec0b66104bc41a7f8c5b96b4e2620cf5041"
@@ -613,14 +576,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.1"
-  phone_input:
-    dependency: transitive
-    description:
-      name: phone_input
-      sha256: b33c55709c6748814196a001c3fab12eb9f1a7945fa7d73e96cbc1b16433d066
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0"
   platform:
     dependency: transitive
     description:
@@ -994,38 +949,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.3"
-  webview_flutter:
-    dependency: transitive
-    description:
-      name: webview_flutter
-      sha256: c3e4fe614b1c814950ad07186007eff2f2e5dd2935eba7b9a9a1af8e5885f1ba
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.13.0"
-  webview_flutter_android:
-    dependency: transitive
-    description:
-      name: webview_flutter_android
-      sha256: e5201c620eb2637dca88a756961fae4a7191bb30b4f2271e08b746405ffdf3fd
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.10.5"
-  webview_flutter_platform_interface:
-    dependency: transitive
-    description:
-      name: webview_flutter_platform_interface
-      sha256: "63d26ee3aca7256a83ccb576a50272edd7cfc80573a4305caa98985feb493ee0"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.14.0"
-  webview_flutter_wkwebview:
-    dependency: transitive
-    description:
-      name: webview_flutter_wkwebview
-      sha256: "5de608fdea144d4370c21d4c80f0528135529e0180aa129790064c345e457a43"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.23.2"
   xdg_directories:
     dependency: transitive
     description:
