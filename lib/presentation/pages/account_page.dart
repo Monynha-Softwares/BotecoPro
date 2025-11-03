@@ -33,8 +33,20 @@ class _AccountPageState extends State<AccountPage> {
       _loading = true;
     });
     
+    // Check if user is authenticated
+    final session = supabase.auth.currentSession;
+    if (session == null) {
+      if (mounted) {
+        // Redirect to login page
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
+      }
+      return;
+    }
     try {
-      final userId = supabase.auth.currentSession!.user.id;
+      final userId = session.user.id;
       final data = await supabase
           .from('profiles')
           .select()
