@@ -12,16 +12,21 @@
 /// │   ├── models/                  # Modelos de dados
 /// │   │   └── data_models.dart     # Todas as entidades (Product, Order, etc)
 /// │   ├── services/                # Serviços de lógica de negócio
-/// │   │   ├── database_service.dart    # Persistência com SharedPreferences
-/// │   │   └── auth_service.dart        # Autenticação (placeholder)
+/// │   │   ├── database_service.dart          # Persistência com SharedPreferences
+/// │   │   ├── supabase_database_service.dart # Persistência com Supabase
+/// │   │   └── auth_service.dart              # Autenticação (legacy)
+/// │   ├── config/                  # Configurações
+/// │   │   └── database_config.dart           # Toggle SharedPreferences/Supabase
 /// │   └── providers/               # Gerenciamento de estado
-/// │       ├── auth_provider.dart       # Estado de autenticação
-/// │       └── database_provider.dart   # SQLite (implementação futura)
+/// │       ├── auth_provider.dart             # Estado de autenticação (legacy)
+/// │       └── database_provider.dart         # SQLite (implementação futura)
 /// └── presentation/                # Interface do usuário
 ///     ├── pages/                   # Telas do app
 ///     │   ├── home_page.dart
-///     │   ├── login_page.dart      # (placeholder)
-///     │   ├── signup_page.dart     # (placeholder)
+///     │   ├── login_page.dart      # Supabase Auth com Magic Link
+///     │   ├── account_page.dart    # Gerenciamento de perfil
+///     │   ├── profile_page.dart    # Wrapper para account_page
+///     │   ├── signup_page.dart     # (placeholder - não usado)
 ///     │   ├── tables_page.dart
 ///     │   ├── products_page.dart
 ///     │   ├── recipes_page.dart
@@ -34,24 +39,26 @@
 ///
 /// PADRÕES UTILIZADOS:
 /// - Clean Architecture (separação core/presentation)
-/// - Singleton (DatabaseService, Providers)
+/// - Singleton (DatabaseService, Supabase client)
 /// - StatefulWidget para gerenciamento de estado local
-/// - ChangeNotifier para estado global (preparado)
+/// - Reactive streams para auth state changes
 ///
 /// FLUXO DE DADOS:
-/// 1. UI (Pages) → DatabaseService → SharedPreferences
-/// 2. Modelos implementam toJson/fromJson para serialização
-/// 3. Cada entidade tem chave única no SharedPreferences
+/// 1. UI (Pages) → DatabaseService → SharedPreferences (default)
+/// 2. UI (Pages) → SupabaseDatabaseService → Supabase (optional)
+/// 3. Modelos implementam toJson/fromJson para serialização
+/// 4. Auth gerenciado por Supabase Auth (magic link email)
 ///
-/// PREPARAÇÃO PARA FUTURO:
-/// - AuthProvider pronto para Firebase Authentication
-/// - DatabaseProvider pronto para migração SQLite
-/// - LoginPage/SignupPage prontas para integração
+/// AUTENTICAÇÃO:
+/// - Supabase Auth com Magic Link (passwordless)
+/// - User profiles armazenados em public.profiles
+/// - Row Level Security habilitada
+/// - Deep links para iOS/Android
 ///
 /// DEPENDÊNCIAS PRINCIPAIS:
-/// - flutter_animate: Animações
+/// - supabase_flutter: Autenticação e persistência remota
 /// - shared_preferences: Persistência local
-/// - provider: Gerenciamento de estado (preparado)
+/// - flutter_dotenv: Variáveis de ambiente
 /// - intl: Formatação de datas e moeda (pt_BR)
 ///
 library;
@@ -64,7 +71,6 @@ import 'package:intl/intl.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'core/constants/clerk_config.dart';
 import 'presentation/pages/home_page.dart';
 import 'presentation/pages/login_page.dart';
 import 'presentation/pages/profile_page.dart';
