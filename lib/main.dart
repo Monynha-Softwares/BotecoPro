@@ -125,6 +125,7 @@ class MyApp extends StatelessWidget {
       home: supabase.auth.currentSession == null
           ? const LoginPage()
           : const MainNavigationScreen(),
+      initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginPage(),
         '/home': (context) => const MainNavigationScreen(),

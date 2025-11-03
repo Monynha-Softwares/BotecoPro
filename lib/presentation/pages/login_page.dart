@@ -126,7 +126,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 16),
                   Text(
                     'Sistema de Gestão para Bares',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
