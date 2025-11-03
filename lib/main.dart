@@ -62,6 +62,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/constants/clerk_config.dart';
 import 'presentation/pages/home_page.dart';
@@ -90,8 +91,25 @@ void main() async {
     debugPrint('⚠️ .env não encontrado, usando configuração padrão');
   }
 
+  // Inicializa Supabase
+  final supabaseUrl = dotenv.env['SUPABASE_URL'] ?? '';
+  final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'] ?? '';
+  
+  if (supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty) {
+    await Supabase.initialize(
+      url: supabaseUrl,
+      anonKey: supabaseAnonKey,
+    );
+    debugPrint('✅ Supabase inicializado com sucesso');
+  } else {
+    debugPrint('⚠️ Credenciais Supabase não encontradas no .env');
+  }
+
   runApp(const MyApp());
 }
+
+// Global Supabase client instance
+final supabase = Supabase.instance.client;
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -104,7 +122,9 @@ class MyApp extends StatelessWidget {
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: ThemeMode.system,
-      initialRoute: '/login',
+      home: supabase.auth.currentSession == null
+          ? const LoginPage()
+          : const MainNavigationScreen(),
       routes: {
         '/login': (context) => const LoginPage(),
         '/home': (context) => const MainNavigationScreen(),
@@ -231,6 +251,20 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       bottomNavigationBar: BottomNavigation(
         currentTab: _currentTab,
         onTabSelected: _selectTab,
+      ),
+    );
+  }
+}
+
+// Extension for showing snackbars throughout the app
+extension ContextExtension on BuildContext {
+  void showSnackBar(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(this).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError
+            ? Theme.of(this).colorScheme.error
+            : Theme.of(this).snackBarTheme.backgroundColor,
       ),
     );
   }

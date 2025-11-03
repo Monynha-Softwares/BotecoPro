@@ -21,6 +21,11 @@ This folder tracks SQL migrations applied to the remote Boteco database (Supabas
 - 0004_helper_functions.sql
   - Created `decrement_product_stock(product_id, quantity)` function for safe stock updates
   - Used by SupabaseDatabaseService.closeOrder() to atomically decrement inventory
+- **0005_profiles_table.sql** ✅ NEW
+  - User profiles table extending auth.users (id, username, website, avatar_url)
+  - RLS policies for profile security
+  - Automatic profile creation trigger on user signup
+  - Used by Supabase Auth integration
 
 ## Using in VS Code with MCP
 
