@@ -17,7 +17,7 @@ Both backends expose the **same API**, so you can switch between them without ch
 flutter pub get
 ```
 
-This installs `supabase_flutter: ^2.11.0` (already in pubspec.yaml).
+This installs `supabase_flutter: ^2.10.3` (already in pubspec.yaml).
 
 ### 2. Get Supabase credentials
 
