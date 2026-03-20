@@ -1,37 +1,11 @@
-// lib/presentation/pages/login_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:provider/provider.dart';
+
+import '../../core/providers/auth_provider.dart';
 import '../../main.dart';
-// TODO: Descomentar quando implementar autenticação
-// import '../../core/providers/auth_provider.dart';
-// import 'package:provider/provider.dart';
 import 'signup_page.dart';
 
-/// LoginPage - Tela de login do aplicativo
-///
-/// IMPLEMENTAÇÃO ATUAL:
-/// - Interface de login com email e senha (não funcional)
-/// - Botão "Entrar" redireciona temporariamente direto para o app
-/// - Link para tela de cadastro
-/// - Design responsivo e animado
-///
-/// TODO: IMPLEMENTAÇÕES FUTURAS
-/// 
-/// 1. Integrar com AuthProvider:
-///    ```dart
-///    final authProvider = context.read<AuthProvider>();
-///    await authProvider.signInWithEmail(email, password);
-///    ```
-///
-/// 2. Adicionar validação de formulário
-/// 3. Implementar feedback de erro/sucesso
-/// 4. Adicionar loading durante autenticação
-/// 5. Implementar "Lembrar-me"
-/// 6. Adicionar login com Google
-/// 7. Implementar recuperação de senha
-///
-/// OBSERVAÇÃO: Atualmente bypassa autenticação para desenvolvimento
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -40,10 +14,9 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _isLoading = false;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
   @override
@@ -53,312 +26,324 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  // TODO: Implementar login real com AuthProvider
   Future<void> _handleLogin() async {
-    if (!_formKey.currentState!.validate()) {
+    final form = _formKey.currentState;
+    if (form == null || !form.validate()) {
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
+    FocusScope.of(context).unfocus();
+    final authProvider = context.read<AuthProvider>();
+    final success = await authProvider.signInWithEmail(
+      _emailController.text.trim(),
+      _passwordController.text,
+    );
 
-    // TODO: Substituir por lógica real de autenticação
-    // Exemplo:
-    // try {
-    //   final authProvider = context.read<AuthProvider>();
-    //   await authProvider.signInWithEmail(
-    //     _emailController.text.trim(),
-    //     _passwordController.text,
-    //   );
-    //   
-    //   if (mounted) {
-    //     Navigator.of(context).pushReplacement(
-    //       MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
-    //     );
-    //   }
-    // } catch (e) {
-    //   if (mounted) {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       SnackBar(content: Text('Erro ao fazer login: $e')),
-    //     );
-    //   }
-    // } finally {
-    //   if (mounted) {
-    //     setState(() {
-    //       _isLoading = false;
-    //     });
-    //   }
-    // }
-
-    // TEMPORÁRIO: Bypass de autenticação para desenvolvimento
-    await Future.delayed(const Duration(seconds: 1));
-    
-    if (mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
-      );
+    if (!mounted) {
+      return;
     }
+
+    if (!success) {
+      _showSnack(authProvider.lastError ?? 'Não foi possível iniciar a sessão.');
+      return;
+    }
+
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(builder: (_) => const MainNavigationScreen()),
+    );
   }
 
-  // TODO: Implementar login com Google
-  Future<void> _handleGoogleLogin() async {
-    // Implementação futura
+  Future<void> _handlePasswordReset() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty || !email.contains('@')) {
+      _showSnack('Informe um email válido para solicitar a recuperação.');
+      return;
+    }
+
+    await context.read<AuthProvider>().sendPasswordReset(email);
+    if (!mounted) {
+      return;
+    }
+
+    _showSnack(
+      'Solicitação registrada localmente. Conecte o backend para enviar emails reais.',
+      isError: false,
+    );
+  }
+
+  void _showSnack(String message, {bool isError = true}) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Login com Google será implementado em breve'),
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red.shade700 : Colors.green.shade700,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final auth = context.watch<AuthProvider>();
+    final isWide = MediaQuery.of(context).size.width >= 960;
+
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 400),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Logo
-                    Icon(
-                      Icons.sports_bar,
-                      size: 80,
-                      color: Theme.of(context).colorScheme.primary,
-                    )
-                        .animate()
-                        .fadeIn(duration: const Duration(milliseconds: 600))
-                        .scale(delay: const Duration(milliseconds: 200)),
-                    
-                    const SizedBox(height: 24),
-                    
-                    // Título
-                    Text(
-                      'Boteco PRO',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                    )
-                        .animate()
-                        .fadeIn(delay: const Duration(milliseconds: 300)),
-                    
-                    const SizedBox(height: 8),
-                    
-                    Text(
-                      'Gestão completa para seu bar',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface.withAlpha(179),
-                          ),
-                    )
-                        .animate()
-                        .fadeIn(delay: const Duration(milliseconds: 400)),
-                    
-                    const SizedBox(height: 48),
-                    
-                    // Campo Email
-                    TextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        labelText: 'Email',
-                        hintText: 'seu@email.com',
-                        prefixIcon: const Icon(Icons.email_outlined),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final formCard = _LoginCard(
+              formKey: _formKey,
+              emailController: _emailController,
+              passwordController: _passwordController,
+              obscurePassword: _obscurePassword,
+              isLoading: auth.isLoading,
+              onTogglePassword: () => setState(() => _obscurePassword = !_obscurePassword),
+              onLogin: _handleLogin,
+              onForgotPassword: _handlePasswordReset,
+            );
+
+            if (!isWide) {
+              return Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: formCard,
+                ),
+              );
+            }
+
+            return Row(
+              children: <Widget>[
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(48),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: <Color>[
+                          theme.colorScheme.primary,
+                          theme.colorScheme.secondary,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Por favor, insira seu email';
-                        }
-                        if (!value.contains('@')) {
-                          return 'Email inválido';
-                        }
-                        return null;
-                      },
-                    )
-                        .animate()
-                        .fadeIn(delay: const Duration(milliseconds: 500))
-                        .moveX(begin: -30, delay: const Duration(milliseconds: 500)),
-                    
-                    const SizedBox(height: 16),
-                    
-                    // Campo Senha
-                    TextFormField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      decoration: InputDecoration(
-                        labelText: 'Senha',
-                        hintText: '••••••••',
-                        prefixIcon: const Icon(Icons.lock_outlined),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Text(
+                          'Monynha Softwares',
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: theme.colorScheme.onPrimary,
                           ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
                         ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                        const SizedBox(height: 12),
+                        Text(
+                          'BotecoPro para uma operação de bar mais estável, rastreável e pronta para sincronização.',
+                          style: theme.textTheme.displaySmall?.copyWith(
+                            color: theme.colorScheme.onPrimary,
+                            fontWeight: FontWeight.w700,
+                            height: 1.15,
+                          ),
                         ),
+                        const SizedBox(height: 20),
+                        Text(
+                          'Sessão local preparada para futura autenticação com Supabase ou FastAPI. Nada de endpoints hardcoded na UI.',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: theme.colorScheme.onPrimary.withOpacity(0.84),
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        Wrap(
+                          spacing: 12,
+                          runSpacing: 12,
+                          children: const <Widget>[
+                            _BrandChip(label: 'Mesas e comandas'),
+                            _BrandChip(label: 'Produtos e estoque'),
+                            _BrandChip(label: 'Receitas e produção'),
+                            _BrandChip(label: 'Base pronta para sync'),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(32),
+                      child: formCard,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _LoginCard extends StatelessWidget {
+  const _LoginCard({
+    required this.formKey,
+    required this.emailController,
+    required this.passwordController,
+    required this.obscurePassword,
+    required this.isLoading,
+    required this.onTogglePassword,
+    required this.onLogin,
+    required this.onForgotPassword,
+  });
+
+  final GlobalKey<FormState> formKey;
+  final TextEditingController emailController;
+  final TextEditingController passwordController;
+  final bool obscurePassword;
+  final bool isLoading;
+  final VoidCallback onTogglePassword;
+  final VoidCallback onLogin;
+  final VoidCallback onForgotPassword;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 440),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(28),
+          child: Form(
+            key: formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Icon(
+                  Icons.sports_bar_rounded,
+                  size: 72,
+                  color: theme.colorScheme.primary,
+                ).animate().fadeIn(duration: const Duration(milliseconds: 400)),
+                const SizedBox(height: 20),
+                Text(
+                  'Entrar no BotecoPro',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Gestão operacional com identidade Monynha e base preparada para backend seguro.',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyLarge,
+                ),
+                const SizedBox(height: 28),
+                TextFormField(
+                  controller: emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    hintText: 'operacao@seuboteco.com',
+                    prefixIcon: Icon(Icons.alternate_email_rounded),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Informe o email de acesso';
+                    }
+                    if (!value.contains('@') || !value.contains('.')) {
+                      return 'Digite um email válido';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: passwordController,
+                  obscureText: obscurePassword,
+                  decoration: InputDecoration(
+                    labelText: 'Senha',
+                    hintText: 'Mínimo de 6 caracteres',
+                    prefixIcon: const Icon(Icons.lock_outline_rounded),
+                    suffixIcon: IconButton(
+                      onPressed: onTogglePassword,
+                      icon: Icon(
+                        obscurePassword ? Icons.visibility_rounded : Icons.visibility_off_rounded,
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Por favor, insira sua senha';
-                        }
-                        if (value.length < 6) {
-                          return 'Senha deve ter pelo menos 6 caracteres';
-                        }
-                        return null;
-                      },
-                    )
-                        .animate()
-                        .fadeIn(delay: const Duration(milliseconds: 600))
-                        .moveX(begin: -30, delay: const Duration(milliseconds: 600)),
-                    
-                    const SizedBox(height: 8),
-                    
-                    // Link Esqueci a Senha
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {
-                          // TODO: Implementar recuperação de senha
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Recuperação de senha será implementada em breve'),
-                            ),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Informe a senha';
+                    }
+                    if (value.length < 6) {
+                      return 'A senha deve ter pelo menos 6 caracteres';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: isLoading ? null : onForgotPassword,
+                    child: const Text('Esqueci minha senha'),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  onPressed: isLoading ? null : onLogin,
+                  icon: isLoading
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.login_rounded),
+                  label: Text(isLoading ? 'Entrando...' : 'Acessar painel'),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: isLoading
+                      ? null
+                      : () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(builder: (_) => const SignupPage()),
                           );
                         },
-                        child: Text(
-                          'Esqueceu a senha?',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 24),
-                    
-                    // Botão Entrar
-                    ElevatedButton(
-                      onPressed: _isLoading ? null : _handleLogin,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            )
-                          : const Text(
-                              'Entrar',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                    )
-                        .animate()
-                        .fadeIn(delay: const Duration(milliseconds: 700))
-                        .scale(delay: const Duration(milliseconds: 700)),
-                    
-                    const SizedBox(height: 24),
-                    
-                    // Divider
-                    Row(
-                      children: [
-                        const Expanded(child: Divider()),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            'OU',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                            ),
-                          ),
-                        ),
-                        const Expanded(child: Divider()),
-                      ],
-                    ),
-                    
-                    const SizedBox(height: 24),
-                    
-                    // Botão Google
-                    OutlinedButton.icon(
-                      onPressed: _handleGoogleLogin,
-                      icon: const Icon(Icons.g_mobiledata, size: 28),
-                      label: const Text('Continuar com Google'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    )
-                        .animate()
-                        .fadeIn(delay: const Duration(milliseconds: 800)),
-                    
-                    const SizedBox(height: 32),
-                    
-                    // Link para Cadastro
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Não tem uma conta? ',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => const SignupPage()),
-                            );
-                          },
-                          child: Text(
-                            'Cadastre-se',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                  icon: const Icon(Icons.person_add_alt_1_rounded),
+                  label: const Text('Criar conta local'),
                 ),
-              ),
+                const SizedBox(height: 16),
+                Text(
+                  'Ao entrar, você usa o fluxo local preparado para futura autenticação real.',
+                  style: theme.textTheme.bodySmall,
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _BrandChip extends StatelessWidget {
+  const _BrandChip({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Chip(
+      label: Text(label),
+      avatar: const Icon(Icons.check_circle_rounded, size: 18),
+      side: BorderSide.none,
+      backgroundColor: Colors.white.withOpacity(0.16),
+      labelStyle: Theme.of(context)
+          .textTheme
+          .labelLarge
+          ?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+      avatarBoxConstraints: const BoxConstraints(minHeight: 18, minWidth: 18),
     );
   }
 }
