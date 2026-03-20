@@ -20,16 +20,16 @@
 /// PADRÃO DE USO:
 /// ```dart
 /// final dbService = DatabaseService();
-/// 
+///
 /// // Criar
 /// await dbService.addProduct(product);
-/// 
+///
 /// // Ler
 /// final products = await dbService.getProducts();
-/// 
+///
 /// // Atualizar
 /// await dbService.updateProduct(updatedProduct);
-/// 
+///
 /// // Deletar
 /// await dbService.deleteProduct(productId);
 /// ```
@@ -72,6 +72,9 @@ class DatabaseService {
   static const String _salesKey = 'sales';
   static const String _recipesKey = 'recipes';
   static const String _productionsKey = 'productions';
+  static const String _schemaVersionKey = 'storage_schema_version';
+  static const String _lastMigrationKey = 'storage_last_migration';
+  static const int currentSchemaVersion = 2;
 
   // Singleton pattern
   static final DatabaseService _instance = DatabaseService._internal();
@@ -97,12 +100,12 @@ class DatabaseService {
   /// Get cached SharedPreferences instance (web-optimized)
   Future<SharedPreferences> get _prefsInstance async {
     if (_prefs != null) return _prefs!;
-    
+
     // If already loading, wait for it
     if (_prefsCompleter != null) {
       return _prefsCompleter!.future;
     }
-    
+
     // Start loading
     _prefsCompleter = Completer<SharedPreferences>();
     try {
@@ -135,9 +138,9 @@ class DatabaseService {
   /// Notify UI with debouncing to batch updates
   void _notify(String topic) {
     if (_changesController.isClosed) return;
-    
+
     _pendingNotifications.add(topic);
-    
+
     // Cancel existing timer and create new one
     _notifyTimer?.cancel();
     _notifyTimer = Timer(const Duration(milliseconds: 50), () {
@@ -154,10 +157,68 @@ class DatabaseService {
     _changesController.close();
   }
 
+
+  Future<void> _initializeStorageMetadata() async {
+    final prefs = await _prefsInstance;
+    final currentVersion = prefs.getInt(_schemaVersionKey);
+    if (currentVersion == currentSchemaVersion) {
+      return;
+    }
+
+    await prefs.setInt(_schemaVersionKey, currentSchemaVersion);
+    await prefs.setString(
+      _lastMigrationKey,
+      DateTime.now().toIso8601String(),
+    );
+  }
+
+  Future<Map<String, dynamic>> exportSnapshot() async {
+    final prefs = await _prefsInstance;
+    return <String, dynamic>{
+      'schemaVersion': prefs.getInt(_schemaVersionKey) ?? currentSchemaVersion,
+      'exportedAt': DateTime.now().toIso8601String(),
+      'suppliers': (await getSuppliers()).map((item) => item.toJson()).toList(),
+      'products': (await getProducts()).map((item) => item.toJson()).toList(),
+      'tables': (await getTables()).map((item) => item.toJson()).toList(),
+      'orders': (await getOrders()).map((item) => item.toJson()).toList(),
+      'sales': (await getSales()).map((item) => item.toJson()).toList(),
+      'recipes': (await getRecipes()).map((item) => item.toJson()).toList(),
+      'productions': (await getInternalProductions())
+          .map((item) => item.toJson())
+          .toList(),
+    };
+  }
+
+  Future<void> importSnapshot(Map<String, dynamic> snapshot) async {
+    await saveSuppliers(((snapshot['suppliers'] as List?) ?? <dynamic>[])
+        .map((item) => Supplier.fromJson(item as Map<String, dynamic>))
+        .toList());
+    await saveProducts(((snapshot['products'] as List?) ?? <dynamic>[])
+        .map((item) => Product.fromJson(item as Map<String, dynamic>))
+        .toList());
+    await saveTables(((snapshot['tables'] as List?) ?? <dynamic>[])
+        .map((item) => TableModel.fromJson(item as Map<String, dynamic>))
+        .toList());
+    await saveOrders(((snapshot['orders'] as List?) ?? <dynamic>[])
+        .map((item) => Order.fromJson(item as Map<String, dynamic>))
+        .toList());
+    await saveSales(((snapshot['sales'] as List?) ?? <dynamic>[])
+        .map((item) => Sale.fromJson(item as Map<String, dynamic>))
+        .toList());
+    await saveRecipes(((snapshot['recipes'] as List?) ?? <dynamic>[])
+        .map((item) => Recipe.fromJson(item as Map<String, dynamic>))
+        .toList());
+    await saveInternalProductions(((snapshot['productions'] as List?) ?? <dynamic>[])
+        .map((item) => InternalProduction.fromJson(item as Map<String, dynamic>))
+        .toList());
+    await _initializeStorageMetadata();
+  }
+
   // Carrega dados iniciais se necessário
   Future<void> initializeData() async {
     final prefs = await _prefsInstance;
-    
+    await _initializeStorageMetadata();
+
     // Verifica se já existem dados
     if (!prefs.containsKey(_tablesKey)) {
       // Cria algumas mesas de exemplo
@@ -233,7 +294,7 @@ class DatabaseService {
       ];
       await saveSuppliers(suppliers);
     }
-    
+
     // Cria receitas de exemplo
     if (!prefs.containsKey(_recipesKey)) {
       List<Recipe> recipes = [
@@ -274,7 +335,7 @@ class DatabaseService {
       ];
       await saveRecipes(recipes);
     }
-    
+
     // Cria produções caseiras de exemplo
     if (!prefs.containsKey(_productionsKey)) {
       List<InternalProduction> productions = [
@@ -614,7 +675,7 @@ class DatabaseService {
     final products = await getProducts();
     return products.where((product) => product.stockQuantity <= threshold).toList();
   }
-  
+
   // Métodos para Receitas
   Future<List<Recipe>> getRecipes() async {
     try {
