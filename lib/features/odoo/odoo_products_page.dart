@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../core/odoo/odoo_connection.dart';
 import '../../core/odoo/odoo_provider.dart';
 import 'odoo_cart_page.dart';
+import 'odoo_sync_banner.dart';
 
 class OdooProductsPage extends StatefulWidget {
   const OdooProductsPage({super.key});
@@ -28,14 +29,18 @@ class _OdooProductsPageState extends State<OdooProductsPage> {
           _CartButton(count: provider.cartItemCount),
           IconButton(
             tooltip: 'Atualizar',
-            onPressed:
-                provider.isLoadingProducts ? null : provider.loadProducts,
+            onPressed: provider.isLoadingProducts
+                ? null
+                : provider.isOffline
+                    ? provider.reconnect
+                    : provider.loadProducts,
             icon: const Icon(Icons.refresh),
           ),
         ],
       ),
       body: Column(
         children: [
+          const OdooSyncBanner(),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: TextField(
@@ -160,6 +165,17 @@ class _CatalogList extends StatelessWidget {
   Widget build(BuildContext context) {
     if (provider.products.isEmpty && provider.isLoadingProducts) {
       return const Center(child: CircularProgressIndicator());
+    }
+    if (provider.products.isEmpty && provider.error != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            '${provider.error!.message}\nNenhum snapshot compatível está disponível.',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
     }
     if (products.isEmpty) {
       final message = provider.products.isEmpty &&
