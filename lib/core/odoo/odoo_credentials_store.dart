@@ -14,6 +14,7 @@ class OdooCredentialsStore {
   static const _apiKey = 'odoo.secret.api_key';
   static const _companyKey = 'odoo.selection.company_id';
   static const _posConfigKey = 'odoo.selection.pos_config_id';
+  static const _userIdKey = 'odoo.identity.user_id';
 
   final FlutterSecureStorage secureStorage;
 
@@ -39,6 +40,11 @@ class OdooCredentialsStore {
   Future<int?> readPosConfigId() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt(_posConfigKey);
+  }
+
+  Future<int?> readUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_userIdKey);
   }
 
   Future<void> saveConnection({
@@ -70,6 +76,11 @@ class OdooCredentialsStore {
     }
   }
 
+  Future<void> saveUserId(int userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_userIdKey, userId);
+  }
+
   Future<void> clear() async {
     final prefs = await SharedPreferences.getInstance();
     for (final key in <String>[
@@ -78,6 +89,7 @@ class OdooCredentialsStore {
       _databaseKey,
       _companyKey,
       _posConfigKey,
+      _userIdKey,
     ]) {
       await prefs.remove(key);
     }

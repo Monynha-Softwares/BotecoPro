@@ -19,7 +19,13 @@ void main() {
       active: true,
       seats: 4,
     );
-    const cart = OdooLocalCart(companyId: 1, posConfigId: 3, table: table);
+    final cart = OdooLocalCart(
+      instanceKey: 'https://example.odoo.com',
+      userId: 2,
+      companyId: 1,
+      posConfigId: 3,
+      table: table,
+    );
 
     final updated = cart
         .add(_product(42, price: 8.5))
@@ -39,7 +45,12 @@ void main() {
   test(
       'updates notes, quantities, removes items and clears only the local cart',
       () {
-    const cart = OdooLocalCart(companyId: 1, posConfigId: 1);
+    final cart = OdooLocalCart(
+      instanceKey: 'https://example.odoo.com',
+      userId: 2,
+      companyId: 1,
+      posConfigId: 1,
+    );
     final withItems = cart.add(_product(10)).add(_product(11, price: 5));
     final noted = withItems.updateNote(10, ' sem gelo ');
     final reduced = noted.updateQuantity(10, 3);
@@ -52,5 +63,64 @@ void main() {
     expect(removed.clear().items, isEmpty);
     expect(removed.clear().companyId, 1);
     expect(removed.clear().posConfigId, 1);
+  });
+
+  test('serializes a local draft without authentication secrets', () {
+    final now = DateTime.utc(2026, 8, 10, 12);
+    final cart = OdooLocalCart(
+      instanceKey: 'https://example.odoo.com',
+      userId: 2,
+      companyId: 1,
+      posConfigId: 3,
+      createdAt: now,
+      updatedAt: now,
+    ).add(_product(42, price: 8.5)).updateNote(42, 'sem gelo');
+
+    final encoded = cart.toJson().toString();
+    final restored = OdooLocalCart.fromJson(cart.toJson());
+
+    expect(encoded, isNot(contains('apiKey')));
+    expect(encoded, isNot(contains('Authorization')));
+    expect(restored.items.single.note, 'sem gelo');
+    expect(restored.createdAt, now);
+    expect(
+      restored.matchesContext(
+        instanceKey: 'https://example.odoo.com',
+        userId: 2,
+        companyId: 1,
+        posConfigId: 3,
+      ),
+      isTrue,
+    );
+    expect(
+      restored.matchesContext(
+        instanceKey: 'https://example.odoo.com',
+        userId: 2,
+        companyId: 9,
+        posConfigId: 3,
+      ),
+      isFalse,
+    );
+  });
+
+  test('reconciles available, changed and unavailable products', () {
+    final cart = OdooLocalCart(
+      instanceKey: 'https://example.odoo.com',
+      userId: 2,
+      companyId: 1,
+      posConfigId: 1,
+    ).add(_product(1, price: 10)).add(_product(2, price: 5)).add(_product(3));
+
+    final reconciled = cart.reconcile([
+      _product(1, price: 10),
+      _product(2, price: 6),
+    ]);
+
+    expect(reconciled.items[0].state, OdooCartItemState.available);
+    expect(reconciled.items[1].state, OdooCartItemState.changed);
+    expect(reconciled.items[1].unitPrice, 5);
+    expect(reconciled.items[1].currentUnitPrice, 6);
+    expect(reconciled.items[2].state, OdooCartItemState.unavailable);
+    expect(reconciled.items, hasLength(3));
   });
 }
