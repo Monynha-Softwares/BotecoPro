@@ -147,6 +147,8 @@ class OdooProduct {
   final DateTime? writeDate;
 }
 
+enum OdooDiagnosticStatus { success, authenticatedButNotReady }
+
 class OdooConnectionDiagnostic {
   const OdooConnectionDiagnostic({
     required this.odooVersion,
@@ -181,4 +183,7 @@ class OdooConnectionDiagnostic {
   bool get isReady =>
       posConfigs.isNotEmpty &&
       modelAccess.values.every((accessible) => accessible);
+
+  OdooDiagnosticStatus get status =>
+      isReady ? OdooDiagnosticStatus.success : OdooDiagnosticStatus.authenticatedButNotReady;
 }
