@@ -3,7 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
+import 'core/odoo/odoo_provider.dart';
+import 'features/connection/connection_page.dart';
+import 'features/odoo/odoo_main_screen.dart';
 import 'pages/home_page.dart';
 import 'pages/production_page.dart';
 import 'pages/products_page.dart';
@@ -25,7 +29,12 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => OdooProvider()..initialize(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -39,7 +48,49 @@ class MyApp extends StatelessWidget {
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: ThemeMode.system,
-      home: const SplashScreen(),
+      home: const ConnectionGate(),
+    );
+  }
+}
+
+class ConnectionGate extends StatelessWidget {
+  const ConnectionGate({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<OdooProvider>(
+      builder: (context, provider, _) {
+        switch (provider.state) {
+          case OdooConnectionState.loading:
+          case OdooConnectionState.connecting:
+            return const _ConnectionLoadingPage();
+          case OdooConnectionState.connected:
+            return provider.isDemoMode
+                ? const MainNavigationScreen()
+                : const OdooMainScreen();
+          case OdooConnectionState.needsConnection:
+          case OdooConnectionState.error:
+            return const ConnectionPage();
+        }
+      },
+    );
+  }
+}
+
+class _ConnectionLoadingPage extends StatelessWidget {
+  const _ConnectionLoadingPage();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      body: Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(
+            Theme.of(context).colorScheme.onPrimary,
+          ),
+        ),
+      ),
     );
   }
 }

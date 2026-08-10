@@ -1,0 +1,32 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [feat/odoo-online-mvp]
+  pull_request:
+
+defaults:
+  run:
+    working-directory: .
+
+jobs:
+  analyze-and-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x'
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Reject tracked local credentials
+        run: |
+          if git ls-files --error-unmatch .env .env.local '.env.*.local' >/dev/null 2>&1; then
+            echo "A local environment file is tracked. Remove it before merging."
+            exit 1
+          fi
+      - run: flutter analyze
+      - run: flutter test
