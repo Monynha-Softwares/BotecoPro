@@ -51,6 +51,19 @@ void main() {
       );
       expect(posCategories, isNotEmpty);
 
+      if (posConfig.restaurant) {
+        final floors = await repository.listRestaurantFloors(
+          companyId: diagnostic.currentCompany.id,
+          posConfigId: posConfig.id,
+        );
+        final tables = await repository.listRestaurantTables(
+          companyId: diagnostic.currentCompany.id,
+          floors: floors,
+        );
+        expect(floors, isNotEmpty);
+        expect(tables, isNotEmpty);
+      }
+
       final productCategories = await client.call(
         'product.category',
         'search_read',
@@ -77,6 +90,8 @@ void main() {
         limit: 5,
       );
       expect(firstPage, isNotEmpty);
+      expect(posConfig.catalogProductCount,
+          greaterThanOrEqualTo(firstPage.length));
       expect(
         firstPage.map((product) => product.id).toSet().intersection(
               secondPage.map((product) => product.id).toSet(),

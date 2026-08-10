@@ -149,4 +149,72 @@ void main() {
       ],
     );
   });
+
+  test(
+      'reads restaurant floors and active tables with the selected POS context',
+      () async {
+    final requests = <String, Map<String, dynamic>>{};
+    final repository = OdooRepository(_client((request) async {
+      final body =
+          jsonDecode((request as http.Request).body) as Map<String, dynamic>;
+      requests[request.url.path] = body;
+      if (request.url.path.endsWith('/restaurant.floor/search_read')) {
+        return http.Response(
+          jsonEncode([
+            {
+              'id': 2,
+              'name': 'Salão',
+              'pos_config_ids': [1],
+            },
+          ]),
+          200,
+        );
+      }
+      return http.Response(
+        jsonEncode([
+          {
+            'id': 8,
+            'table_number': 12,
+            'seats': 4,
+            'floor_id': [2, 'Salão'],
+            'active': true,
+          },
+        ]),
+        200,
+      );
+    }));
+
+    final floors = await repository.listRestaurantFloors(
+      companyId: 1,
+      posConfigId: 1,
+    );
+    final tables = await repository.listRestaurantTables(
+      companyId: 1,
+      floors: floors,
+    );
+
+    expect(floors.single.name, 'Salão');
+    expect(tables.single.label, 'Salão · Mesa 12');
+    expect(
+      requests['/json/2/restaurant.floor/search_read']?['domain'],
+      [
+        [
+          'pos_config_ids',
+          'in',
+          [1]
+        ],
+      ],
+    );
+    expect(
+      requests['/json/2/restaurant.table/search_read']?['domain'],
+      [
+        ['active', '=', true],
+        [
+          'floor_id',
+          'in',
+          [2]
+        ],
+      ],
+    );
+  });
 }

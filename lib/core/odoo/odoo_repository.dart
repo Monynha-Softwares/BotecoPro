@@ -257,6 +257,85 @@ class OdooRepository {
         .toList(growable: false);
   }
 
+  Future<List<OdooRestaurantFloor>> listRestaurantFloors({
+    required int companyId,
+    required int posConfigId,
+  }) async {
+    final rows = await client.call(
+      'restaurant.floor',
+      'search_read',
+      arguments: {
+        'domain': [
+          [
+            'pos_config_ids',
+            'in',
+            [posConfigId]
+          ],
+        ],
+        'fields': ['id', 'name', 'pos_config_ids'],
+        'order': 'sequence,id',
+        'limit': 100,
+        'context': {
+          'allowed_company_ids': [companyId]
+        },
+      },
+    );
+    if (rows is! List) return const <OdooRestaurantFloor>[];
+    return rows
+        .whereType<Map>()
+        .map((row) {
+          final value = Map<String, dynamic>.from(row);
+          return OdooRestaurantFloor(
+            id: _asInt(value['id']) ?? 0,
+            name: _asString(value['name']) ?? 'Piso',
+            posConfigIds: _relationIds(value['pos_config_ids']),
+          );
+        })
+        .where((floor) => floor.id > 0)
+        .toList(growable: false);
+  }
+
+  Future<List<OdooRestaurantTable>> listRestaurantTables({
+    required int companyId,
+    required List<OdooRestaurantFloor> floors,
+  }) async {
+    if (floors.isEmpty) return const <OdooRestaurantTable>[];
+    final floorNames = {for (final floor in floors) floor.id: floor.name};
+    final rows = await client.call(
+      'restaurant.table',
+      'search_read',
+      arguments: {
+        'domain': [
+          ['active', '=', true],
+          ['floor_id', 'in', floorNames.keys.toList()],
+        ],
+        'fields': ['id', 'table_number', 'seats', 'floor_id', 'active'],
+        'order': 'floor_id,table_number,id',
+        'limit': 1000,
+        'context': {
+          'allowed_company_ids': [companyId]
+        },
+      },
+    );
+    if (rows is! List) return const <OdooRestaurantTable>[];
+    return rows
+        .whereType<Map>()
+        .map((row) {
+          final value = Map<String, dynamic>.from(row);
+          final floorId = _relationId(value['floor_id']) ?? 0;
+          return OdooRestaurantTable(
+            id: _asInt(value['id']) ?? 0,
+            number: _asInt(value['table_number']) ?? 0,
+            floorId: floorId,
+            floorName: floorNames[floorId] ?? 'Piso',
+            active: value['active'] != false,
+            seats: _asInt(value['seats']),
+          );
+        })
+        .where((table) => table.id > 0 && table.number > 0)
+        .toList(growable: false);
+  }
+
   Future<int> countProducts({
     required int companyId,
     required OdooPosConfig posConfig,

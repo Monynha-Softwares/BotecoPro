@@ -1,12 +1,19 @@
 import 'package:flutter/foundation.dart';
 
+import 'odoo_cart.dart';
 import 'odoo_client.dart';
 import 'odoo_connection.dart';
 import 'odoo_credentials_store.dart';
 import 'odoo_exception.dart';
 import 'odoo_repository.dart';
 
-enum OdooConnectionState { loading, needsConnection, connecting, connected, error }
+enum OdooConnectionState {
+  loading,
+  needsConnection,
+  connecting,
+  connected,
+  error
+}
 
 class OdooProvider extends ChangeNotifier {
   OdooProvider({OdooCredentialsStore? store})
@@ -23,6 +30,10 @@ class OdooProvider extends ChangeNotifier {
   OdooPosConfig? _selectedPosConfig;
   List<OdooCategory> _categories = const [];
   List<OdooProduct> _products = const [];
+  List<OdooRestaurantFloor> _restaurantFloors = const [];
+  List<OdooRestaurantTable> _restaurantTables = const [];
+  OdooRestaurantTable? _selectedTable;
+  OdooLocalCart? _cart;
   bool _demoMode = false;
   bool _loadingProducts = false;
 
@@ -33,6 +44,17 @@ class OdooProvider extends ChangeNotifier {
   OdooPosConfig? get selectedPosConfig => _selectedPosConfig;
   List<OdooCategory> get categories => _categories;
   List<OdooProduct> get products => _products;
+  List<OdooRestaurantFloor> get restaurantFloors => _restaurantFloors;
+  List<OdooRestaurantTable> get restaurantTables => _restaurantTables;
+  OdooRestaurantTable? get selectedTable => _selectedTable;
+  List<OdooCartItem> get cartItems => _cart?.items ?? const [];
+  int get cartItemCount => _cart?.itemCount ?? 0;
+  double get cartSubtotal => _cart?.subtotal ?? 0;
+  bool get hasMoreProducts {
+    final count = _selectedPosConfig?.catalogProductCount;
+    return count == null || _products.length < count;
+  }
+
   bool get isDemoMode => _demoMode;
   bool get isConnected => _state == OdooConnectionState.connected;
   bool get isLoadingProducts => _loadingProducts;
@@ -99,6 +121,10 @@ class OdooProvider extends ChangeNotifier {
     _selectedPosConfig = null;
     _categories = const [];
     _products = const [];
+    _restaurantFloors = const [];
+    _restaurantTables = const [];
+    _selectedTable = null;
+    _cart = null;
     _demoMode = false;
     await _store.clear();
     _state = OdooConnectionState.needsConnection;
@@ -113,13 +139,14 @@ class OdooProvider extends ChangeNotifier {
     );
     _categories = const [];
     _products = const [];
+    _restaurantFloors = const [];
+    _restaurantTables = const [];
+    _selectedTable = null;
+    _cart = null;
     notifyListeners();
     if (_diagnostic != null && _repository != null) {
       try {
-        _categories = await _repository!.listCategories(
-          companyId: _diagnostic!.currentCompany.id,
-          categoryIds: config.limitCategories ? config.categoryIds : null,
-        );
+        await _loadSelectedPosData();
         notifyListeners();
         await loadProducts();
       } catch (error) {
@@ -131,7 +158,8 @@ class OdooProvider extends ChangeNotifier {
   Future<void> selectCompany(OdooCompany company) async {
     final diagnostic = _diagnostic;
     final repository = _repository;
-    if (diagnostic == null || repository == null ||
+    if (diagnostic == null ||
+        repository == null ||
         diagnostic.currentCompany.id == company.id) {
       return;
     }
@@ -144,19 +172,15 @@ class OdooProvider extends ChangeNotifier {
       _selectedPosConfig = _selectInitialPosConfig(_diagnostic!);
       _categories = const [];
       _products = const [];
+      _restaurantFloors = const [];
+      _restaurantTables = const [];
+      _selectedTable = null;
+      _cart = null;
       await _store.saveSelections(
         companyId: company.id,
         posConfigId: _selectedPosConfig?.id,
       );
-      if (_selectedPosConfig != null &&
-          diagnostic.modelAccess['pos.category'] == true) {
-        _categories = await repository.listCategories(
-          companyId: company.id,
-          categoryIds: _selectedPosConfig!.limitCategories
-              ? _selectedPosConfig!.categoryIds
-              : null,
-        );
-      }
+      await _loadSelectedPosData();
       notifyListeners();
       await loadProducts();
     } catch (error) {
@@ -165,7 +189,9 @@ class OdooProvider extends ChangeNotifier {
   }
 
   Future<void> loadProducts({bool append = false}) async {
-    if (_repository == null || _diagnostic == null || _selectedPosConfig == null) {
+    if (_repository == null ||
+        _diagnostic == null ||
+        _selectedPosConfig == null) {
       return;
     }
     if (_loadingProducts) return;
@@ -227,12 +253,7 @@ class OdooProvider extends ChangeNotifier {
       );
       if (_selectedPosConfig != null &&
           diagnostic.modelAccess['pos.category'] == true) {
-        _categories = await repository.listCategories(
-          companyId: diagnostic.currentCompany.id,
-          categoryIds: _selectedPosConfig!.limitCategories
-              ? _selectedPosConfig!.categoryIds
-              : null,
-        );
+        await _loadSelectedPosData();
       }
       if (persist) {
         await _store.saveConnection(connection: connection, apiKey: apiKey);
@@ -265,6 +286,84 @@ class OdooProvider extends ChangeNotifier {
     return configs.first;
   }
 
+  Future<void> _loadSelectedPosData() async {
+    final repository = _repository;
+    final diagnostic = _diagnostic;
+    final config = _selectedPosConfig;
+    if (repository == null || diagnostic == null || config == null) return;
+    if (diagnostic.modelAccess['pos.category'] == true) {
+      _categories = await repository.listCategories(
+        companyId: diagnostic.currentCompany.id,
+        categoryIds: config.limitCategories ? config.categoryIds : null,
+      );
+    }
+    if (!config.restaurant) return;
+    try {
+      _restaurantFloors = await repository.listRestaurantFloors(
+        companyId: diagnostic.currentCompany.id,
+        posConfigId: config.id,
+      );
+      _restaurantTables = await repository.listRestaurantTables(
+        companyId: diagnostic.currentCompany.id,
+        floors: _restaurantFloors,
+      );
+    } on OdooException {
+      _restaurantFloors = const [];
+      _restaurantTables = const [];
+    }
+  }
+
+  void addToCart(OdooProduct product) {
+    final diagnostic = _diagnostic;
+    final config = _selectedPosConfig;
+    if (diagnostic == null || config == null) return;
+    final cart = _cart ??
+        OdooLocalCart(
+          companyId: diagnostic.currentCompany.id,
+          posConfigId: config.id,
+          table: _selectedTable,
+        );
+    _cart = cart.add(product);
+    notifyListeners();
+  }
+
+  void updateCartItemQuantity(int productId, int quantity) {
+    if (_cart == null) return;
+    _cart = _cart!.updateQuantity(productId, quantity);
+    notifyListeners();
+  }
+
+  void updateCartItemNote(int productId, String note) {
+    if (_cart == null) return;
+    _cart = _cart!.updateNote(productId, note);
+    notifyListeners();
+  }
+
+  void removeCartItem(int productId) {
+    if (_cart == null) return;
+    _cart = _cart!.remove(productId);
+    notifyListeners();
+  }
+
+  void clearCart() {
+    if (_cart == null) return;
+    _cart = _cart!.clear();
+    notifyListeners();
+  }
+
+  void selectTable(OdooRestaurantTable? table) {
+    _selectedTable = table;
+    if (_cart != null) {
+      _cart = OdooLocalCart(
+        companyId: _cart!.companyId,
+        posConfigId: _cart!.posConfigId,
+        table: table,
+        items: _cart!.items,
+      );
+    }
+    notifyListeners();
+  }
+
   void _setError(Object error, {bool preserveConnection = false}) {
     _error = error is OdooException
         ? error
@@ -286,5 +385,7 @@ class OdooProvider extends ChangeNotifier {
   static const _debugDatabase = String.fromEnvironment('ODOO_ONLINE_DATABASE');
 
   static bool get _debugConnectionReady =>
-      _debugUrl.isNotEmpty && _debugUsername.isNotEmpty && _debugApiKey.isNotEmpty;
+      _debugUrl.isNotEmpty &&
+      _debugUsername.isNotEmpty &&
+      _debugApiKey.isNotEmpty;
 }
