@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/data_models.dart';
+import '../models/legacy/data_models.dart';
 
 class DatabaseService {
   static const String _suppliersKey = 'suppliers';

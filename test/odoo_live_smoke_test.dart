@@ -2,9 +2,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:boteco_pro/core/odoo/odoo_client.dart';
-import 'package:boteco_pro/core/odoo/odoo_connection.dart';
-import 'package:boteco_pro/core/odoo/odoo_repository.dart';
+import 'package:boteco_pro/models/connection.dart';
+import 'package:boteco_pro/services/odoo/odoo_runtime.dart';
 
 const _urlKey = 'ODOO_ONLINE_URL';
 const _usernameKey = 'ODOO_ONLINE_USERNAME';
@@ -21,18 +20,17 @@ void main() {
   test(
     'read-only Odoo Online smoke test',
     () async {
-      final connection = OdooConnection.fromInput(
+      final connection = ConnectionConfig.fromInput(
         baseUrl: environment[_urlKey]!,
         username: environment[_usernameKey]!,
       );
-      final client = OdooClient(
-        connection: connection,
-        apiKey: environment[_apiKeyKey]!,
+      final runtime = const OdooRuntimeFactory().create(
+        connection,
+        environment[_apiKeyKey]!,
       );
-      addTearDown(client.close);
-      final repository = OdooRepository(client);
+      addTearDown(runtime.close);
 
-      final diagnostic = await repository.testConnection(
+      final diagnostic = await runtime.connection.testConnection(
         expectedUsername: connection.username,
       );
       expect(diagnostic.odooVersion, isNotEmpty);
@@ -45,18 +43,18 @@ void main() {
 
       final posConfig = diagnostic.posConfigs.first;
       expect(posConfig.catalogProductCount, greaterThan(0));
-      final posCategories = await repository.listCategories(
+      final posCategories = await runtime.catalog.listCategories(
         companyId: diagnostic.currentCompany.id,
         categoryIds: posConfig.limitCategories ? posConfig.categoryIds : null,
       );
       expect(posCategories, isNotEmpty);
 
       if (posConfig.restaurant) {
-        final floors = await repository.listRestaurantFloors(
+        final floors = await runtime.pos.listRestaurantFloors(
           companyId: diagnostic.currentCompany.id,
           posConfigId: posConfig.id,
         );
-        final tables = await repository.listRestaurantTables(
+        final tables = await runtime.pos.listRestaurantTables(
           companyId: diagnostic.currentCompany.id,
           floors: floors,
         );
@@ -64,7 +62,7 @@ void main() {
         expect(tables, isNotEmpty);
       }
 
-      final productCategories = await client.call(
+      final productCategories = await runtime.client.call(
         'product.category',
         'search_read',
         arguments: {
@@ -78,12 +76,12 @@ void main() {
       );
       expect(productCategories, isA<List>());
 
-      final firstPage = await repository.listProducts(
+      final firstPage = await runtime.catalog.listProducts(
         companyId: diagnostic.currentCompany.id,
         posConfig: posConfig,
         limit: 5,
       );
-      final secondPage = await repository.listProducts(
+      final secondPage = await runtime.catalog.listProducts(
         companyId: diagnostic.currentCompany.id,
         posConfig: posConfig,
         offset: 5,

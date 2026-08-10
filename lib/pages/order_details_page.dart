@@ -3,7 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import '../services/database_service.dart';
 import '../widgets/shared_widgets.dart';
-import '../models/data_models.dart';
+import '../models/legacy/data_models.dart';
 
 class OrderDetailsPage extends StatefulWidget {
   final Order order;
