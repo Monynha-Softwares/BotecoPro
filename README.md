@@ -22,6 +22,45 @@ The first release supports Android, iOS and native POS devices. Flutter Web is
 not part of this direct-credential MVP because browser storage cannot protect a
 long-lived Odoo API key.
 
+## Flutter architecture
+
+The connected application deliberately uses a small service-based structure:
+
+```text
+pages/widgets
+    ↓
+providers
+    ↓
+Odoo and storage services
+    ↓
+OdooClient → HTTPS/JSON-2 → Odoo Online
+```
+
+- `models/` contains immutable application data and the isolated
+  `models/legacy/` demo types.
+- `services/odoo/` owns JSON-2 transport, mapping, connection diagnostics,
+  catalog and read-only POS/Restaurant access.
+- `services/storage/` separates credentials, synchronized snapshots and the
+  local draft cart. Only the API key uses secure storage.
+- `providers/` separates session/context, synchronized catalog state and the
+  local cart.
+- `pages/` and `widgets/` contain presentation only.
+
+The former `lib/core/odoo` package was removed because it had become a mixed
+container for models, I/O, persistence and application state. `lib/features`
+was also consolidated under `pages/`; it contained only screens. This is an
+intentional simple MVP architecture, not a Clean Architecture or repository
+layer.
+
+Connected mode never imports the local demo business models. Demo mode is an
+explicit debug-only route and cannot act as an offline fallback.
+
+The synchronized catalog snapshot and draft cart retain their schema-v1 JSON
+keys, so this structural refactor does not invalidate data already stored by
+M7. A snapshot is accepted only for the same instance, user, company and POS.
+The draft price is an informational captured `lst_price`, not an Odoo
+transactional price.
+
 ## Development
 
 ```bash
@@ -42,4 +81,5 @@ flutter run \
 
 The Odoo smoke test is opt-in and must be run locally only after a real API key
 has been entered. It performs read-only calls for version, identity, companies,
-POS configurations, categories and products.
+POS configurations, categories, Restaurant context and products. Normal tests
+use sanitized fakes and never require a real credential.
