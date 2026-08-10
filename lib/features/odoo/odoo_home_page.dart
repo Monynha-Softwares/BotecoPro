@@ -19,7 +19,8 @@ class OdooHomePage extends StatelessWidget {
             child: ListTile(
               leading: const Icon(Icons.verified_user_outlined),
               title: Text(diagnostic?.identity.name ?? 'Modo demo'),
-              subtitle: Text(diagnostic?.identity.login ?? 'Dados locais de demonstração'),
+              subtitle: Text(
+                  diagnostic?.identity.login ?? 'Dados locais de demonstração'),
             ),
           ),
           if (diagnostic != null) ...[
@@ -27,7 +28,8 @@ class OdooHomePage extends StatelessWidget {
               child: ListTile(
                 leading: const Icon(Icons.business_outlined),
                 title: Text(diagnostic.currentCompany.name),
-                subtitle: Text('${diagnostic.companies.length} empresa(s) permitida(s)'),
+                subtitle: Text(
+                    '${diagnostic.companies.length} empresa(s) permitida(s)'),
                 trailing: diagnostic.companies.length > 1
                     ? DropdownButton<int>(
                         value: diagnostic.currentCompany.id,
@@ -53,8 +55,12 @@ class OdooHomePage extends StatelessWidget {
             Card(
               child: ListTile(
                 leading: const Icon(Icons.point_of_sale_outlined),
-                title: Text('${diagnostic.posConfigs.length} configuração(ões) POS'),
-                subtitle: Text('Odoo ${diagnostic.odooVersion}'),
+                title: Text(
+                    '${diagnostic.posConfigs.length} configuração(ões) POS'),
+                subtitle: Text(
+                  'Odoo ${diagnostic.odooVersion} · '
+                  '${provider.selectedPosConfig?.catalogProductCount ?? '—'} produto(s) no catálogo selecionado',
+                ),
               ),
             ),
           ],

@@ -18,7 +18,8 @@ class OdooProductsPage extends StatelessWidget {
         actions: [
           IconButton(
             tooltip: 'Atualizar',
-            onPressed: provider.isLoadingProducts ? null : provider.loadProducts,
+            onPressed:
+                provider.isLoadingProducts ? null : provider.loadProducts,
             icon: const Icon(Icons.refresh),
           ),
         ],
@@ -26,7 +27,17 @@ class OdooProductsPage extends StatelessWidget {
       body: products.isEmpty && provider.isLoadingProducts
           ? const Center(child: CircularProgressIndicator())
           : products.isEmpty
-              ? const Center(child: Text('Nenhum produto disponível no POS.'))
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Text(
+                      provider.selectedPosConfig?.catalogProductCount == 0
+                          ? 'A configuração POS selecionada não autoriza produtos. Verifique as categorias disponíveis no Odoo.'
+                          : 'Nenhum produto disponível no POS.',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                )
               : ListView.builder(
                   padding: const EdgeInsets.all(12),
                   itemCount: products.length + 1,
@@ -38,7 +49,9 @@ class OdooProductsPage extends StatelessWidget {
                           onPressed: provider.isLoadingProducts
                               ? null
                               : () => provider.loadProducts(append: true),
-                          child: Text(provider.isLoadingProducts ? 'A carregar…' : 'Carregar mais'),
+                          child: Text(provider.isLoadingProducts
+                              ? 'A carregar…'
+                              : 'Carregar mais'),
                         ),
                       );
                     }
@@ -47,8 +60,10 @@ class OdooProductsPage extends StatelessWidget {
                       child: ListTile(
                         title: Text(product.name),
                         subtitle: Text([
-                          if (product.defaultCode?.isNotEmpty == true) product.defaultCode!,
-                          if (product.barcode?.isNotEmpty == true) product.barcode!,
+                          if (product.defaultCode?.isNotEmpty == true)
+                            product.defaultCode!,
+                          if (product.barcode?.isNotEmpty == true)
+                            product.barcode!,
                         ].join(' · ')),
                         trailing: Text(currency.format(product.price)),
                       ),

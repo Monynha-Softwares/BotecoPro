@@ -24,7 +24,11 @@ class OdooClient {
       final response = await _http.get(connection.versionUri).timeout(timeout);
       final body = _decode(response.body);
       if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw OdooException.fromHttp(statusCode: response.statusCode, body: body);
+        throw OdooException.fromHttp(
+          statusCode: response.statusCode,
+          body: body,
+          sensitiveValues: [_apiKey],
+        );
       }
       if (body is! Map<String, dynamic> || body['version'] == null) {
         throw const OdooException(
@@ -75,7 +79,11 @@ class OdooClient {
           .timeout(timeout);
       final body = _decode(response.body);
       if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw OdooException.fromHttp(statusCode: response.statusCode, body: body);
+        throw OdooException.fromHttp(
+          statusCode: response.statusCode,
+          body: body,
+          sensitiveValues: [_apiKey],
+        );
       }
       return body;
     } on OdooException {

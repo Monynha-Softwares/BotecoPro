@@ -97,6 +97,7 @@ class OdooPosConfig {
     this.currentSessionState,
     this.currencyId,
     this.pricelistId,
+    this.catalogProductCount,
   });
 
   final int id;
@@ -109,6 +110,26 @@ class OdooPosConfig {
   final String? currentSessionState;
   final int? currencyId;
   final int? pricelistId;
+  final int? catalogProductCount;
+
+  bool get hasCatalogProducts =>
+      catalogProductCount == null || catalogProductCount! > 0;
+
+  OdooPosConfig copyWith({int? catalogProductCount}) {
+    return OdooPosConfig(
+      id: id,
+      name: name,
+      companyId: companyId,
+      active: active,
+      limitCategories: limitCategories,
+      categoryIds: categoryIds,
+      restaurant: restaurant,
+      currentSessionState: currentSessionState,
+      currencyId: currencyId,
+      pricelistId: pricelistId,
+      catalogProductCount: catalogProductCount ?? this.catalogProductCount,
+    );
+  }
 }
 
 class OdooCategory {
@@ -182,8 +203,10 @@ class OdooConnectionDiagnostic {
 
   bool get isReady =>
       posConfigs.isNotEmpty &&
-      modelAccess.values.every((accessible) => accessible);
+      modelAccess.values.every((accessible) => accessible) &&
+      posConfigs.any((config) => config.hasCatalogProducts);
 
-  OdooDiagnosticStatus get status =>
-      isReady ? OdooDiagnosticStatus.success : OdooDiagnosticStatus.authenticatedButNotReady;
+  OdooDiagnosticStatus get status => isReady
+      ? OdooDiagnosticStatus.success
+      : OdooDiagnosticStatus.authenticatedButNotReady;
 }

@@ -23,11 +23,12 @@ class OdooException implements Exception {
   factory OdooException.fromHttp({
     required int statusCode,
     required dynamic body,
+    Iterable<String> sensitiveValues = const [],
   }) {
-    final rawMessage = body is Map<String, dynamic>
-        ? body['message']?.toString()
-        : null;
-    final message = _safeMessage(rawMessage) ?? _messageForStatus(statusCode);
+    final rawMessage =
+        body is Map<String, dynamic> ? body['message']?.toString() : null;
+    final message = _safeMessage(rawMessage, sensitiveValues) ??
+        _messageForStatus(statusCode);
     final kind = switch (statusCode) {
       401 => OdooErrorKind.unauthorized,
       403 => OdooErrorKind.forbidden,
@@ -39,9 +40,14 @@ class OdooException implements Exception {
     return OdooException(kind: kind, message: message, statusCode: statusCode);
   }
 
-  static String? _safeMessage(String? value) {
+  static String? _safeMessage(String? value, Iterable<String> sensitiveValues) {
     if (value == null || value.trim().isEmpty) return null;
-    final normalized = value.replaceAll(RegExp(r'[\r\n\t]+'), ' ').trim();
+    var normalized = value.replaceAll(RegExp(r'[\r\n\t]+'), ' ').trim();
+    for (final sensitiveValue in sensitiveValues) {
+      if (sensitiveValue.isNotEmpty) {
+        normalized = normalized.replaceAll(sensitiveValue, '[redacted]');
+      }
+    }
     if (normalized.length > 240) return normalized.substring(0, 240);
     return normalized;
   }

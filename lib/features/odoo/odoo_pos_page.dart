@@ -22,12 +22,22 @@ class OdooPosPage extends StatelessWidget {
                 final selected = provider.selectedPosConfig?.id == config.id;
                 return Card(
                   child: ListTile(
-                    leading: Icon(selected ? Icons.check_circle : Icons.point_of_sale),
+                    leading: Icon(
+                        selected ? Icons.check_circle : Icons.point_of_sale),
                     title: Text(config.name),
                     subtitle: Text(
-                      'Estado da sessão: ${config.currentSessionState ?? 'não informado'}',
+                      'Sessão: ${config.currentSessionState ?? 'não informado'} · '
+                      'catálogo: ${config.catalogProductCount ?? 'não verificado'} produto(s)',
                     ),
-                    trailing: selected ? const Chip(label: Text('Selecionado')) : null,
+                    trailing: selected
+                        ? Chip(
+                            label: Text(
+                              config.hasCatalogProducts
+                                  ? 'Selecionado'
+                                  : 'Sem produtos',
+                            ),
+                          )
+                        : null,
                     onTap: () => provider.selectPosConfig(config),
                   ),
                 );

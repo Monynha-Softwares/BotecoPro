@@ -48,7 +48,8 @@ class OdooRepository {
 
     final user = Map<String, dynamic>.from(userRows.first as Map);
     final login = _asString(user['login']);
-    if (login == null || login.toLowerCase() != expectedUsername.trim().toLowerCase()) {
+    if (login == null ||
+        login.toLowerCase() != expectedUsername.trim().toLowerCase()) {
       throw const OdooException(
         kind: OdooErrorKind.unauthorized,
         message: 'A API key pertence a outro utilizador do Odoo.',
@@ -156,15 +157,29 @@ class OdooRepository {
         ],
         'order': 'id',
         'limit': 100,
-        'context': {'allowed_company_ids': [companyId]},
+        'context': {
+          'allowed_company_ids': [companyId]
+        },
       },
     );
     if (rows is! List) return const <OdooPosConfig>[];
-    return rows
+    final configs = rows
         .whereType<Map>()
         .map((row) => _parsePosConfig(Map<String, dynamic>.from(row)))
         .where((config) => config.id > 0)
         .toList(growable: false);
+    return Future.wait(configs.map((config) async {
+      try {
+        return config.copyWith(
+          catalogProductCount: await countProducts(
+            companyId: companyId,
+            posConfig: config,
+          ),
+        );
+      } on OdooException {
+        return config;
+      }
+    }));
   }
 
   Future<List<OdooCategory>> listCategories({
@@ -183,7 +198,9 @@ class OdooRepository {
         'fields': ['id', 'name', 'parent_id'],
         'order': 'sequence,id',
         'limit': 1000,
-        'context': {'allowed_company_ids': [companyId]},
+        'context': {
+          'allowed_company_ids': [companyId]
+        },
       },
     );
     if (rows is! List) return const <OdooCategory>[];
@@ -207,17 +224,7 @@ class OdooRepository {
     int offset = 0,
     int limit = 100,
   }) async {
-    final domain = <List<Object?>>[
-      ['active', '=', true],
-      ['product_tmpl_id.available_in_pos', '=', true],
-    ];
-    if (posConfig.limitCategories && posConfig.categoryIds.isNotEmpty) {
-      domain.add([
-        'product_tmpl_id.pos_categ_ids',
-        'in',
-        posConfig.categoryIds,
-      ]);
-    }
+    final domain = _productDomain(posConfig);
     final rows = await client.call(
       'product.product',
       'search_read',
@@ -237,7 +244,9 @@ class OdooRepository {
         'order': 'default_code,name,id',
         'offset': offset,
         'limit': limit,
-        'context': {'allowed_company_ids': [companyId]},
+        'context': {
+          'allowed_company_ids': [companyId]
+        },
       },
     );
     if (rows is! List) return const <OdooProduct>[];
@@ -246,6 +255,45 @@ class OdooRepository {
         .map((row) => _parseProduct(Map<String, dynamic>.from(row)))
         .where((product) => product.id > 0)
         .toList(growable: false);
+  }
+
+  Future<int> countProducts({
+    required int companyId,
+    required OdooPosConfig posConfig,
+  }) async {
+    final count = await client.call(
+      'product.product',
+      'search_count',
+      arguments: {
+        'domain': _productDomain(posConfig),
+        'context': {
+          'allowed_company_ids': [companyId]
+        },
+      },
+    );
+    final value = _asInt(count);
+    if (value == null || value < 0) {
+      throw const OdooException(
+        kind: OdooErrorKind.unexpected,
+        message: 'Odoo não devolveu a contagem do catálogo POS.',
+      );
+    }
+    return value;
+  }
+
+  List<List<Object?>> _productDomain(OdooPosConfig posConfig) {
+    final domain = <List<Object?>>[
+      ['active', '=', true],
+      ['product_tmpl_id.available_in_pos', '=', true],
+    ];
+    if (posConfig.limitCategories && posConfig.categoryIds.isNotEmpty) {
+      domain.add([
+        'product_tmpl_id.pos_categ_ids',
+        'in',
+        posConfig.categoryIds,
+      ]);
+    }
+    return domain;
   }
 
   Future<bool> _canRead(String model) async {
@@ -284,7 +332,9 @@ class OdooRepository {
     final writeDate = _asString(value['write_date']);
     return OdooProduct(
       id: _asInt(value['id']) ?? 0,
-      name: _asString(value['display_name']) ?? _asString(value['name']) ?? 'Produto',
+      name: _asString(value['display_name']) ??
+          _asString(value['name']) ??
+          'Produto',
       price: _asDouble(value['lst_price']),
       templateId: _relationId(value['product_tmpl_id']),
       defaultCode: _asString(value['default_code']),

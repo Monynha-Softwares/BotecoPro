@@ -49,11 +49,12 @@ void main() {
     expect(request.headers['Content-Type'], contains('application/json'));
   });
 
-  test('redacts server traceback and maps unauthorized responses', () async {
+  test('redacts secrets in server errors and maps unauthorized responses',
+      () async {
     final fake = _FakeClient((_) async {
       return http.Response(
         jsonEncode({
-          'message': 'Invalid apikey',
+          'message': 'Invalid apikey unit-test-placeholder',
           'debug': 'traceback with credentials should not escape',
         }),
         401,
@@ -73,7 +74,11 @@ void main() {
       throwsA(
         isA<OdooException>()
             .having((error) => error.kind, 'kind', OdooErrorKind.unauthorized)
-            .having((error) => error.message, 'message', 'Invalid apikey'),
+            .having(
+              (error) => error.message,
+              'message',
+              'Invalid apikey [redacted]',
+            ),
       ),
     );
   });
