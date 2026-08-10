@@ -26,7 +26,7 @@ long-lived Odoo API key.
 
 ```bash
 flutter pub get
-flutter analyze
+flutter analyze --fatal-infos
 flutter test
 ```
 

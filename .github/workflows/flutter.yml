@@ -28,5 +28,5 @@ jobs:
             echo "A local environment file is tracked. Remove it before merging."
             exit 1
           fi
-      - run: flutter analyze
+      - run: flutter analyze --fatal-infos
       - run: flutter test
