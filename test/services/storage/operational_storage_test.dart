@@ -150,4 +150,64 @@ void main() {
     expect(await snapshotStore.read(context), isNull);
     expect(await cartStore.read(context), isNull);
   });
+
+  test('integration namespace cannot overwrite normal snapshot or cart',
+      () async {
+    const normalSnapshots = SnapshotStorageService();
+    const isolatedSnapshots = SnapshotStorageService(
+      namespace: 'botecopro.integration.synthetic.v1',
+    );
+    const normalCarts = CartStorageService();
+    const isolatedCarts = CartStorageService(
+      namespace: 'botecopro.integration.synthetic.v1',
+    );
+    const context = OperationalContext(
+      instanceKey: 'https://example.odoo.com',
+      userId: 2,
+      companyId: 1,
+      posConfigId: 3,
+    );
+    SyncSnapshot snapshot(String company) => SyncSnapshot(
+          context: context,
+          synchronizedAt: DateTime.utc(2026, 8, 11),
+          odooVersion: 'saas~19.4+e',
+          company: Company(id: 1, name: company),
+          posConfig: const PosConfig(
+            id: 3,
+            name: 'POS',
+            companyId: 1,
+            active: true,
+            limitCategories: false,
+            categoryIds: [],
+            restaurant: false,
+            catalogProductCount: 0,
+          ),
+          categories: const [],
+          products: const [],
+          floors: const [],
+          tables: const [],
+        );
+    DraftCart cart(int productId) => DraftCart(context: context).add(
+          CatalogProduct(
+            id: productId,
+            name: 'Produto $productId',
+            catalogPrice: 8.5,
+          ),
+        );
+
+    await normalSnapshots.save(snapshot('Normal'));
+    await isolatedSnapshots.save(snapshot('Isolada'));
+    await normalCarts.save(cart(42));
+    await isolatedCarts.save(cart(99));
+
+    expect((await normalSnapshots.read(context))?.company.name, 'Normal');
+    expect((await isolatedSnapshots.read(context))?.company.name, 'Isolada');
+    expect((await normalCarts.read(context))?.items.single.productId, 42);
+    expect((await isolatedCarts.read(context))?.items.single.productId, 99);
+
+    await isolatedSnapshots.clear();
+    await isolatedCarts.clear();
+    expect((await normalSnapshots.read(context))?.company.name, 'Normal');
+    expect((await normalCarts.read(context))?.items.single.productId, 42);
+  });
 }

@@ -68,6 +68,7 @@ class OdooCartPage extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                           child: DropdownButtonFormField<int>(
+                            key: const Key('restaurant.table.selector'),
                             value: cart.selectedTable?.id ?? 0,
                             decoration: const InputDecoration(
                               labelText: 'Mesa (opcional)',
@@ -78,7 +79,9 @@ class OdooCartPage extends StatelessWidget {
                                   value: 0, child: Text('Sem mesa')),
                               for (final table in catalog.restaurantTables)
                                 DropdownMenuItem(
-                                    value: table.id, child: Text(table.label)),
+                                    key: Key('restaurant.table.${table.id}'),
+                                    value: table.id,
+                                    child: Text(table.label)),
                             ],
                             onChanged: (tableId) => cart.selectTable(
                               tableId == null || tableId == 0
@@ -126,6 +129,7 @@ class OdooCartPage extends StatelessWidget {
                                 children: [
                                   const Text('Subtotal'),
                                   Text(
+                                    key: const Key('cart.subtotal'),
                                     formatCatalogAmount(
                                       cart.subtotal,
                                       currency: currency,
@@ -169,6 +173,7 @@ class _CartItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cart = context.read<CartProvider>();
     return Card(
+      key: Key('cart.item.${item.productId}'),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -180,6 +185,7 @@ class _CartItemCard extends StatelessWidget {
                     child: Text(item.productName,
                         style: Theme.of(context).textTheme.titleMedium)),
                 IconButton(
+                  key: Key('cart.item.remove.${item.productId}'),
                   tooltip: 'Remover',
                   onPressed: () => cart.remove(item.productId),
                   icon: const Icon(Icons.delete_outline),
@@ -215,6 +221,7 @@ class _CartItemCard extends StatelessWidget {
             Row(
               children: [
                 IconButton(
+                  key: Key('cart.quantity.minus.${item.productId}'),
                   tooltip: 'Diminuir',
                   onPressed: () =>
                       cart.updateQuantity(item.productId, item.quantity - 1),
@@ -223,6 +230,7 @@ class _CartItemCard extends StatelessWidget {
                 Text('${item.quantity}',
                     style: Theme.of(context).textTheme.titleMedium),
                 IconButton(
+                  key: Key('cart.quantity.plus.${item.productId}'),
                   tooltip: 'Aumentar',
                   onPressed: () =>
                       cart.updateQuantity(item.productId, item.quantity + 1),
@@ -241,6 +249,7 @@ class _CartItemCard extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: TextButton.icon(
+                key: Key('cart.note.${item.productId}'),
                 onPressed: () => _editNote(context, item),
                 icon: const Icon(Icons.note_alt_outlined),
                 label:
@@ -260,6 +269,7 @@ class _CartItemCard extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: const Text('Nota do item'),
         content: TextFormField(
+          key: Key('cart.note.field.${item.productId}'),
           initialValue: item.note,
           onChanged: (value) => editedNote = value,
           autofocus: true,
@@ -271,6 +281,7 @@ class _CartItemCard extends StatelessWidget {
               onPressed: () => Navigator.pop(context),
               child: const Text('Cancelar')),
           FilledButton(
+              key: Key('cart.note.save.${item.productId}'),
               onPressed: () => Navigator.pop(context, editedNote),
               child: const Text('Guardar')),
         ],

@@ -6,6 +6,7 @@ import '../../models/connection.dart';
 class CredentialsStorageService {
   const CredentialsStorageService({
     this.secureStorage = const FlutterSecureStorage(),
+    this.namespace = '',
   });
 
   static const _baseUrlKey = 'odoo.connection.base_url';
@@ -17,34 +18,37 @@ class CredentialsStorageService {
   static const _userIdKey = 'odoo.identity.user_id';
 
   final FlutterSecureStorage secureStorage;
+  final String namespace;
+
+  String _key(String key) => namespace.isEmpty ? key : '$namespace.$key';
 
   Future<ConnectionConfig?> readConnection() async {
     final prefs = await SharedPreferences.getInstance();
-    final baseUrl = prefs.getString(_baseUrlKey);
-    final username = prefs.getString(_usernameKey);
+    final baseUrl = prefs.getString(_key(_baseUrlKey));
+    final username = prefs.getString(_key(_usernameKey));
     if (baseUrl == null || username == null) return null;
     return ConnectionConfig(
       baseUrl: baseUrl,
       username: username,
-      database: prefs.getString(_databaseKey),
+      database: prefs.getString(_key(_databaseKey)),
     );
   }
 
-  Future<String?> readApiKey() => secureStorage.read(key: _apiKey);
+  Future<String?> readApiKey() => secureStorage.read(key: _key(_apiKey));
 
   Future<int?> readCompanyId() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(_companyKey);
+    return prefs.getInt(_key(_companyKey));
   }
 
   Future<int?> readPosConfigId() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(_posConfigKey);
+    return prefs.getInt(_key(_posConfigKey));
   }
 
   Future<int?> readUserId() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(_userIdKey);
+    return prefs.getInt(_key(_userIdKey));
   }
 
   Future<void> saveConnection({
@@ -52,33 +56,33 @@ class CredentialsStorageService {
     required String apiKey,
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_baseUrlKey, connection.baseUrl);
-    await prefs.setString(_usernameKey, connection.username);
+    await prefs.setString(_key(_baseUrlKey), connection.baseUrl);
+    await prefs.setString(_key(_usernameKey), connection.username);
     if (connection.database == null) {
-      await prefs.remove(_databaseKey);
+      await prefs.remove(_key(_databaseKey));
     } else {
-      await prefs.setString(_databaseKey, connection.database!);
+      await prefs.setString(_key(_databaseKey), connection.database!);
     }
-    await secureStorage.write(key: _apiKey, value: apiKey);
+    await secureStorage.write(key: _key(_apiKey), value: apiKey);
   }
 
   Future<void> saveSelections({int? companyId, int? posConfigId}) async {
     final prefs = await SharedPreferences.getInstance();
     if (companyId == null) {
-      await prefs.remove(_companyKey);
+      await prefs.remove(_key(_companyKey));
     } else {
-      await prefs.setInt(_companyKey, companyId);
+      await prefs.setInt(_key(_companyKey), companyId);
     }
     if (posConfigId == null) {
-      await prefs.remove(_posConfigKey);
+      await prefs.remove(_key(_posConfigKey));
     } else {
-      await prefs.setInt(_posConfigKey, posConfigId);
+      await prefs.setInt(_key(_posConfigKey), posConfigId);
     }
   }
 
   Future<void> saveUserId(int userId) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_userIdKey, userId);
+    await prefs.setInt(_key(_userIdKey), userId);
   }
 
   Future<void> clear() async {
@@ -91,8 +95,8 @@ class CredentialsStorageService {
       _posConfigKey,
       _userIdKey,
     ]) {
-      await prefs.remove(key);
+      await prefs.remove(_key(key));
     }
-    await secureStorage.delete(key: _apiKey);
+    await secureStorage.delete(key: _key(_apiKey));
   }
 }

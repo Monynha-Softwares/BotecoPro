@@ -40,6 +40,7 @@ class OdooSyncStatus extends StatelessWidget {
         : DateFormat('dd/MM/yyyy HH:mm').format(synchronizedAt!.toLocal());
     final colors = Theme.of(context).colorScheme;
     return Material(
+      key: const Key('sync.status'),
       color: isOffline ? colors.errorContainer : colors.secondaryContainer,
       child: ListTile(
         dense: true,
@@ -48,6 +49,7 @@ class OdooSyncStatus extends StatelessWidget {
         subtitle: date == null ? null : Text('Última sincronização: $date'),
         trailing: isOffline
             ? TextButton(
+                key: const Key('sync.retry'),
                 onPressed: onRetry,
                 child: const Text('Tentar novamente'),
               )

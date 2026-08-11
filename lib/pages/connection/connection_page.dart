@@ -80,6 +80,7 @@ class _ConnectionPageState extends State<ConnectionPage> {
                       ),
                       const SizedBox(height: 24),
                       TextFormField(
+                        key: const Key('connection.url'),
                         controller: _urlController,
                         keyboardType: TextInputType.url,
                         decoration: const InputDecoration(
@@ -99,6 +100,7 @@ class _ConnectionPageState extends State<ConnectionPage> {
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
+                        key: const Key('connection.username'),
                         controller: _usernameController,
                         keyboardType: TextInputType.emailAddress,
                         decoration: const InputDecoration(
@@ -112,6 +114,7 @@ class _ConnectionPageState extends State<ConnectionPage> {
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
+                        key: const Key('connection.database'),
                         controller: _databaseController,
                         decoration: const InputDecoration(
                           labelText: 'Base de dados (opcional)',
@@ -120,6 +123,7 @@ class _ConnectionPageState extends State<ConnectionPage> {
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
+                        key: const Key('connection.api_key'),
                         controller: _apiKeyController,
                         obscureText: _obscureApiKey,
                         decoration: InputDecoration(
@@ -150,6 +154,7 @@ class _ConnectionPageState extends State<ConnectionPage> {
                         const SizedBox(height: 12),
                       ],
                       FilledButton.icon(
+                        key: const Key('connection.submit'),
                         onPressed: connecting ? null : _connect,
                         icon: connecting
                             ? const SizedBox.square(

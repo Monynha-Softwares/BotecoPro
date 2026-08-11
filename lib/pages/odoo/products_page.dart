@@ -45,6 +45,7 @@ class _OdooProductsPageState extends State<OdooProductsPage> {
         actions: [
           _CartButton(count: cartCount),
           IconButton(
+            key: const Key('catalog.refresh'),
             tooltip: 'Atualizar',
             onPressed: catalog.isLoading ? null : catalog.refresh,
             icon: const Icon(Icons.refresh),
@@ -57,6 +58,7 @@ class _OdooProductsPageState extends State<OdooProductsPage> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: TextField(
+              key: const Key('catalog.search'),
               onChanged: (value) => setState(() => _query = value.trim()),
               decoration: const InputDecoration(
                 hintText: 'Procurar no catálogo Odoo',
@@ -106,6 +108,7 @@ class _CartButton extends StatelessWidget {
         alignment: Alignment.center,
         children: [
           IconButton(
+            key: const Key('cart.open'),
             tooltip: 'Comanda local',
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const OdooCartPage()),
@@ -146,6 +149,7 @@ class _CategoryFilter extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: ChoiceChip(
+                key: const Key('catalog.category.all'),
                 label: const Text('Todos'),
                 selected: selectedCategoryId == null,
                 onSelected: (_) => onSelected(null),
@@ -155,6 +159,7 @@ class _CategoryFilter extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: ChoiceChip(
+                  key: Key('catalog.category.${category.id}'),
                   label: Text(category.name),
                   selected: selectedCategoryId == category.id,
                   onSelected: (_) => onSelected(category.id),
@@ -214,6 +219,7 @@ class _CatalogList extends StatelessWidget {
         final product = products[index];
         return Card(
           child: ListTile(
+            key: Key('catalog.product.${product.id}'),
             onTap: () => _showProductDetails(context, product, currency),
             title: Text(product.name),
             subtitle: Text([
@@ -229,6 +235,7 @@ class _CatalogList extends StatelessWidget {
                   amountCurrencyId: product.currencyId,
                 )),
                 IconButton(
+                  key: Key('catalog.product.add.${product.id}'),
                   tooltip: 'Adicionar à comanda local',
                   onPressed: () => context.read<CartProvider>().add(product),
                   icon: const Icon(Icons.add_shopping_cart_outlined),
@@ -250,6 +257,7 @@ class _CatalogList extends StatelessWidget {
       context: context,
       showDragHandle: true,
       builder: (sheetContext) => Padding(
+        key: Key('catalog.product.detail.${product.id}'),
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -278,6 +286,7 @@ class _CatalogList extends StatelessWidget {
               ),
             const SizedBox(height: 16),
             FilledButton.icon(
+              key: Key('catalog.product.detail.add.${product.id}'),
               onPressed: () {
                 context.read<CartProvider>().add(product);
                 Navigator.pop(sheetContext);

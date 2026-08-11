@@ -12,6 +12,7 @@ class OdooHomePage extends StatelessWidget {
     final provider = context.watch<OdooSessionProvider>();
     final diagnostic = provider.diagnostic;
     return Scaffold(
+      key: const Key('connected.home'),
       appBar: AppBar(title: const Text('BotecoPRO · Odoo')),
       body: Column(
         children: [

@@ -15,53 +15,75 @@ import 'services/storage/snapshot_storage_service.dart';
 import 'theme.dart';
 
 void main() async {
+  await initializeBotecoProPlatform();
+  runApp(const BotecoProApp());
+}
+
+Future<void> initializeBotecoProPlatform() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-// Inicializa a localização para português brasileiro
   await initializeDateFormatting('pt_BR', null);
   Intl.defaultLocale = 'pt_BR';
 
-// Define a orientação da tela para retrato
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+}
 
-  const credentialsStorage = CredentialsStorageService();
-  const snapshotStorage = SnapshotStorageService();
-  const cartStorage = CartStorageService();
-  const runtimeFactory = OdooRuntimeFactory();
+class BotecoProDependencies {
+  const BotecoProDependencies({
+    this.credentialsStorage = const CredentialsStorageService(),
+    this.snapshotStorage = const SnapshotStorageService(),
+    this.cartStorage = const CartStorageService(),
+    this.runtimeFactory = const OdooRuntimeFactory(),
+  });
 
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (_) => OdooSessionProvider(
-            credentialsStorage: credentialsStorage,
-            snapshotStorage: snapshotStorage,
-            cartStorage: cartStorage,
-            runtimeFactory: runtimeFactory,
-          )..initialize(),
-        ),
-        ChangeNotifierProxyProvider<OdooSessionProvider, CatalogProvider>(
-          create: (_) => CatalogProvider(snapshotStorage: snapshotStorage),
-          update: (_, session, catalog) {
-            catalog!.bind(session);
-            return catalog;
-          },
-        ),
-        ChangeNotifierProxyProvider2<OdooSessionProvider, CatalogProvider,
-            CartProvider>(
-          create: (_) => CartProvider(storage: cartStorage),
-          update: (_, session, catalog, cart) {
-            cart!.bind(session, catalog);
-            return cart;
-          },
-        ),
-      ],
-      child: const MyApp(),
-    ),
-  );
+  final CredentialsStorageService credentialsStorage;
+  final SnapshotStorageService snapshotStorage;
+  final CartStorageService cartStorage;
+  final OdooRuntimeFactory runtimeFactory;
+}
+
+class BotecoProApp extends StatelessWidget {
+  const BotecoProApp({
+    this.dependencies = const BotecoProDependencies(),
+    super.key,
+  });
+
+  final BotecoProDependencies dependencies;
+
+  @override
+  Widget build(BuildContext context) => MultiProvider(
+        providers: [
+          ChangeNotifierProvider(
+            create: (_) => OdooSessionProvider(
+              credentialsStorage: dependencies.credentialsStorage,
+              snapshotStorage: dependencies.snapshotStorage,
+              cartStorage: dependencies.cartStorage,
+              runtimeFactory: dependencies.runtimeFactory,
+            )..initialize(),
+          ),
+          ChangeNotifierProxyProvider<OdooSessionProvider, CatalogProvider>(
+            create: (_) => CatalogProvider(
+              snapshotStorage: dependencies.snapshotStorage,
+            ),
+            update: (_, session, catalog) {
+              catalog!.bind(session);
+              return catalog;
+            },
+          ),
+          ChangeNotifierProxyProvider2<OdooSessionProvider, CatalogProvider,
+              CartProvider>(
+            create: (_) => CartProvider(storage: dependencies.cartStorage),
+            update: (_, session, catalog, cart) {
+              cart!.bind(session, catalog);
+              return cart;
+            },
+          ),
+        ],
+        child: const MyApp(),
+      );
 }
 
 class MyApp extends StatelessWidget {
