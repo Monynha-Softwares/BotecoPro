@@ -242,10 +242,15 @@ void main() {
         await capture('cart', '06-cart');
 
         currentStep = 'table-selected';
-        await tester.tap(find.byKey(const Key('restaurant.table.selector')));
+        FocusManager.instance.primaryFocus?.unfocus();
+        await tester.pump(const Duration(seconds: 1));
+        final tableSelector =
+            find.byKey(const Key('restaurant.table.selector'));
+        await tester.ensureVisible(tableSelector);
         await tester.pumpAndSettle();
-        final visibleTableOption =
-            find.byKey(Key('restaurant.table.$syntheticTableId')).hitTestable();
+        await tester.tap(tableSelector);
+        await tester.pumpAndSettle();
+        final visibleTableOption = find.text('Salão · Mesa 1').hitTestable();
         await _waitForFinder(
           tester,
           visibleTableOption,
