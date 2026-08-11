@@ -252,4 +252,52 @@ void main() {
     expect(reconciled.table, selectedTable);
     expect(reconciled.items.single.state, DraftCartItemState.available);
   });
+
+  test('allocates and persists stable future submission identities', () {
+    var sequence = 0;
+    String nextUuid() =>
+        '00000000-0000-4000-8000-${(++sequence).toString().padLeft(12, '0')}';
+    final cart =
+        DraftCart(context: _context).add(_product(42)).add(_product(9));
+
+    final prepared = cart.prepareSubmissionIdentity(nextUuid);
+    final preparedAgain = prepared.prepareSubmissionIdentity(nextUuid);
+    final restored = DraftCart.fromJson(prepared.toJson());
+
+    expect(prepared.hasStableSubmissionIdentity, isTrue);
+    expect(preparedAgain.submissionOrderUuid, prepared.submissionOrderUuid);
+    expect(
+      preparedAgain.items.map((item) => item.submissionLineUuid),
+      prepared.items.map((item) => item.submissionLineUuid),
+    );
+    expect(restored.submissionOrderUuid, prepared.submissionOrderUuid);
+    expect(
+      restored.items.map((item) => item.submissionLineUuid),
+      prepared.items.map((item) => item.submissionLineUuid),
+    );
+    expect(prepared.toJson().toString(), isNot(contains('apiKey')));
+  });
+
+  test('retains line identity on edits and resets it after remove or clear',
+      () {
+    var sequence = 0;
+    String nextUuid() =>
+        '00000000-0000-4000-8000-${(++sequence).toString().padLeft(12, '0')}';
+    final prepared = DraftCart(context: _context)
+        .add(_product(42))
+        .prepareSubmissionIdentity(nextUuid);
+    final lineUuid = prepared.items.single.submissionLineUuid;
+
+    final edited = prepared.updateQuantity(42, 3).updateNote(42, 'sem gelo');
+    final readded =
+        edited.remove(42).add(_product(42)).prepareSubmissionIdentity(nextUuid);
+    final cleared = prepared.clear();
+
+    expect(edited.items.single.submissionLineUuid, lineUuid);
+    expect(readded.submissionOrderUuid, prepared.submissionOrderUuid);
+    expect(readded.items.single.submissionLineUuid, isNot(lineUuid));
+    expect(cleared.items, isEmpty);
+    expect(cleared.submissionOrderUuid, isNull);
+    expect(cleared.hasStableSubmissionIdentity, isFalse);
+  });
 }

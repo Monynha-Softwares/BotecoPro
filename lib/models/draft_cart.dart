@@ -16,6 +16,7 @@ class DraftCartItem {
     this.currentProductName,
     this.currentCatalogPrice,
     this.currentCurrencyId,
+    this.submissionLineUuid,
   });
 
   final int productId;
@@ -32,6 +33,12 @@ class DraftCartItem {
   final double? currentCatalogPrice;
   final int? currentCurrencyId;
 
+  /// Stable local identity reserved for a future controlled POS submission.
+  ///
+  /// It is deliberately not an Odoo write queue and is never sent anywhere by
+  /// the M8 preparation milestone.
+  final String? submissionLineUuid;
+
   double get subtotal => capturedUnitPrice * quantity;
 
   DraftCartItem copyWith({
@@ -41,6 +48,7 @@ class DraftCartItem {
     String? currentProductName,
     double? currentCatalogPrice,
     int? currentCurrencyId,
+    String? submissionLineUuid,
     bool clearCurrentValues = false,
   }) =>
       DraftCartItem(
@@ -60,6 +68,7 @@ class DraftCartItem {
         currentCurrencyId: clearCurrentValues
             ? null
             : currentCurrencyId ?? this.currentCurrencyId,
+        submissionLineUuid: submissionLineUuid ?? this.submissionLineUuid,
       );
 
   Map<String, Object?> toJson() => {
@@ -69,6 +78,7 @@ class DraftCartItem {
         'currencyId': capturedCurrencyId,
         'quantity': quantity,
         'note': note,
+        'submissionLineUuid': submissionLineUuid,
       };
 
   factory DraftCartItem.fromJson(Map<String, dynamic> json) => DraftCartItem(
@@ -78,6 +88,7 @@ class DraftCartItem {
         capturedCurrencyId: json['currencyId'] as int?,
         quantity: json['quantity'] as int,
         note: json['note'] as String? ?? '',
+        submissionLineUuid: json['submissionLineUuid'] as String?,
       );
 }
 
@@ -86,16 +97,22 @@ class DraftCart {
     required this.context,
     this.table,
     this.items = const [],
+    this.submissionOrderUuid,
     DateTime? createdAt,
     DateTime? updatedAt,
   })  : createdAt = createdAt ?? DateTime.now().toUtc(),
         updatedAt = updatedAt ?? DateTime.now().toUtc();
 
   static const currentSchemaVersion = 1;
+  static final _uuidV4Pattern = RegExp(
+    r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
+    caseSensitive: false,
+  );
 
   final OperationalContext context;
   final RestaurantTable? table;
   final List<DraftCartItem> items;
+  final String? submissionOrderUuid;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -113,6 +130,14 @@ class DraftCart {
 
   bool get hasUnavailableItems =>
       items.any((item) => item.state == DraftCartItemState.unavailable);
+
+  bool get hasStableSubmissionIdentity =>
+      _isUuidV4(submissionOrderUuid) &&
+      items.isNotEmpty &&
+      items.every((item) => _isUuidV4(item.submissionLineUuid));
+
+  static bool _isUuidV4(String? value) =>
+      value != null && _uuidV4Pattern.hasMatch(value);
 
   bool matchesContext(OperationalContext candidate) =>
       context.matches(candidate);
@@ -158,7 +183,23 @@ class DraftCart {
             .toList(growable: false),
       );
 
-  DraftCart clear() => copyWith(items: const []);
+  DraftCart clear() => copyWith(items: const [], clearSubmissionIdentity: true);
+
+  /// Allocates stable retry identities without performing an Odoo write.
+  ///
+  /// Repeated calls preserve every previously allocated UUID. New lines get a
+  /// new identity, while a removed and re-added product is intentionally a new
+  /// line. The caller persists the returned draft before any future request.
+  DraftCart prepareSubmissionIdentity(String Function() generateUuid) =>
+      copyWith(
+        submissionOrderUuid: submissionOrderUuid ?? generateUuid(),
+        items: [
+          for (final item in items)
+            item.copyWith(
+              submissionLineUuid: item.submissionLineUuid ?? generateUuid(),
+            ),
+        ],
+      );
 
   DraftCart reconcile(
     List<CatalogProduct> products, {
@@ -199,12 +240,17 @@ class DraftCart {
     RestaurantTable? table,
     bool clearTable = false,
     List<DraftCartItem>? items,
+    String? submissionOrderUuid,
+    bool clearSubmissionIdentity = false,
     DateTime? updatedAt,
   }) =>
       DraftCart(
         context: context,
         table: clearTable ? null : table ?? this.table,
         items: items ?? this.items,
+        submissionOrderUuid: clearSubmissionIdentity
+            ? null
+            : submissionOrderUuid ?? this.submissionOrderUuid,
         createdAt: createdAt,
         updatedAt: updatedAt ?? DateTime.now().toUtc(),
       );
@@ -226,6 +272,7 @@ class DraftCart {
                 'seats': table!.seats,
               },
         'items': [for (final item in items) item.toJson()],
+        'submissionOrderUuid': submissionOrderUuid,
         'createdAt': createdAt.toUtc().toIso8601String(),
         'updatedAt': updatedAt.toUtc().toIso8601String(),
       };
@@ -260,6 +307,7 @@ class DraftCart {
                 Map<String, dynamic>.from(item as Map),
               ))
           .toList(growable: false),
+      submissionOrderUuid: json['submissionOrderUuid'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );

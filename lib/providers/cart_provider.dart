@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:uuid/uuid.dart';
 
 import '../models/catalog.dart';
 import '../models/draft_cart.dart';
@@ -11,10 +12,12 @@ import 'catalog_provider.dart';
 import 'odoo_session_provider.dart';
 
 class CartProvider extends ChangeNotifier {
-  CartProvider({CartStorageService? storage})
-      : _storage = storage ?? const CartStorageService();
+  CartProvider({CartStorageService? storage, Uuid? uuid})
+      : _storage = storage ?? const CartStorageService(),
+        _uuid = uuid ?? const Uuid();
 
   final CartStorageService _storage;
+  final Uuid _uuid;
 
   DraftCart? _cart;
   OperationalContext? _boundContext;
@@ -123,6 +126,16 @@ class CartProvider extends ChangeNotifier {
   void selectTable(RestaurantTable? table) {
     if (_cart == null) return;
     _cart = _cart!.copyWith(table: table, clearTable: table == null);
+    _queueSave(_cart!);
+    notifyListeners();
+  }
+
+  /// Persists idempotency identities for a future controlled submission.
+  ///
+  /// This method only changes the local draft. It never calls Odoo.
+  void prepareSubmissionIdentity() {
+    if (_cart == null || _cart!.items.isEmpty) return;
+    _cart = _cart!.prepareSubmissionIdentity(() => _uuid.v4());
     _queueSave(_cart!);
     notifyListeners();
   }
