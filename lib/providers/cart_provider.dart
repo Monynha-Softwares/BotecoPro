@@ -23,6 +23,7 @@ class CartProvider extends ChangeNotifier {
   OperationalContext? _boundContext;
   int _boundCatalogRevision = -1;
   int _generation = 0;
+  int _mutationRevision = 0;
   bool _hasPersistenceError = false;
   Future<void> _writeChain = Future<void>.value();
 
@@ -45,6 +46,7 @@ class CartProvider extends ChangeNotifier {
       if (_boundContext != null || _cart != null) {
         _boundContext = null;
         _cart = null;
+        _mutationRevision++;
         final generation = ++_generation;
         _queueClear();
         scheduleMicrotask(() {
@@ -58,13 +60,17 @@ class CartProvider extends ChangeNotifier {
       final replacesExistingContext = _boundContext != null;
       _boundContext = context;
       _cart = null;
+      _mutationRevision++;
       _boundCatalogRevision = catalog.dataRevision;
       final generation = ++_generation;
+      final mutationRevision = _mutationRevision;
       if (replacesExistingContext) _queueClear();
       scheduleMicrotask(() {
         if (generation != _generation) return;
         notifyListeners();
-        unawaited(_restore(context, catalog, generation));
+        unawaited(
+          _restore(context, catalog, generation, mutationRevision),
+        );
       });
       return;
     }
@@ -75,6 +81,7 @@ class CartProvider extends ChangeNotifier {
         final generation = _generation;
         scheduleMicrotask(() {
           if (generation != _generation || _cart == null) return;
+          _mutationRevision++;
           _cart = _cart!.reconcile(
             catalog.products,
             restaurantTables: catalog.restaurantTables,
@@ -89,6 +96,7 @@ class CartProvider extends ChangeNotifier {
   void add(CatalogProduct product) {
     final context = _boundContext;
     if (context == null) return;
+    _mutationRevision++;
     _cart = (_cart ?? DraftCart(context: context)).add(product);
     _queueSave(_cart!);
     notifyListeners();
@@ -96,6 +104,7 @@ class CartProvider extends ChangeNotifier {
 
   void updateQuantity(int productId, int quantity) {
     if (_cart == null) return;
+    _mutationRevision++;
     _cart = _cart!.updateQuantity(productId, quantity);
     _queueSave(_cart!);
     notifyListeners();
@@ -103,6 +112,7 @@ class CartProvider extends ChangeNotifier {
 
   void updateNote(int productId, String note) {
     if (_cart == null) return;
+    _mutationRevision++;
     _cart = _cart!.updateNote(productId, note);
     _queueSave(_cart!);
     notifyListeners();
@@ -110,6 +120,7 @@ class CartProvider extends ChangeNotifier {
 
   void remove(int productId) {
     if (_cart == null) return;
+    _mutationRevision++;
     _cart = _cart!.remove(productId);
     _queueSave(_cart!);
     notifyListeners();
@@ -118,6 +129,7 @@ class CartProvider extends ChangeNotifier {
   void clear() {
     if (_cart == null) return;
     final context = _boundContext;
+    _mutationRevision++;
     _cart = context == null ? null : DraftCart(context: context);
     _queueClear();
     notifyListeners();
@@ -125,6 +137,7 @@ class CartProvider extends ChangeNotifier {
 
   void selectTable(RestaurantTable? table) {
     if (_cart == null) return;
+    _mutationRevision++;
     _cart = _cart!.copyWith(table: table, clearTable: table == null);
     _queueSave(_cart!);
     notifyListeners();
@@ -135,6 +148,7 @@ class CartProvider extends ChangeNotifier {
   /// This method only changes the local draft. It never calls Odoo.
   void prepareSubmissionIdentity() {
     if (_cart == null || _cart!.items.isEmpty) return;
+    _mutationRevision++;
     _cart = _cart!.prepareSubmissionIdentity(() => _uuid.v4());
     _queueSave(_cart!);
     notifyListeners();
@@ -144,9 +158,14 @@ class CartProvider extends ChangeNotifier {
     OperationalContext context,
     CatalogProvider catalog,
     int generation,
+    int mutationRevision,
   ) async {
     final stored = await _storage.read(context);
-    if (generation != _generation || stored == null) return;
+    if (generation != _generation ||
+        mutationRevision != _mutationRevision ||
+        stored == null) {
+      return;
+    }
     _cart = _catalogReady(catalog, context)
         ? stored.reconcile(
             catalog.products,

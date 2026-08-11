@@ -74,7 +74,7 @@ class OdooSessionProvider extends ChangeNotifier {
     final pos = _selectedPosConfig;
     if (connection == null || diagnostic == null || pos == null) return null;
     return OperationalContext(
-      instanceKey: connection.baseUrl,
+      instanceKey: connection.instanceKey,
       userId: diagnostic.identity.id,
       companyId: diagnostic.currentCompany.id,
       posConfigId: pos.id,
@@ -456,7 +456,7 @@ class OdooSessionProvider extends ChangeNotifier {
       return false;
     }
     final context = OperationalContext(
-      instanceKey: connection.baseUrl,
+      instanceKey: connection.instanceKey,
       userId: userId,
       companyId: companyId,
       posConfigId: posConfigId,

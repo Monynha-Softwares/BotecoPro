@@ -150,8 +150,12 @@ class OdooConnectionService {
         },
       );
       return true;
-    } on OdooException {
-      return false;
+    } on OdooException catch (error) {
+      if (error.kind == OdooErrorKind.forbidden ||
+          error.kind == OdooErrorKind.notFound) {
+        return false;
+      }
+      rethrow;
     }
   }
 }

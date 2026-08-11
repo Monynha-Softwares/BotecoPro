@@ -25,6 +25,30 @@ class _FakeClient extends http.BaseClient {
 }
 
 void main() {
+  test('isolates local operational data by optional Odoo database', () {
+    final withoutDatabase = ConnectionConfig.fromInput(
+      baseUrl: 'https://odoo.example.com/',
+      username: 'user@example.com',
+    );
+    final databaseA = ConnectionConfig.fromInput(
+      baseUrl: 'https://odoo.example.com/',
+      username: 'user@example.com',
+      database: ' tenant a ',
+    );
+    final databaseB = ConnectionConfig.fromInput(
+      baseUrl: 'https://odoo.example.com',
+      username: 'user@example.com',
+      database: 'tenant b',
+    );
+
+    expect(withoutDatabase.instanceKey, 'https://odoo.example.com');
+    expect(
+        databaseA.instanceKey, 'https://odoo.example.com?database=tenant%20a');
+    expect(
+        databaseB.instanceKey, 'https://odoo.example.com?database=tenant%20b');
+    expect(databaseA.instanceKey, isNot(databaseB.instanceKey));
+  });
+
   test('builds a JSON-2 request with bearer authentication', () async {
     late http.BaseRequest request;
     final fake = _FakeClient((incoming) async {

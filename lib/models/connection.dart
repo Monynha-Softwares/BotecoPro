@@ -9,6 +9,18 @@ class ConnectionConfig {
   final String username;
   final String? database;
 
+  /// Stable identity for data that must never cross Odoo database boundaries.
+  ///
+  /// Odoo.sh and self-hosted installations may expose multiple databases from
+  /// the same HTTPS origin. Keeping the optional database in this opaque key
+  /// prevents snapshots and local drafts from being restored into another
+  /// tenant whose numeric record IDs happen to overlap.
+  String get instanceKey {
+    final databaseName = database;
+    if (databaseName == null) return baseUrl;
+    return '$baseUrl?database=${Uri.encodeComponent(databaseName)}';
+  }
+
   factory ConnectionConfig.fromInput({
     required String baseUrl,
     required String username,
