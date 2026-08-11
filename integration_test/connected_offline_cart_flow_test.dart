@@ -248,9 +248,16 @@ void main() {
             find.byKey(const Key('restaurant.table.selector'));
         await tester.ensureVisible(tableSelector);
         await tester.pumpAndSettle();
-        await tester.tap(tableSelector);
+        final tableButton = find.descendant(
+          of: tableSelector,
+          matching: find.byType(DropdownButton<int>),
+        );
+        expect(tableButton, findsOneWidget);
+        await tester.tap(tableButton);
         await tester.pumpAndSettle();
-        final visibleTableOption = find.text('Salão · Mesa 1').hitTestable();
+        final visibleTableOption = find
+            .byKey(const Key('restaurant.table.$syntheticTableId'))
+            .hitTestable();
         await _waitForFinder(
           tester,
           visibleTableOption,
