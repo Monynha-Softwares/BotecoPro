@@ -1,8 +1,10 @@
 import 'package:boteco_pro/models/catalog.dart';
 import 'package:boteco_pro/models/company.dart';
 import 'package:boteco_pro/models/connection.dart';
+import 'package:boteco_pro/models/currency.dart';
 import 'package:boteco_pro/models/draft_cart.dart';
 import 'package:boteco_pro/models/pos_config.dart';
+import 'package:boteco_pro/models/pos_operational_profile.dart';
 import 'package:boteco_pro/models/restaurant.dart';
 import 'package:boteco_pro/models/sync_snapshot.dart';
 import 'package:boteco_pro/providers/cart_provider.dart';
@@ -72,11 +74,55 @@ SyncSnapshot _snapshot() => SyncSnapshot(
         limitCategories: true,
         categoryIds: [4],
         restaurant: false,
+        currencyId: 6,
+        pricelistId: 11,
+        availablePricelistIds: [11],
+        usePricelist: true,
+        paymentMethodIds: [21],
         catalogProductCount: 1,
+      ),
+      posOperationalProfile: const PosOperationalProfile(
+        posConfigId: 3,
+        currency: CurrencyInfo(
+          id: 6,
+          name: 'BRL',
+          symbol: r'R$',
+          position: CurrencySymbolPosition.before,
+          decimalPlaces: 2,
+          rounding: 0.01,
+        ),
+        pricelist: PricelistInfo(
+          id: 11,
+          name: 'Padrão',
+          currencyId: 6,
+          active: true,
+          companyId: 1,
+        ),
+        pricelistReadable: true,
+        nonClosedSessions: [],
+        sessionsReadable: true,
+        paymentMethods: [
+          PaymentMethodSummary(
+            id: 21,
+            name: 'Dinheiro',
+            active: true,
+            isCashCount: true,
+            splitTransactions: false,
+            sequence: 1,
+            type: 'cash',
+            paymentMethodType: 'none',
+          ),
+        ],
+        paymentMethodsReadable: true,
       ),
       categories: const [CatalogCategory(id: 4, name: 'Bebidas')],
       products: const [
-        CatalogProduct(id: 42, name: 'Produto', catalogPrice: 8.5),
+        CatalogProduct(
+          id: 42,
+          name: 'Produto',
+          catalogPrice: 8.5,
+          currencyId: 6,
+        ),
       ],
       floors: const [],
       tables: const [],
@@ -112,6 +158,7 @@ void main() {
             id: 42,
             name: 'Produto',
             catalogPrice: 8.5,
+            currencyId: 6,
           ),
         ),
       );
@@ -135,6 +182,15 @@ void main() {
       expect(session.isOfflineBootstrap, isTrue);
       expect(session.isDemoMode, isFalse);
       expect(session.operationalContext?.matches(_context), isTrue);
+      expect(session.posOperationalProfile?.posConfigId, 3);
+      expect(session.posOperationalProfile?.currency.name, 'BRL');
+      expect(session.posOperationalProfile?.pricelist?.id, 11);
+      expect(session.posOperationalProfile?.sessionsReadable, isFalse);
+      expect(session.posOperationalProfile?.nonClosedSessions, isEmpty);
+      expect(session.posOperationalProfile?.paymentMethods, isEmpty);
+      expect(session.posOperationalProfile?.paymentMethodsReadable, isFalse);
+      expect(session.posProfileError, isNull);
+      expect(session.isPosProfileLoading, isFalse);
       expect(catalog.freshness, CatalogFreshness.offline);
       expect(catalog.products.single.id, 42);
       expect(catalog.categories.single.id, 4);

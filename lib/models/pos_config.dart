@@ -10,6 +10,10 @@ class PosConfig {
     this.currentSessionState,
     this.currencyId,
     this.pricelistId,
+    this.availablePricelistIds = const [],
+    this.usePricelist = false,
+    this.paymentMethodIds = const [],
+    this.currentSessionId,
     this.catalogProductCount,
   });
 
@@ -23,6 +27,10 @@ class PosConfig {
   final String? currentSessionState;
   final int? currencyId;
   final int? pricelistId;
+  final List<int> availablePricelistIds;
+  final bool usePricelist;
+  final List<int> paymentMethodIds;
+  final int? currentSessionId;
   final int? catalogProductCount;
 
   bool get hasCatalogProducts =>
@@ -39,6 +47,10 @@ class PosConfig {
         currentSessionState: currentSessionState,
         currencyId: currencyId,
         pricelistId: pricelistId,
+        availablePricelistIds: availablePricelistIds,
+        usePricelist: usePricelist,
+        paymentMethodIds: paymentMethodIds,
+        currentSessionId: currentSessionId,
         catalogProductCount: catalogProductCount ?? this.catalogProductCount,
       );
 }

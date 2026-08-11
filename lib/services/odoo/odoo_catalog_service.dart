@@ -64,10 +64,12 @@ class OdooCatalogService {
           'default_code',
           'barcode',
           'uom_id',
+          'currency_id',
           'pos_categ_ids',
           'write_date',
         ],
-        'order': 'default_code,name,id',
+        // Immutable ordering is required for deterministic offset pagination.
+        'order': 'id',
         'offset': offset,
         'limit': limit,
         'context': {
@@ -123,19 +125,26 @@ class OdooCatalogService {
   }
 
   CatalogProduct _parseProduct(Map<String, dynamic> value) {
-    final writeDate = odooString(value['write_date']);
+    final catalogPrice = odooNullableDouble(value['lst_price']);
+    if (catalogPrice == null) {
+      throw const OdooException(
+        kind: OdooErrorKind.unexpected,
+        message: 'Odoo devolveu um valor de catálogo inválido.',
+      );
+    }
     return CatalogProduct(
       id: odooInt(value['id']) ?? 0,
       name: odooString(value['display_name']) ??
           odooString(value['name']) ??
           'Produto',
-      catalogPrice: odooDouble(value['lst_price']),
+      catalogPrice: catalogPrice,
       templateId: odooRelationId(value['product_tmpl_id']),
       defaultCode: odooString(value['default_code']),
       barcode: odooString(value['barcode']),
       uomId: odooRelationId(value['uom_id']),
+      currencyId: odooRelationId(value['currency_id']),
       categoryIds: odooRelationIds(value['pos_categ_ids']),
-      writeDate: writeDate == null ? null : DateTime.tryParse(writeDate),
+      writeDate: odooDateTimeUtc(value['write_date']),
     );
   }
 }

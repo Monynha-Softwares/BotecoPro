@@ -34,8 +34,12 @@ void main() {
         expectedUsername: connection.username,
       );
       expect(diagnostic.odooVersion, isNotEmpty);
-      expect(diagnostic.identity.login.toLowerCase(),
-          connection.username.toLowerCase());
+      expect(
+        diagnostic.identity.login.toLowerCase() ==
+            connection.username.toLowerCase(),
+        isTrue,
+        reason: 'A API key deve pertencer ao utilizador configurado.',
+      );
       expect(diagnostic.currentCompany.id, greaterThan(0));
       expect(diagnostic.companies, isNotEmpty);
       expect(diagnostic.modelAccess.values, everyElement(isTrue));
@@ -43,6 +47,72 @@ void main() {
 
       final posConfig = diagnostic.posConfigs.first;
       expect(posConfig.catalogProductCount, greaterThan(0));
+      final operationalProfile = await runtime.pos.loadOperationalProfile(
+        companyId: diagnostic.currentCompany.id,
+        posConfig: posConfig,
+      );
+      expect(
+        operationalProfile.posConfigId == posConfig.id,
+        isTrue,
+        reason: 'O perfil operacional deve pertencer à POS selecionada.',
+      );
+      expect(
+        operationalProfile.currency.id == posConfig.currencyId,
+        isTrue,
+        reason: 'A moeda deve corresponder à configuração POS.',
+      );
+      expect(operationalProfile.currency.name.isNotEmpty, isTrue);
+      expect(operationalProfile.currency.symbol.isNotEmpty, isTrue);
+      expect(operationalProfile.currency.decimalPlaces >= 0, isTrue);
+      expect(operationalProfile.currency.rounding > 0, isTrue);
+      if (posConfig.usePricelist) {
+        expect(posConfig.pricelistId != null, isTrue);
+        expect(operationalProfile.pricelist != null, isTrue);
+        expect(
+          operationalProfile.pricelist?.id == posConfig.pricelistId,
+          isTrue,
+          reason: 'A pricelist deve corresponder à configuração POS.',
+        );
+        expect(
+          operationalProfile.pricelist?.currencyId ==
+              operationalProfile.currency.id,
+          isTrue,
+          reason: 'A pricelist e a POS devem usar a mesma moeda.',
+        );
+      } else {
+        expect(operationalProfile.pricelist, isNull);
+      }
+      expect(operationalProfile.sessionsReadable, isTrue);
+      expect(
+        operationalProfile.nonClosedSessions.every(
+          (session) =>
+              session.configId == posConfig.id &&
+              session.currencyId == operationalProfile.currency.id &&
+              const {
+                'opening_control',
+                'opened',
+                'closing_control',
+              }.contains(session.state),
+        ),
+        isTrue,
+        reason: 'As sessões devem ser não fechadas e da POS selecionada.',
+      );
+      expect(operationalProfile.paymentMethodsReadable, isTrue);
+      expect(
+        operationalProfile.paymentMethods.every(
+          (method) =>
+              posConfig.paymentMethodIds.contains(method.id) &&
+              method.name.isNotEmpty,
+        ),
+        isTrue,
+        reason: 'Os métodos devem estar configurados na POS selecionada.',
+      );
+      expect(
+        operationalProfile.paymentMethods.length ==
+            posConfig.paymentMethodIds.length,
+        isTrue,
+        reason: 'Todos os métodos configurados devem ser legíveis.',
+      );
       final posCategories = await runtime.catalog.listCategories(
         companyId: diagnostic.currentCompany.id,
         categoryIds: posConfig.limitCategories ? posConfig.categoryIds : null,
@@ -91,10 +161,13 @@ void main() {
       expect(posConfig.catalogProductCount,
           greaterThanOrEqualTo(firstPage.length));
       expect(
-        firstPage.map((product) => product.id).toSet().intersection(
-              secondPage.map((product) => product.id).toSet(),
-            ),
-        isEmpty,
+        firstPage
+            .map((product) => product.id)
+            .toSet()
+            .intersection(secondPage.map((product) => product.id).toSet())
+            .isEmpty,
+        isTrue,
+        reason: 'As páginas do catálogo não devem repetir produtos.',
       );
     },
     skip: !enabled

@@ -5,6 +5,7 @@ import '../models/connection.dart';
 import '../models/connection_diagnostic.dart';
 import '../models/identity.dart';
 import '../models/pos_config.dart';
+import '../models/pos_operational_profile.dart';
 import '../models/sync_snapshot.dart';
 import '../services/odoo/odoo_exception.dart';
 import '../services/odoo/odoo_runtime.dart';
@@ -42,6 +43,9 @@ class OdooSessionProvider extends ChangeNotifier {
   ConnectionConfig? _connection;
   ConnectionDiagnostic? _diagnostic;
   PosConfig? _selectedPosConfig;
+  PosOperationalProfile? _posOperationalProfile;
+  OdooException? _posProfileError;
+  bool _posProfileLoading = false;
   OdooRuntime? _runtime;
   OdooException? _error;
   SyncSnapshot? _offlineSnapshot;
@@ -53,6 +57,9 @@ class OdooSessionProvider extends ChangeNotifier {
   ConnectionConfig? get connection => _connection;
   ConnectionDiagnostic? get diagnostic => _diagnostic;
   PosConfig? get selectedPosConfig => _selectedPosConfig;
+  PosOperationalProfile? get posOperationalProfile => _posOperationalProfile;
+  OdooException? get posProfileError => _posProfileError;
+  bool get isPosProfileLoading => _posProfileLoading;
   OdooRuntime? get runtime => _runtime;
   OdooException? get error => _error;
   SyncSnapshot? get offlineSnapshot => _offlineSnapshot;
@@ -117,6 +124,9 @@ class OdooSessionProvider extends ChangeNotifier {
     final generation = ++_operationGeneration;
     _state = OdooSessionState.connecting;
     _error = null;
+    _posOperationalProfile = null;
+    _posProfileError = null;
+    _posProfileLoading = true;
     _demoMode = false;
     notifyListeners();
     try {
@@ -145,6 +155,9 @@ class OdooSessionProvider extends ChangeNotifier {
     if (connection == null || apiKey == null || apiKey.isEmpty) return;
     _state = OdooSessionState.connecting;
     _error = null;
+    _posOperationalProfile = null;
+    _posProfileError = null;
+    _posProfileLoading = true;
     notifyListeners();
     try {
       await _connect(
@@ -166,6 +179,9 @@ class OdooSessionProvider extends ChangeNotifier {
     _operationGeneration++;
     _runtime?.close();
     _runtime = null;
+    _posOperationalProfile = null;
+    _posProfileError = null;
+    _posProfileLoading = false;
     _demoMode = true;
     _offlineSnapshot = null;
     _state = OdooSessionState.connected;
@@ -181,14 +197,20 @@ class OdooSessionProvider extends ChangeNotifier {
     _connection = null;
     _diagnostic = null;
     _selectedPosConfig = null;
+    _posOperationalProfile = null;
+    _posProfileError = null;
+    _posProfileLoading = false;
     _offlineSnapshot = null;
     _error = null;
     _demoMode = false;
+    _state = OdooSessionState.loading;
+    _contextRevision++;
+    // Invalidate catalog/cart work before deleting their persisted state.
+    notifyListeners();
     await _snapshotStorage.clear();
     await _cartStorage.clear();
     await _credentialsStorage.clear();
     _state = OdooSessionState.needsConnection;
-    _contextRevision++;
     notifyListeners();
   }
 
@@ -201,14 +223,28 @@ class OdooSessionProvider extends ChangeNotifier {
       return;
     }
     final generation = ++_operationGeneration;
+    _posProfileLoading = true;
+    _posProfileError = null;
+    notifyListeners();
     try {
       final configs = await runtime.pos.listPosConfigs(companyId: company.id);
       if (generation != _operationGeneration || runtime != _runtime) return;
-      _diagnostic = diagnostic.copyWith(
+      final nextDiagnostic = diagnostic.copyWith(
         currentCompany: company,
         posConfigs: configs,
       );
-      _selectedPosConfig = _selectInitialPosConfig(_diagnostic!);
+      final selectedPos = _selectInitialPosConfig(nextDiagnostic);
+      final profileResult = await _loadPosProfile(
+        runtime: runtime,
+        companyId: company.id,
+        posConfig: selectedPos,
+      );
+      if (generation != _operationGeneration || runtime != _runtime) return;
+      _diagnostic = nextDiagnostic;
+      _selectedPosConfig = selectedPos;
+      _posOperationalProfile = profileResult.profile;
+      _posProfileError = profileResult.error;
+      _posProfileLoading = false;
       _offlineSnapshot = null;
       await _credentialsStorage.saveSelections(
         companyId: company.id,
@@ -219,25 +255,84 @@ class OdooSessionProvider extends ChangeNotifier {
       notifyListeners();
     } catch (error) {
       if (generation != _operationGeneration) return;
+      _posProfileLoading = false;
       _setError(error, preserveConnection: true);
     }
   }
 
   Future<void> selectPosConfig(PosConfig config) async {
     if (_selectedPosConfig?.id == config.id) return;
-    _operationGeneration++;
-    _selectedPosConfig = config;
-    _offlineSnapshot = null;
-    _contextRevision++;
-    _error = null;
+    final runtime = _runtime;
+    final companyId = _diagnostic?.currentCompany.id;
+    if (runtime == null || companyId == null) return;
+    final generation = ++_operationGeneration;
+    _posProfileLoading = true;
+    _posProfileError = null;
     notifyListeners();
     try {
+      final profileResult = await _loadPosProfile(
+        runtime: runtime,
+        companyId: companyId,
+        posConfig: config,
+      );
+      if (generation != _operationGeneration || runtime != _runtime) return;
+      _selectedPosConfig = config;
+      _posOperationalProfile = profileResult.profile;
+      _posProfileError = profileResult.error;
+      _posProfileLoading = false;
+      _offlineSnapshot = null;
+      _contextRevision++;
+      _error = null;
+      notifyListeners();
       await _credentialsStorage.saveSelections(
         companyId: _diagnostic?.currentCompany.id,
         posConfigId: config.id,
       );
     } catch (error) {
+      if (generation != _operationGeneration) return;
+      _posProfileLoading = false;
       _setError(error, preserveConnection: true);
+    }
+  }
+
+  /// Refreshes live, read-only POS metadata for the selected context.
+  ///
+  /// Session and payment information is intentionally refreshed separately
+  /// from the offline snapshot because it must never be treated as durable
+  /// operational readiness.
+  Future<void> refreshPosOperationalProfile() async {
+    final runtime = _runtime;
+    final companyId = _diagnostic?.currentCompany.id;
+    final posConfig = _selectedPosConfig;
+    if (runtime == null || companyId == null || posConfig == null) return;
+
+    final generation = ++_operationGeneration;
+    _posProfileLoading = true;
+    _posProfileError = null;
+    notifyListeners();
+    try {
+      final result = await _loadPosProfile(
+        runtime: runtime,
+        companyId: companyId,
+        posConfig: posConfig,
+      );
+      if (generation != _operationGeneration || runtime != _runtime) return;
+      _posOperationalProfile =
+          result.profile ?? _posOperationalProfile?.withoutDynamicState();
+      _posProfileError = result.error;
+      _posProfileLoading = false;
+      notifyListeners();
+    } catch (error) {
+      if (generation != _operationGeneration || runtime != _runtime) return;
+      _posOperationalProfile = _posOperationalProfile?.withoutDynamicState();
+      _posProfileError = error is OdooException
+          ? error
+          : const OdooException(
+              kind: OdooErrorKind.unexpected,
+              message: 'Não foi possível atualizar o perfil da POS.',
+            );
+      _posProfileLoading = false;
+      notifyListeners();
     }
   }
 
@@ -284,6 +379,11 @@ class OdooSessionProvider extends ChangeNotifier {
         diagnostic,
         savedPosConfigId: savedPosConfigId,
       );
+      final profileResult = await _loadPosProfile(
+        runtime: nextRuntime,
+        companyId: diagnostic.currentCompany.id,
+        posConfig: selectedPos,
+      );
 
       if (generation != _operationGeneration) {
         nextRuntime.close();
@@ -312,6 +412,9 @@ class OdooSessionProvider extends ChangeNotifier {
       _connection = connection;
       _diagnostic = diagnostic;
       _selectedPosConfig = selectedPos;
+      _posOperationalProfile = profileResult.profile;
+      _posProfileError = profileResult.error;
+      _posProfileLoading = false;
       _offlineSnapshot = null;
       _demoMode = false;
       _state = OdooSessionState.connected;
@@ -361,6 +464,9 @@ class OdooSessionProvider extends ChangeNotifier {
     _runtime = null;
     _offlineSnapshot = snapshot;
     _selectedPosConfig = snapshot.posConfig;
+    _posOperationalProfile = snapshot.posOperationalProfile;
+    _posProfileError = null;
+    _posProfileLoading = false;
     _diagnostic = ConnectionDiagnostic(
       odooVersion: snapshot.odooVersion,
       identity: AuthenticatedUser(
@@ -389,6 +495,7 @@ class OdooSessionProvider extends ChangeNotifier {
   }
 
   void _setError(Object error, {bool preserveConnection = false}) {
+    _posProfileLoading = false;
     _error = error is OdooException
         ? error
         : OdooException(
@@ -399,6 +506,43 @@ class OdooSessionProvider extends ChangeNotifier {
           );
     if (!preserveConnection) _state = OdooSessionState.error;
     notifyListeners();
+  }
+
+  Future<
+      ({
+        PosOperationalProfile? profile,
+        OdooException? error,
+      })> _loadPosProfile({
+    required OdooRuntime runtime,
+    required int companyId,
+    required PosConfig? posConfig,
+  }) async {
+    if (posConfig == null) return (profile: null, error: null);
+    try {
+      return (
+        profile: await runtime.pos.loadOperationalProfile(
+          companyId: companyId,
+          posConfig: posConfig,
+        ),
+        error: null,
+      );
+    } on OdooException catch (error) {
+      if (error.kind == OdooErrorKind.network ||
+          error.kind == OdooErrorKind.timeout ||
+          error.kind == OdooErrorKind.unauthorized ||
+          error.kind == OdooErrorKind.invalidConfiguration) {
+        rethrow;
+      }
+      return (profile: null, error: error);
+    } on Object {
+      return (
+        profile: null,
+        error: const OdooException(
+          kind: OdooErrorKind.unexpected,
+          message: 'Não foi possível ler o contexto operacional da POS.',
+        ),
+      );
+    }
   }
 
   @override

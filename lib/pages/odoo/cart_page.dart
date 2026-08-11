@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../models/currency.dart';
 import '../../models/draft_cart.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/catalog_provider.dart';
 import '../../providers/odoo_session_provider.dart';
+import '../../widgets/catalog_money_formatter.dart';
 import '../../widgets/odoo_sync_banner.dart';
 
 class OdooCartPage extends StatelessWidget {
@@ -18,8 +19,16 @@ class OdooCartPage extends StatelessWidget {
     final selectedPosName = context.select<OdooSessionProvider, String?>(
       (session) => session.selectedPosConfig?.name,
     );
-    final currency = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
+    final currency = context.select<OdooSessionProvider, CurrencyInfo?>(
+      (session) => session.posOperationalProfile?.currency,
+    );
     final items = cart.items;
+    final capturedCurrencyIds =
+        items.map((item) => item.capturedCurrencyId).whereType<int>().toSet();
+    final cartCurrencyId =
+        capturedCurrencyIds.length == 1 ? capturedCurrencyIds.single : null;
+    final currencyVerified = currency != null &&
+        items.every((item) => item.capturedCurrencyId == currency.id);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Comanda local'),
@@ -89,8 +98,10 @@ class OdooCartPage extends StatelessWidget {
                           itemCount: items.length,
                           separatorBuilder: (_, __) =>
                               const SizedBox(height: 8),
-                          itemBuilder: (context, index) =>
-                              _CartItemCard(item: items[index]),
+                          itemBuilder: (context, index) => _CartItemCard(
+                            item: items[index],
+                            currency: currency,
+                          ),
                         ),
                       ),
                       SafeArea(
@@ -118,13 +129,22 @@ class OdooCartPage extends StatelessWidget {
                                 children: [
                                   const Text('Subtotal'),
                                   Text(
-                                    currency.format(cart.subtotal),
+                                    formatCatalogAmount(
+                                      cart.subtotal,
+                                      currency: currency,
+                                      amountCurrencyId: cartCurrencyId,
+                                    ),
                                     style:
                                         Theme.of(context).textTheme.titleLarge,
                                   ),
                                 ],
                               ),
                               const SizedBox(height: 8),
+                              if (!currencyVerified)
+                                const Text(
+                                  'Moeda do rascunho não verificada; os valores permanecem apenas informativos.',
+                                  textAlign: TextAlign.center,
+                                ),
                               const Text(
                                 'Sem pedido, pagamento, stock ou lançamento fiscal no Odoo.',
                                 textAlign: TextAlign.center,
@@ -143,14 +163,14 @@ class OdooCartPage extends StatelessWidget {
 }
 
 class _CartItemCard extends StatelessWidget {
-  const _CartItemCard({required this.item});
+  const _CartItemCard({required this.item, required this.currency});
 
   final DraftCartItem item;
+  final CurrencyInfo? currency;
 
   @override
   Widget build(BuildContext context) {
     final cart = context.read<CartProvider>();
-    final currency = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -170,7 +190,11 @@ class _CartItemCard extends StatelessWidget {
               ],
             ),
             Text(
-              '${currency.format(item.capturedUnitPrice)} por unidade',
+              '${formatCatalogAmount(
+                item.capturedUnitPrice,
+                currency: currency,
+                amountCurrencyId: item.capturedCurrencyId,
+              )} por unidade',
             ),
             if (item.state != DraftCartItemState.available) ...[
               const SizedBox(height: 6),
@@ -208,7 +232,12 @@ class _CartItemCard extends StatelessWidget {
                   icon: const Icon(Icons.add_circle_outline),
                 ),
                 const Spacer(),
-                Text(currency.format(item.subtotal),
+                Text(
+                    formatCatalogAmount(
+                      item.subtotal,
+                      currency: currency,
+                      amountCurrencyId: item.capturedCurrencyId,
+                    ),
                     style: Theme.of(context).textTheme.titleMedium),
               ],
             ),

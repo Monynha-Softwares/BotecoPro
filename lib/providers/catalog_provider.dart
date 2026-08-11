@@ -30,6 +30,7 @@ class CatalogProvider extends ChangeNotifier {
   int _boundSessionRevision = -1;
   int _generation = 0;
   int _dataRevision = 0;
+  Future<void> _snapshotWriteTail = Future<void>.value();
 
   List<CatalogCategory> get categories => _categories;
   List<CatalogProduct> get products => _products;
@@ -88,6 +89,7 @@ class CatalogProvider extends ChangeNotifier {
       await session.reconnect();
       return;
     }
+    await session.refreshPosOperationalProfile();
     final context = session.operationalContext;
     if (context == null) return;
     final generation = ++_generation;
@@ -137,16 +139,32 @@ class CatalogProvider extends ChangeNotifier {
       }
 
       final products = <CatalogProduct>[];
-      final expectedCount = posConfig.catalogProductCount;
-      do {
+      final productIds = <int>{};
+      final initialCount = await runtime.catalog.countProducts(
+        companyId: context.companyId,
+        posConfig: posConfig,
+      );
+      while (products.length < initialCount) {
         final page = await runtime.catalog.listProducts(
           companyId: context.companyId,
           posConfig: posConfig,
           offset: products.length,
         );
-        products.addAll(page);
+        for (final product in page) {
+          if (!productIds.add(product.id)) {
+            throw const OdooException(
+              kind: OdooErrorKind.unexpected,
+              message: 'Odoo devolveu produtos duplicados na paginação.',
+            );
+          }
+          products.add(product);
+        }
         if (page.isEmpty || page.length < 100) break;
-      } while (expectedCount == null || products.length < expectedCount);
+      }
+      final confirmedCount = await runtime.catalog.countProducts(
+        companyId: context.companyId,
+        posConfig: posConfig,
+      );
 
       final currentContext = session.operationalContext;
       if (generation != _generation ||
@@ -154,10 +172,11 @@ class CatalogProvider extends ChangeNotifier {
           !context.matches(currentContext)) {
         return;
       }
-      if (expectedCount != null && products.length != expectedCount) {
+      if (initialCount != confirmedCount || products.length != confirmedCount) {
         throw const OdooException(
           kind: OdooErrorKind.unexpected,
-          message: 'A sincronização do catálogo Odoo ficou incompleta.',
+          message:
+              'O catálogo Odoo mudou durante a sincronização. Atualize novamente.',
         );
       }
 
@@ -167,14 +186,14 @@ class CatalogProvider extends ChangeNotifier {
         synchronizedAt: synchronizedAt,
         odooVersion: diagnostic.odooVersion,
         company: diagnostic.currentCompany,
-        posConfig: posConfig,
+        posConfig: posConfig.copyWith(catalogProductCount: products.length),
         categories: categories,
         products: products,
         floors: floors,
         tables: tables,
+        posOperationalProfile: session.posOperationalProfile,
       );
-      await _snapshotStorage.save(snapshot);
-      if (generation != _generation) return;
+      if (!await _saveSnapshotIfCurrent(snapshot, generation)) return;
       _categories = categories;
       _products = products;
       _restaurantFloors = floors;
@@ -198,6 +217,23 @@ class CatalogProvider extends ChangeNotifier {
       _freshness = CatalogFreshness.unavailable;
       notifyListeners();
     }
+  }
+
+  Future<bool> _saveSnapshotIfCurrent(
+    SyncSnapshot snapshot,
+    int generation,
+  ) async {
+    final previous = _snapshotWriteTail.then<void>(
+      (_) {},
+      onError: (_, __) {},
+    );
+    final write = previous.then<void>((_) async {
+      if (generation != _generation) return;
+      await _snapshotStorage.save(snapshot);
+    });
+    _snapshotWriteTail = write;
+    await write;
+    return generation == _generation;
   }
 
   void _applySnapshot(SyncSnapshot snapshot) {

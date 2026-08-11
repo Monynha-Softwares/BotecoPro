@@ -19,6 +19,7 @@ class CatalogProduct {
     this.defaultCode,
     this.barcode,
     this.uomId,
+    this.currencyId,
     this.categoryIds = const [],
     this.writeDate,
   });
@@ -35,6 +36,7 @@ class CatalogProduct {
   final String? defaultCode;
   final String? barcode;
   final int? uomId;
+  final int? currencyId;
   final List<int> categoryIds;
   final DateTime? writeDate;
 }

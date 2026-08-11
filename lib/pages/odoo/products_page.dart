@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/catalog.dart';
+import '../../models/currency.dart';
 import '../../models/pos_config.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/catalog_provider.dart';
 import '../../providers/odoo_session_provider.dart';
+import '../../widgets/catalog_money_formatter.dart';
 import '../../widgets/odoo_sync_banner.dart';
 import 'cart_page.dart';
 
@@ -28,6 +29,9 @@ class _OdooProductsPageState extends State<OdooProductsPage> {
         context.select<CartProvider, int>((cart) => cart.itemCount);
     final posConfig = context.select<OdooSessionProvider, PosConfig?>(
         (value) => value.selectedPosConfig);
+    final currency = context.select<OdooSessionProvider, CurrencyInfo?>(
+      (session) => session.posOperationalProfile?.currency,
+    );
     final products = catalog.products.where(_matches).toList(growable: false);
     return Scaffold(
       appBar: AppBar(
@@ -65,6 +69,7 @@ class _OdooProductsPageState extends State<OdooProductsPage> {
               catalogProductCount: posConfig?.catalogProductCount,
               products: products,
               hasFilter: _query.isNotEmpty || _categoryId != null,
+              currency: currency,
             ),
           ),
         ],
@@ -160,12 +165,14 @@ class _CatalogList extends StatelessWidget {
     required this.catalogProductCount,
     required this.products,
     required this.hasFilter,
+    required this.currency,
   });
 
   final CatalogProvider catalog;
   final int? catalogProductCount;
   final List<CatalogProduct> products;
   final bool hasFilter;
+  final CurrencyInfo? currency;
 
   @override
   Widget build(BuildContext context) {
@@ -194,7 +201,6 @@ class _CatalogList extends StatelessWidget {
               padding: const EdgeInsets.all(24),
               child: Text(message, textAlign: TextAlign.center)));
     }
-    final currency = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
     return ListView.builder(
       padding: const EdgeInsets.all(12),
       itemCount: products.length,
@@ -202,7 +208,7 @@ class _CatalogList extends StatelessWidget {
         final product = products[index];
         return Card(
           child: ListTile(
-            onTap: () => _showProductDetails(context, product),
+            onTap: () => _showProductDetails(context, product, currency),
             title: Text(product.name),
             subtitle: Text([
               if (product.defaultCode?.isNotEmpty == true) product.defaultCode!,
@@ -212,7 +218,11 @@ class _CatalogList extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(currency.format(product.catalogPrice)),
+                Text(formatCatalogAmount(
+                  product.catalogPrice,
+                  currency: currency,
+                  amountCurrencyId: product.currencyId,
+                )),
                 IconButton(
                   tooltip: 'Adicionar à comanda local',
                   onPressed: () => context.read<CartProvider>().add(product),
@@ -226,8 +236,11 @@ class _CatalogList extends StatelessWidget {
     );
   }
 
-  void _showProductDetails(BuildContext context, CatalogProduct product) {
-    final currency = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
+  void _showProductDetails(
+    BuildContext context,
+    CatalogProduct product,
+    CurrencyInfo? currency,
+  ) {
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -241,7 +254,11 @@ class _CatalogList extends StatelessWidget {
                 style: Theme.of(sheetContext).textTheme.headlineSmall),
             const SizedBox(height: 8),
             Text(
-              'Preço de catálogo Odoo: ${currency.format(product.catalogPrice)}',
+              'Valor de catálogo Odoo: ${formatCatalogAmount(
+                product.catalogPrice,
+                currency: currency,
+                amountCurrencyId: product.currencyId,
+              )}',
             ),
             if (product.defaultCode?.isNotEmpty == true)
               Text('Referência: ${product.defaultCode}'),
@@ -250,6 +267,10 @@ class _CatalogList extends StatelessWidget {
             const SizedBox(height: 8),
             const Text(
                 'O preço apresentado é informativo; regras transacionais de pricelist e fiscalidade serão tratadas antes de qualquer write.'),
+            if (currency == null || product.currencyId != currency.id)
+              const Text(
+                'A moeda deste valor ainda não foi validada contra o perfil da POS.',
+              ),
             const SizedBox(height: 16),
             FilledButton.icon(
               onPressed: () {

@@ -100,4 +100,54 @@ void main() {
       isNull,
     );
   });
+
+  test('clear is serialized after pending snapshot and cart writes', () async {
+    const snapshotStore = SnapshotStorageService();
+    const cartStore = CartStorageService();
+    const context = OperationalContext(
+      instanceKey: 'https://example.odoo.com',
+      userId: 2,
+      companyId: 1,
+      posConfigId: 3,
+    );
+    final snapshot = SyncSnapshot(
+      context: context,
+      synchronizedAt: DateTime.utc(2026, 8, 10),
+      odooVersion: 'saas~19.4+e',
+      company: const Company(id: 1, name: 'Empresa'),
+      posConfig: const PosConfig(
+        id: 3,
+        name: 'POS',
+        companyId: 1,
+        active: true,
+        limitCategories: false,
+        categoryIds: [],
+        restaurant: false,
+        catalogProductCount: 0,
+      ),
+      categories: const [],
+      products: const [],
+      floors: const [],
+      tables: const [],
+    );
+    final cart = DraftCart(context: context).add(const CatalogProduct(
+      id: 42,
+      name: 'Produto',
+      catalogPrice: 8.5,
+    ));
+
+    final snapshotWrite = snapshotStore.save(snapshot);
+    final snapshotClear = snapshotStore.clear();
+    final cartWrite = cartStore.save(cart);
+    final cartClear = cartStore.clear();
+    await Future.wait([
+      snapshotWrite,
+      snapshotClear,
+      cartWrite,
+      cartClear,
+    ]);
+
+    expect(await snapshotStore.read(context), isNull);
+    expect(await cartStore.read(context), isNull);
+  });
 }

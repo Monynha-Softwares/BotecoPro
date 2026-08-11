@@ -39,6 +39,7 @@ class CartProvider extends ChangeNotifier {
         _boundContext = null;
         _cart = null;
         final generation = ++_generation;
+        _queueClear();
         scheduleMicrotask(() {
           if (generation == _generation) notifyListeners();
         });
@@ -47,10 +48,12 @@ class CartProvider extends ChangeNotifier {
     }
 
     if (_boundContext == null || !_boundContext!.matches(context)) {
+      final replacesExistingContext = _boundContext != null;
       _boundContext = context;
       _cart = null;
       _boundCatalogRevision = catalog.dataRevision;
       final generation = ++_generation;
+      if (replacesExistingContext) _queueClear();
       scheduleMicrotask(() {
         if (generation != _generation) return;
         notifyListeners();
@@ -145,7 +148,16 @@ class CartProvider extends ChangeNotifier {
   }
 
   void _queueSave(DraftCart cart) {
-    _enqueue(() => _storage.save(cart));
+    final generation = _generation;
+    _enqueue(() async {
+      final context = _boundContext;
+      if (generation != _generation ||
+          context == null ||
+          !cart.matchesContext(context)) {
+        return;
+      }
+      await _storage.save(cart);
+    });
   }
 
   void _queueClear() {

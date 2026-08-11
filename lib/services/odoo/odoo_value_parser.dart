@@ -4,14 +4,24 @@ int? odooInt(Object? value) {
   return int.tryParse(value?.toString() ?? '');
 }
 
-double odooDouble(Object? value) {
+double? odooNullableDouble(Object? value) {
   if (value is num) return value.toDouble();
-  return double.tryParse(value?.toString() ?? '') ?? 0;
+  return double.tryParse(value?.toString() ?? '');
 }
 
 String? odooString(Object? value) {
   if (value == null || value == false) return null;
   return value.toString();
+}
+
+DateTime? odooDateTimeUtc(Object? value) {
+  final raw = odooString(value);
+  if (raw == null) return null;
+  var normalized = raw.replaceFirst(' ', 'T');
+  if (!RegExp(r'(Z|[+-]\d{2}:?\d{2})$').hasMatch(normalized)) {
+    normalized = '${normalized}Z';
+  }
+  return DateTime.tryParse(normalized)?.toUtc();
 }
 
 int? odooRelationId(Object? value) {

@@ -9,11 +9,13 @@ class DraftCartItem {
     required this.productId,
     required this.productName,
     required this.capturedUnitPrice,
+    this.capturedCurrencyId,
     this.quantity = 1,
     this.note = '',
     this.state = DraftCartItemState.available,
     this.currentProductName,
     this.currentCatalogPrice,
+    this.currentCurrencyId,
   });
 
   final int productId;
@@ -22,11 +24,13 @@ class DraftCartItem {
   /// Informational catalog value captured when the item entered the draft.
   /// It is not an authoritative Odoo transactional price.
   final double capturedUnitPrice;
+  final int? capturedCurrencyId;
   final int quantity;
   final String note;
   final DraftCartItemState state;
   final String? currentProductName;
   final double? currentCatalogPrice;
+  final int? currentCurrencyId;
 
   double get subtotal => capturedUnitPrice * quantity;
 
@@ -36,12 +40,14 @@ class DraftCartItem {
     DraftCartItemState? state,
     String? currentProductName,
     double? currentCatalogPrice,
+    int? currentCurrencyId,
     bool clearCurrentValues = false,
   }) =>
       DraftCartItem(
         productId: productId,
         productName: productName,
         capturedUnitPrice: capturedUnitPrice,
+        capturedCurrencyId: capturedCurrencyId,
         quantity: quantity ?? this.quantity,
         note: note ?? this.note,
         state: state ?? this.state,
@@ -51,12 +57,16 @@ class DraftCartItem {
         currentCatalogPrice: clearCurrentValues
             ? null
             : currentCatalogPrice ?? this.currentCatalogPrice,
+        currentCurrencyId: clearCurrentValues
+            ? null
+            : currentCurrencyId ?? this.currentCurrencyId,
       );
 
   Map<String, Object?> toJson() => {
         'productId': productId,
         'productName': productName,
         'unitPrice': capturedUnitPrice,
+        'currencyId': capturedCurrencyId,
         'quantity': quantity,
         'note': note,
       };
@@ -65,6 +75,7 @@ class DraftCartItem {
         productId: json['productId'] as int,
         productName: json['productName'] as String,
         capturedUnitPrice: (json['unitPrice'] as num).toDouble(),
+        capturedCurrencyId: json['currencyId'] as int?,
         quantity: json['quantity'] as int,
         note: json['note'] as String? ?? '',
       );
@@ -105,6 +116,7 @@ class DraftCart {
           productId: product.id,
           productName: product.name,
           capturedUnitPrice: product.catalogPrice,
+          capturedCurrencyId: product.currencyId,
         )
       ]);
     }
@@ -149,14 +161,17 @@ class DraftCart {
     if (product == null) {
       return item.copyWith(state: DraftCartItemState.unavailable);
     }
-    final priceChanged = (item.capturedUnitPrice * 100).round() !=
-        (product.catalogPrice * 100).round();
-    final changed = item.productName != product.name || priceChanged;
+    final priceChanged =
+        (item.capturedUnitPrice - product.catalogPrice).abs() > 0.000000001;
+    final currencyChanged = item.capturedCurrencyId != product.currencyId;
+    final changed =
+        item.productName != product.name || priceChanged || currencyChanged;
     return item.copyWith(
       state:
           changed ? DraftCartItemState.changed : DraftCartItemState.available,
       currentProductName: changed ? product.name : null,
       currentCatalogPrice: changed ? product.catalogPrice : null,
+      currentCurrencyId: changed ? product.currencyId : null,
       clearCurrentValues: !changed,
     );
   }
