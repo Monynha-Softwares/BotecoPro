@@ -244,9 +244,14 @@ void main() {
         currentStep = 'table-selected';
         await tester.tap(find.byKey(const Key('restaurant.table.selector')));
         await tester.pumpAndSettle();
-        await tester.tap(
-          find.byKey(const Key('restaurant.table.$syntheticTableId')).last,
+        final visibleTableOption =
+            find.byKey(Key('restaurant.table.$syntheticTableId')).hitTestable();
+        await _waitForFinder(
+          tester,
+          visibleTableOption,
+          reason: 'A opção de mesa não ficou visível no seletor.',
         );
+        await tester.tap(visibleTableOption);
         await tester.pumpAndSettle();
         expect(find.text('Salão · Mesa 1'), findsOneWidget);
         await _waitForStoredCart(tester, quantity: 2);
