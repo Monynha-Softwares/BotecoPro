@@ -17,7 +17,8 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.0
   fl_chart: 0.68.0
-  google_fonts: 6.1.0
+  # 6.3.2+ removes a const FontWeight map that fails on Flutter 3.44 AOT.
+  google_fonts: ^6.3.3
   shared_preferences: ^2.3.2
   path_provider: 2.1.4
   provider: 6.1.2
