@@ -2,16 +2,48 @@ name: Flutter CI
 
 on:
   push:
-    branches: [feat/odoo-online-mvp]
+    branches: [odoo-online, stable-v0.1.2]
   pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: flutter-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 defaults:
   run:
     working-directory: .
 
 jobs:
-  analyze-and-test:
+  quality-and-web:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.9'
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Reject tracked local credentials
+        run: |
+          tracked_credentials="$(git ls-files -- .env .env.local '.env.*.local')"
+          if [[ -n "$tracked_credentials" ]]; then
+            echo "A local environment file is tracked. Remove it before merging."
+            echo "$tracked_credentials"
+            exit 1
+          fi
+      - run: flutter analyze --fatal-infos
+      - run: flutter test
+      - name: Build Web release
+        run: flutter build web --release --no-pub
+
+  android-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:
@@ -27,15 +59,5 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
-      - name: Reject tracked local credentials
-        run: |
-          if git ls-files --error-unmatch .env .env.local '.env.*.local' >/dev/null 2>&1; then
-            echo "A local environment file is tracked. Remove it before merging."
-            exit 1
-          fi
-      - run: flutter analyze --fatal-infos
-      - run: flutter test
-      - name: Build Web release
-        run: flutter build web --release --no-pub
       - name: Build Android debug APK
         run: flutter build apk --debug --no-pub
