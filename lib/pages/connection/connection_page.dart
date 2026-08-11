@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/odoo_session_provider.dart';
+import '../../services/odoo/odoo_exception.dart';
 
 class ConnectionPage extends StatefulWidget {
   const ConnectionPage({super.key});
@@ -74,10 +75,26 @@ class _ConnectionPageState extends State<ConnectionPage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'A API key será guardada apenas no armazenamento seguro do dispositivo.',
+                        kIsWeb
+                            ? 'No navegador, a API key fica no armazenamento local desta origem e não tem a mesma proteção do app nativo.'
+                            : 'A API key será guardada apenas no armazenamento seguro do dispositivo.',
                         style: Theme.of(context).textTheme.bodyMedium,
                         textAlign: TextAlign.center,
                       ),
+                      if (kIsWeb) ...[
+                        const SizedBox(height: 12),
+                        Card(
+                          color:
+                              Theme.of(context).colorScheme.secondaryContainer,
+                          child: const Padding(
+                            padding: EdgeInsets.all(12),
+                            child: Text(
+                              'Odoo Online precisa autorizar CORS para uma conexão Web direta. Sem essa autorização, use o app Android/iOS.',
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 24),
                       TextFormField(
                         key: const Key('connection.url'),
@@ -151,6 +168,14 @@ class _ConnectionPageState extends State<ConnectionPage> {
                               color: Theme.of(context).colorScheme.error),
                           textAlign: TextAlign.center,
                         ),
+                        if (kIsWeb &&
+                            provider.error!.kind == OdooErrorKind.network) ...[
+                          const SizedBox(height: 6),
+                          const Text(
+                            'O navegador pode ter bloqueado a chamada por CORS. Isso não indica necessariamente uma API key inválida.',
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                         const SizedBox(height: 12),
                       ],
                       FilledButton.icon(

@@ -33,7 +33,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _loadData() async {
     await _databaseService.initializeData();
-    
+
     final tables = await _databaseService.getTables();
     final activeOrders = await _databaseService.getActiveOrders();
     final todaySales = await _databaseService.getTodaySales();
@@ -43,7 +43,9 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _tables = tables;
         _activeOrders = activeOrders;
-        _activeTablesCount = tables.where((table) => table.status == TableStatus.occupied).length;
+        _activeTablesCount = tables
+            .where((table) => table.status == TableStatus.occupied)
+            .length;
         _todaySales = todaySales;
         _lowStockProductsCount = lowStockProducts.length;
       });
@@ -51,7 +53,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   String _capitalize(String s) =>
-    s.isNotEmpty ? s[0].toUpperCase() + s.substring(1) : s;
+      s.isNotEmpty ? s[0].toUpperCase() + s.substring(1) : s;
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +110,7 @@ class _HomePageState extends State<HomePage> {
       greeting = 'Boa noite';
     }
     // pattern corrigido: o 'de' entre aspas simples é literal
-    final fmt = DateFormat("EEEE, d 'de' MMMM", 'pt_BR');
+    final fmt = DateFormat("EEEE, d 'de' MMMM", 'pt-BR');
     final dataText = _capitalize(fmt.format(now));
 
     return Container(
@@ -142,7 +144,8 @@ class _HomePageState extends State<HomePage> {
           Text(
             dataText,
             style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                  color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                  color:
+                      Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
                 ),
           ),
           const SizedBox(height: 16),
@@ -180,7 +183,10 @@ class _HomePageState extends State<HomePage> {
                         const SizedBox(height: 8),
                         Text(
                           formatCurrency(_todaySales),
-                          style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall!
+                              .copyWith(
                                 color: Theme.of(context).colorScheme.onPrimary,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -228,8 +234,8 @@ class _HomePageState extends State<HomePage> {
             title: 'Produtos com estoque baixo',
             value: '$_lowStockProductsCount',
             icon: Icons.warning_amber,
-            color: _lowStockProductsCount > 0 
-                ? const Color(0xFFF44336) 
+            color: _lowStockProductsCount > 0
+                ? const Color(0xFFF44336)
                 : const Color(0xFF4CAF50),
           ),
         ],
@@ -386,7 +392,8 @@ class _HomePageState extends State<HomePage> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   leading: CircleAvatar(
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     child: Text(
@@ -425,10 +432,9 @@ class _HomePageState extends State<HomePage> {
                     ).then((_) => _loadData());
                   },
                 ),
-              )
-              .animate()
-              .fadeIn()
-              .slideX(begin: 30, duration: Duration(milliseconds: 200 + (index * 100)));
+              ).animate().fadeIn().slideX(
+                  begin: 30,
+                  duration: Duration(milliseconds: 200 + (index * 100)));
             },
           ),
           if (_activeOrders.length > 3)

@@ -6,7 +6,7 @@ String formatCatalogAmount(
   double amount, {
   required CurrencyInfo? currency,
   required int? amountCurrencyId,
-  String locale = 'pt_BR',
+  String locale = 'pt-BR',
 }) {
   final number = NumberFormat.currency(
     locale: locale,

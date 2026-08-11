@@ -22,8 +22,8 @@ void main() async {
 Future<void> initializeBotecoProPlatform() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await initializeDateFormatting('pt_BR', null);
-  Intl.defaultLocale = 'pt_BR';
+  await initializeDateFormatting('pt-BR', null);
+  Intl.defaultLocale = 'pt-BR';
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
