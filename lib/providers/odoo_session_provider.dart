@@ -122,19 +122,23 @@ class OdooSessionProvider extends ChangeNotifier {
     String? database,
   }) async {
     final generation = ++_operationGeneration;
-    _state = OdooSessionState.connecting;
-    _error = null;
-    _posOperationalProfile = null;
-    _posProfileError = null;
-    _posProfileLoading = true;
-    _demoMode = false;
-    notifyListeners();
     try {
       final connection = ConnectionConfig.fromInput(
         baseUrl: baseUrl,
         username: username,
         database: database,
       );
+      // Keep only non-secret connection metadata in memory so the form can
+      // survive a failed authentication attempt. The API key remains confined
+      // to this call and secure storage after a successful connection.
+      _connection = connection;
+      _state = OdooSessionState.connecting;
+      _error = null;
+      _posOperationalProfile = null;
+      _posProfileError = null;
+      _posProfileLoading = true;
+      _demoMode = false;
+      notifyListeners();
       await _connect(
         connection,
         apiKey.trim(),

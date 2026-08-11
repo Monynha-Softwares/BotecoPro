@@ -27,13 +27,17 @@ class CartProvider extends ChangeNotifier {
   RestaurantTable? get selectedTable => _cart?.table;
   int get itemCount => _cart?.itemCount ?? 0;
   double get subtotal => _cart?.subtotal ?? 0;
+  int? get capturedCurrencyId => _cart?.capturedCurrencyId;
   bool get hasUnavailableItems => _cart?.hasUnavailableItems ?? false;
   bool get hasPersistenceError => _hasPersistenceError;
 
   void bind(OdooSessionProvider session, CatalogProvider catalog) {
-    final context = session.isConnected && !session.isDemoMode
-        ? session.operationalContext
-        : null;
+    // A reconnect temporarily changes the session state to `connecting`, but
+    // the validated operational context remains the same. Treating that
+    // transition as a disconnect would erase the local draft exactly when it
+    // is needed for offline continuity. Explicit disconnect/demo transitions
+    // clear the context themselves and still take the cleanup path below.
+    final context = !session.isDemoMode ? session.operationalContext : null;
     if (context == null) {
       if (_boundContext != null || _cart != null) {
         _boundContext = null;
@@ -68,7 +72,10 @@ class CartProvider extends ChangeNotifier {
         final generation = _generation;
         scheduleMicrotask(() {
           if (generation != _generation || _cart == null) return;
-          _cart = _cart!.reconcile(catalog.products);
+          _cart = _cart!.reconcile(
+            catalog.products,
+            restaurantTables: catalog.restaurantTables,
+          );
           _queueSave(_cart!);
           notifyListeners();
         });
@@ -128,7 +135,10 @@ class CartProvider extends ChangeNotifier {
     final stored = await _storage.read(context);
     if (generation != _generation || stored == null) return;
     _cart = _catalogReady(catalog, context)
-        ? stored.reconcile(catalog.products)
+        ? stored.reconcile(
+            catalog.products,
+            restaurantTables: catalog.restaurantTables,
+          )
         : stored;
     if (_catalogReady(catalog, context)) _queueSave(_cart!);
     notifyListeners();

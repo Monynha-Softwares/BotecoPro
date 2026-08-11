@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../models/pos_config.dart';
 import '../../providers/catalog_provider.dart';
 import '../../providers/odoo_session_provider.dart';
+import '../../widgets/odoo_sync_banner.dart';
 
 class OdooPosPage extends StatelessWidget {
   const OdooPosPage({super.key});
@@ -32,6 +33,8 @@ class OdooPosPage extends StatelessWidget {
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
+                const OdooSyncBanner(),
+                const SizedBox(height: 8),
                 if (session.isPosProfileLoading) ...[
                   const LinearProgressIndicator(),
                   const SizedBox(height: 12),

@@ -101,6 +101,16 @@ class DraftCart {
 
   int get itemCount => items.fold(0, (total, item) => total + item.quantity);
   double get subtotal => items.fold(0, (total, item) => total + item.subtotal);
+  int? get capturedCurrencyId {
+    if (items.isEmpty) return null;
+    final candidate = items.first.capturedCurrencyId;
+    if (candidate == null ||
+        items.any((item) => item.capturedCurrencyId != candidate)) {
+      return null;
+    }
+    return candidate;
+  }
+
   bool get hasUnavailableItems =>
       items.any((item) => item.state == DraftCartItemState.unavailable);
 
@@ -150,11 +160,20 @@ class DraftCart {
 
   DraftCart clear() => copyWith(items: const []);
 
-  DraftCart reconcile(List<CatalogProduct> products) {
+  DraftCart reconcile(
+    List<CatalogProduct> products, {
+    List<RestaurantTable>? restaurantTables,
+  }) {
     final catalog = {for (final product in products) product.id: product};
-    return copyWith(items: [
-      for (final item in items) _reconcileItem(item, catalog[item.productId]),
-    ]);
+    final tableStillAvailable = table == null ||
+        restaurantTables == null ||
+        restaurantTables.any((candidate) => candidate.id == table!.id);
+    return copyWith(
+      clearTable: !tableStillAvailable,
+      items: [
+        for (final item in items) _reconcileItem(item, catalog[item.productId]),
+      ],
+    );
   }
 
   DraftCartItem _reconcileItem(DraftCartItem item, CatalogProduct? product) {

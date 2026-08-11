@@ -10,6 +10,7 @@ import 'package:boteco_pro/models/sync_snapshot.dart';
 import 'package:boteco_pro/providers/catalog_provider.dart';
 import 'package:boteco_pro/providers/odoo_session_provider.dart';
 import 'package:boteco_pro/services/odoo/odoo_client.dart';
+import 'package:boteco_pro/services/odoo/odoo_exception.dart';
 import 'package:boteco_pro/services/odoo/odoo_runtime.dart';
 import 'package:boteco_pro/services/storage/snapshot_storage_service.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -337,6 +338,92 @@ void main() {
     expect(storage.persisted?.products.single.id, 201);
     expect(catalog.products.single.id, 201);
     expect(catalog.error, isNull);
+
+    catalog.dispose();
+    session.dispose();
+    firstRuntime.close();
+    secondRuntime.close();
+  });
+
+  test(
+      'clears the previous context immediately and keeps it empty after a non-network error',
+      () async {
+    final storage = _RecordingSnapshotStorage();
+    const firstCompany = Company(id: 1, name: 'Empresa 1', currencyId: 6);
+    const secondCompany = Company(id: 2, name: 'Empresa 2', currencyId: 6);
+    final firstPos = _posConfig(id: 10, companyId: firstCompany.id);
+    final secondPos = _posConfig(id: 20, companyId: secondCompany.id);
+    final firstContext = OperationalContext(
+      instanceKey: _connection.baseUrl,
+      userId: 2,
+      companyId: firstCompany.id,
+      posConfigId: firstPos.id,
+    );
+    final secondContext = OperationalContext(
+      instanceKey: _connection.baseUrl,
+      userId: 2,
+      companyId: secondCompany.id,
+      posConfigId: secondPos.id,
+    );
+    final secondRequestStarted = Completer<void>();
+    final releaseSecondRequest = Completer<void>();
+
+    final firstRuntime = _runtime((request) async {
+      if (request.url.path.endsWith('/pos.category/search_read')) {
+        return http.Response('[]', 200);
+      }
+      if (request.url.path.endsWith('/product.product/search_count')) {
+        return http.Response('1', 200);
+      }
+      if (request.url.path.endsWith('/product.product/search_read')) {
+        return http.Response(jsonEncode([_product(101, firstCompany.id)]), 200);
+      }
+      return http.Response('{}', 404);
+    });
+    final secondRuntime = _runtime((request) async {
+      if (request.url.path.endsWith('/pos.category/search_read')) {
+        if (!secondRequestStarted.isCompleted) secondRequestStarted.complete();
+        await releaseSecondRequest.future;
+        return http.Response(jsonEncode({'message': 'Acesso negado.'}), 403);
+      }
+      return http.Response('{}', 404);
+    });
+    final session = _SessionHarness(
+      context: firstContext,
+      posConfig: firstPos,
+      diagnostic: _diagnostic(company: firstCompany, posConfig: firstPos),
+      runtime: firstRuntime,
+    );
+    final catalog = CatalogProvider(snapshotStorage: storage);
+
+    catalog.bind(session);
+    await _waitUntil(() => catalog.freshness == CatalogFreshness.online);
+    expect(catalog.products.single.id, 101);
+    expect(storage.saveCalls, 1);
+
+    session.replace(
+      context: secondContext,
+      posConfig: secondPos,
+      diagnostic: _diagnostic(company: secondCompany, posConfig: secondPos),
+      runtime: secondRuntime,
+    );
+    catalog.bind(session);
+    await secondRequestStarted.future.timeout(const Duration(seconds: 2));
+
+    expect(catalog.operationalContext?.matches(secondContext), isTrue);
+    expect(catalog.freshness, CatalogFreshness.synchronizing);
+    expect(catalog.products, isEmpty);
+    expect(catalog.categories, isEmpty);
+
+    releaseSecondRequest.complete();
+    await _waitUntil(() => catalog.error != null);
+
+    expect(catalog.error?.kind, OdooErrorKind.forbidden);
+    expect(catalog.freshness, CatalogFreshness.unavailable);
+    expect(catalog.products, isEmpty);
+    expect(catalog.categories, isEmpty);
+    expect(storage.readCalls, 0);
+    expect(storage.saveCalls, 1);
 
     catalog.dispose();
     session.dispose();

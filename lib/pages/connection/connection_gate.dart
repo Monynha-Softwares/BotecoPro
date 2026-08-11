@@ -16,8 +16,14 @@ class ConnectionGate extends StatelessWidget {
       builder: (context, session, _) {
         switch (session.state) {
           case OdooSessionState.loading:
-          case OdooSessionState.connecting:
             return const _ConnectionLoadingPage();
+          case OdooSessionState.connecting:
+            // Keep the active shell during an offline retry and keep the form
+            // mounted during a first connection attempt. This preserves the
+            // local cart and non-secret form fields across transient failures.
+            return session.operationalContext != null
+                ? const OdooMainScreen()
+                : const ConnectionPage();
           case OdooSessionState.connected:
             return session.isDemoMode
                 ? const MainNavigationScreen()

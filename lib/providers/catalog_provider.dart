@@ -66,6 +66,8 @@ class CatalogProvider extends ChangeNotifier {
       _clear();
       return;
     }
+    final contextChanged =
+        _operationalContext == null || !_operationalContext!.matches(context);
     _operationalContext = context;
     final offlineSnapshot = session.offlineSnapshot;
     if (offlineSnapshot != null && offlineSnapshot.matches(context)) {
@@ -75,6 +77,14 @@ class CatalogProvider extends ChangeNotifier {
     if (session.runtime == null) {
       _clear();
       return;
+    }
+    if (contextChanged) {
+      _categories = const [];
+      _products = const [];
+      _restaurantFloors = const [];
+      _restaurantTables = const [];
+      _lastSynchronizedAt = null;
+      _dataRevision++;
     }
     _freshness = CatalogFreshness.synchronizing;
     _error = null;
@@ -213,8 +223,14 @@ class CatalogProvider extends ChangeNotifier {
           return;
         }
       }
+      _categories = const [];
+      _products = const [];
+      _restaurantFloors = const [];
+      _restaurantTables = const [];
+      _lastSynchronizedAt = null;
       _error = _asException(error);
       _freshness = CatalogFreshness.unavailable;
+      _dataRevision++;
       notifyListeners();
     }
   }

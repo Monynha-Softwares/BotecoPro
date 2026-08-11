@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:boteco_pro/models/catalog.dart';
 import 'package:boteco_pro/models/company.dart';
 import 'package:boteco_pro/models/connection.dart';
@@ -23,6 +25,23 @@ class _OfflineClient extends http.BaseClient {
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) =>
       Future<http.StreamedResponse>.error(http.ClientException('offline'));
+}
+
+class _ReconnectOfflineClient extends http.BaseClient {
+  final reconnectStarted = Completer<void>();
+  final releaseReconnect = Completer<void>();
+  var _requestCount = 0;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    _requestCount++;
+    if (_requestCount == 1) {
+      throw http.ClientException('offline');
+    }
+    if (!reconnectStarted.isCompleted) reconnectStarted.complete();
+    await releaseReconnect.future;
+    throw http.ClientException('offline');
+  }
 }
 
 class _Credentials extends CredentialsStorageService {
@@ -137,6 +156,16 @@ OdooRuntimeFactory _offlineRuntimeFactory() => OdooRuntimeFactory(
       ),
     );
 
+OdooRuntimeFactory _reconnectRuntimeFactory(_ReconnectOfflineClient client) =>
+    OdooRuntimeFactory(
+      clientBuilder: (connection, apiKey) => OdooClient(
+        connection: connection,
+        apiKey: apiKey,
+        httpClient: client,
+        timeout: const Duration(seconds: 2),
+      ),
+    );
+
 Future<void> _settleAsyncWork() async {
   for (var index = 0; index < 6; index++) {
     await Future<void>.delayed(Duration.zero);
@@ -210,6 +239,68 @@ void main() {
       expect(cart.items, isEmpty);
       expect(cart.selectedTable, isNull);
       expect(await cartStorage.read(_context), isNull);
+    },
+  );
+
+  test(
+    'transient reconnect and network failure preserve the persisted draft',
+    () async {
+      const snapshotStorage = SnapshotStorageService();
+      const cartStorage = CartStorageService();
+      await snapshotStorage.save(_snapshot());
+      await cartStorage.save(
+        DraftCart(context: _context).add(
+          const CatalogProduct(
+            id: 42,
+            name: 'Produto',
+            catalogPrice: 8.5,
+            currencyId: 6,
+          ),
+        ),
+      );
+      final client = _ReconnectOfflineClient();
+      final session = OdooSessionProvider(
+        credentialsStorage: const _Credentials(),
+        snapshotStorage: snapshotStorage,
+        cartStorage: cartStorage,
+        runtimeFactory: _reconnectRuntimeFactory(client),
+      );
+      final catalog = CatalogProvider(snapshotStorage: snapshotStorage);
+      final cart = CartProvider(storage: cartStorage);
+
+      await session.initialize();
+      catalog.bind(session);
+      await _settleAsyncWork();
+      cart.bind(session, catalog);
+      await _settleAsyncWork();
+      expect(cart.items.single.productId, 42);
+
+      final reconnect = session.reconnect();
+      await client.reconnectStarted.future;
+      expect(session.state, OdooSessionState.connecting);
+
+      // Mirrors the ProxyProvider update caused by the connecting notification.
+      cart.bind(session, catalog);
+      await _settleAsyncWork();
+      expect(cart.items.single.productId, 42);
+      expect((await cartStorage.read(_context))?.items.single.productId, 42);
+
+      client.releaseReconnect.complete();
+      await reconnect;
+      catalog.bind(session);
+      cart.bind(session, catalog);
+      await _settleAsyncWork();
+      cart.bind(session, catalog);
+      await _settleAsyncWork();
+
+      expect(session.state, OdooSessionState.connected);
+      expect(session.isOfflineBootstrap, isTrue);
+      expect(cart.items.single.productId, 42);
+      expect((await cartStorage.read(_context))?.items.single.productId, 42);
+
+      session.dispose();
+      catalog.dispose();
+      cart.dispose();
     },
   );
 

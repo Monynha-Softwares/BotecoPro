@@ -184,4 +184,72 @@ void main() {
     expect(reconciled.items.single.capturedUnitPrice, 8.5);
     expect(reconciled.items.single.currentCatalogPrice, 8.5);
   });
+
+  test('only exposes a captured currency when every item agrees', () {
+    final verified = DraftCart(context: _context)
+        .add(_product(1, currencyId: 6))
+        .add(_product(2, currencyId: 6));
+    final missing = verified.add(_product(3, currencyId: null));
+    final mixed = verified.add(_product(4, currencyId: 2));
+
+    expect(verified.capturedCurrencyId, 6);
+    expect(missing.capturedCurrencyId, isNull);
+    expect(mixed.capturedCurrencyId, isNull);
+    expect(DraftCart(context: _context).capturedCurrencyId, isNull);
+  });
+
+  test('clears the selected table when it leaves the restaurant catalog', () {
+    const selectedTable = RestaurantTable(
+      id: 8,
+      number: 12,
+      floorId: 2,
+      floorName: 'Sala principal',
+      active: true,
+      seats: 4,
+    );
+    final cart = DraftCart(
+      context: _context,
+      table: selectedTable,
+    ).add(_product(42));
+
+    final reconciled = cart.reconcile(
+      [_product(42)],
+      restaurantTables: const [
+        RestaurantTable(
+          id: 9,
+          number: 13,
+          floorId: 2,
+          floorName: 'Sala principal',
+          active: true,
+          seats: 4,
+        ),
+      ],
+    );
+
+    expect(reconciled.table, isNull);
+    expect(reconciled.items.single.state, DraftCartItemState.available);
+  });
+
+  test('preserves the selected table while it remains in the catalog', () {
+    const selectedTable = RestaurantTable(
+      id: 8,
+      number: 12,
+      floorId: 2,
+      floorName: 'Sala principal',
+      active: true,
+      seats: 4,
+    );
+    final cart = DraftCart(
+      context: _context,
+      table: selectedTable,
+    ).add(_product(42));
+
+    final reconciled = cart.reconcile(
+      [_product(42)],
+      restaurantTables: const [selectedTable],
+    );
+
+    expect(reconciled.table, selectedTable);
+    expect(reconciled.items.single.state, DraftCartItemState.available);
+  });
 }

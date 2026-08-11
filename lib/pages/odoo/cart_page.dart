@@ -23,10 +23,7 @@ class OdooCartPage extends StatelessWidget {
       (session) => session.posOperationalProfile?.currency,
     );
     final items = cart.items;
-    final capturedCurrencyIds =
-        items.map((item) => item.capturedCurrencyId).whereType<int>().toSet();
-    final cartCurrencyId =
-        capturedCurrencyIds.length == 1 ? capturedCurrencyIds.single : null;
+    final cartCurrencyId = cart.capturedCurrencyId;
     final currencyVerified = currency != null &&
         items.every((item) => item.capturedCurrencyId == currency.id);
     return Scaffold(
@@ -257,13 +254,14 @@ class _CartItemCard extends StatelessWidget {
   }
 
   Future<void> _editNote(BuildContext context, DraftCartItem item) async {
-    final controller = TextEditingController(text: item.note);
+    var editedNote = item.note;
     final note = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Nota do item'),
-        content: TextField(
-          controller: controller,
+        content: TextFormField(
+          initialValue: item.note,
+          onChanged: (value) => editedNote = value,
           autofocus: true,
           maxLength: 250,
           decoration: const InputDecoration(hintText: 'Ex.: sem gelo'),
@@ -273,12 +271,11 @@ class _CartItemCard extends StatelessWidget {
               onPressed: () => Navigator.pop(context),
               child: const Text('Cancelar')),
           FilledButton(
-              onPressed: () => Navigator.pop(context, controller.text),
+              onPressed: () => Navigator.pop(context, editedNote),
               child: const Text('Guardar')),
         ],
       ),
     );
-    controller.dispose();
     if (note != null && context.mounted) {
       context.read<CartProvider>().updateNote(item.productId, note);
     }

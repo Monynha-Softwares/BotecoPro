@@ -32,7 +32,13 @@ class _OdooProductsPageState extends State<OdooProductsPage> {
     final currency = context.select<OdooSessionProvider, CurrencyInfo?>(
       (session) => session.posOperationalProfile?.currency,
     );
-    final products = catalog.products.where(_matches).toList(growable: false);
+    final selectedCategoryId =
+        catalog.categories.any((category) => category.id == _categoryId)
+            ? _categoryId
+            : null;
+    final products = catalog.products
+        .where((product) => _matches(product, selectedCategoryId))
+        .toList(growable: false);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Produtos POS'),
@@ -60,7 +66,7 @@ class _OdooProductsPageState extends State<OdooProductsPage> {
           ),
           _CategoryFilter(
             categories: catalog.categories,
-            selectedCategoryId: _categoryId,
+            selectedCategoryId: selectedCategoryId,
             onSelected: (id) => setState(() => _categoryId = id),
           ),
           Expanded(
@@ -77,15 +83,15 @@ class _OdooProductsPageState extends State<OdooProductsPage> {
     );
   }
 
-  bool _matches(CatalogProduct product) {
+  bool _matches(CatalogProduct product, int? selectedCategoryId) {
     final normalizedQuery = _query.toLowerCase();
     final matchesQuery = normalizedQuery.isEmpty ||
         product.name.toLowerCase().contains(normalizedQuery) ||
         (product.defaultCode?.toLowerCase().contains(normalizedQuery) ??
             false) ||
         (product.barcode?.contains(_query) ?? false);
-    final matchesCategory =
-        _categoryId == null || product.categoryIds.contains(_categoryId);
+    final matchesCategory = selectedCategoryId == null ||
+        product.categoryIds.contains(selectedCategoryId);
     return matchesQuery && matchesCategory;
   }
 }
@@ -214,9 +220,8 @@ class _CatalogList extends StatelessWidget {
               if (product.defaultCode?.isNotEmpty == true) product.defaultCode!,
               if (product.barcode?.isNotEmpty == true) product.barcode!,
             ].join(' · ')),
-            trailing: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(formatCatalogAmount(
                   product.catalogPrice,
