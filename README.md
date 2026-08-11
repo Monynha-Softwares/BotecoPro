@@ -77,7 +77,19 @@ reimplement pricelist, fiscal-position, tax or payment calculations.
 flutter pub get
 flutter analyze --fatal-infos
 flutter test
+flutter build apk --debug --no-pub
 ```
+
+CI pins Flutter 3.44.9 and Java 17, then runs the same non-secret analysis,
+tests and Android debug compilation. It neither injects `.env.local` nor
+publishes the APK. Android release networking is HTTPS-only, and Android backup
+is disabled so secure credentials and operational snapshots are not migrated
+outside their device security context.
+
+The current `com.example.botecopro` application ID and debug release signing
+are development placeholders. A production ID and signing policy must be
+chosen before distribution; changing them is deliberately outside this MVP
+hardening step.
 
 For an optional debug bootstrap, pass the ignored local values as Dart defines
 (`--dart-define`); release builds do not use these values:
