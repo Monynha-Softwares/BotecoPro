@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../models/data_models.dart';
+import '../models/legacy/data_models.dart';
 import 'package:intl/intl.dart';
 
 // Formata valor como moeda brasileira
 String formatCurrency(double value) {
-  final formatter = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
+  final formatter = NumberFormat.currency(locale: 'pt-BR', symbol: 'R\$');
   return formatter.format(value);
 }
 
 // Formata data e hora no padrão brasileiro
 String formatDateTime(DateTime dateTime) {
-  return DateFormat('dd/MM/yyyy HH:mm', 'pt_BR').format(dateTime);
+  return DateFormat('dd/MM/yyyy HH:mm', 'pt-BR').format(dateTime);
 }
 
 // Formata apenas a data no padrão brasileiro
 String formatDate(DateTime dateTime) {
-  return DateFormat('dd/MM/yyyy', 'pt_BR').format(dateTime);
+  return DateFormat('dd/MM/yyyy', 'pt-BR').format(dateTime);
 }
 
 // AppBar customizada para o app
@@ -295,9 +295,7 @@ class QuantitySelector extends StatelessWidget {
                 ? Theme.of(context).colorScheme.outline
                 : Theme.of(context).colorScheme.primary,
           ),
-          onPressed: quantity <= min
-              ? null
-              : () => onChanged(quantity - 1),
+          onPressed: quantity <= min ? null : () => onChanged(quantity - 1),
         ),
         Container(
           width: 40,
@@ -324,9 +322,7 @@ class QuantitySelector extends StatelessWidget {
                 ? Theme.of(context).colorScheme.outline
                 : Theme.of(context).colorScheme.primary,
           ),
-          onPressed: quantity >= max
-              ? null
-              : () => onChanged(quantity + 1),
+          onPressed: quantity >= max ? null : () => onChanged(quantity + 1),
         ),
       ],
     );
@@ -362,14 +358,16 @@ class CategoryFilter extends StatelessWidget {
             selected: selectedCategory == null,
             onSelected: (_) => onCategorySelected(null),
             backgroundColor: Theme.of(context).colorScheme.surface,
-            selectedColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+            selectedColor:
+                Theme.of(context).colorScheme.primary.withOpacity(0.2),
             checkmarkColor: Theme.of(context).colorScheme.primary,
             labelStyle: TextStyle(
               color: selectedCategory == null
                   ? Theme.of(context).colorScheme.primary
                   : Theme.of(context).colorScheme.onSurface,
-              fontWeight:
-                  selectedCategory == null ? FontWeight.bold : FontWeight.normal,
+              fontWeight: selectedCategory == null
+                  ? FontWeight.bold
+                  : FontWeight.normal,
             ),
           ),
           const SizedBox(width: 8),
@@ -384,7 +382,8 @@ class CategoryFilter extends StatelessWidget {
             selected: selectedCategory == ProductCategory.drink,
             onSelected: (_) => onCategorySelected(ProductCategory.drink),
             backgroundColor: Theme.of(context).colorScheme.surface,
-            selectedColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+            selectedColor:
+                Theme.of(context).colorScheme.primary.withOpacity(0.2),
             checkmarkColor: Theme.of(context).colorScheme.primary,
             labelStyle: TextStyle(
               color: selectedCategory == ProductCategory.drink
@@ -407,7 +406,8 @@ class CategoryFilter extends StatelessWidget {
             selected: selectedCategory == ProductCategory.food,
             onSelected: (_) => onCategorySelected(ProductCategory.food),
             backgroundColor: Theme.of(context).colorScheme.surface,
-            selectedColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+            selectedColor:
+                Theme.of(context).colorScheme.primary.withOpacity(0.2),
             checkmarkColor: Theme.of(context).colorScheme.primary,
             labelStyle: TextStyle(
               color: selectedCategory == ProductCategory.food
@@ -430,7 +430,8 @@ class CategoryFilter extends StatelessWidget {
             selected: selectedCategory == ProductCategory.other,
             onSelected: (_) => onCategorySelected(ProductCategory.other),
             backgroundColor: Theme.of(context).colorScheme.surface,
-            selectedColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+            selectedColor:
+                Theme.of(context).colorScheme.primary.withOpacity(0.2),
             checkmarkColor: Theme.of(context).colorScheme.primary,
             labelStyle: TextStyle(
               color: selectedCategory == ProductCategory.other
@@ -530,11 +531,14 @@ class EmptyStateCard extends StatelessWidget {
             Text(
               message,
               style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.7),
                   ),
               textAlign: TextAlign.center,
             ),
-            if (actionText != null && onAction != null) ...[  
+            if (actionText != null && onAction != null) ...[
               const SizedBox(height: 16),
               ElevatedButton.icon(
                 onPressed: onAction,
@@ -543,7 +547,8 @@ class EmptyStateCard extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
               ),
             ],
@@ -575,18 +580,21 @@ class ActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
       onPressed: onPressed,
-      icon: Icon(icon, color: foregroundColor ?? Theme.of(context).colorScheme.onPrimary),
+      icon: Icon(icon,
+          color: foregroundColor ?? Theme.of(context).colorScheme.onPrimary),
       label: Text(
         label,
-        style: TextStyle(color: foregroundColor ?? Theme.of(context).colorScheme.onPrimary),
+        style: TextStyle(
+            color: foregroundColor ?? Theme.of(context).colorScheme.onPrimary),
       ),
       style: ElevatedButton.styleFrom(
-        backgroundColor: backgroundColor ?? Theme.of(context).colorScheme.primary,
+        backgroundColor:
+            backgroundColor ?? Theme.of(context).colorScheme.primary,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
-    )
-    .animate()
-    .scale(delay: const Duration(milliseconds: 100), duration: const Duration(milliseconds: 200));
+    ).animate().scale(
+        delay: const Duration(milliseconds: 100),
+        duration: const Duration(milliseconds: 200));
   }
 }

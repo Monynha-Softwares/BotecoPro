@@ -1,4 +1,4 @@
-name: botecoPro
+name: boteco_pro
 description: "Gestão completa para seu bar"
 publish_to: 'none'
 version: 1.0.0
@@ -17,20 +17,22 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.0
   fl_chart: 0.68.0
-  google_fonts: 6.1.0
-  shared_preferences: 2.3.2
+  # 6.3.2+ removes a const FontWeight map that fails on Flutter 3.44 AOT.
+  google_fonts: ^6.3.3
+  shared_preferences: ^2.3.2
   path_provider: 2.1.4
   provider: 6.1.2
-  http: '>=1.0.0'
-  uuid: '>=3.0.0'
-
-  dio: any
-  flutter_secure_storage: any
-  google_sign_in: any
-  jwt_decode: any
+  http: ^1.2.2
+  uuid: ^4.5.1
+  flutter_secure_storage: ^9.2.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_driver:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
 
 flutter:
   uses-material-design: true

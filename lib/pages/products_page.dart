@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../services/database_service.dart';
 import '../widgets/shared_widgets.dart';
-import '../models/data_models.dart';
+import '../models/legacy/data_models.dart';
 
 class ProductsPage extends StatefulWidget {
   const ProductsPage({Key? key}) : super(key: key);
@@ -10,7 +10,6 @@ class ProductsPage extends StatefulWidget {
   @override
   State<ProductsPage> createState() => _ProductsPageState();
 }
-
 class _ProductsPageState extends State<ProductsPage> {
   final DatabaseService _databaseService = DatabaseService();
   List<Product> _products = [];
@@ -726,7 +725,6 @@ class _ProductsPageState extends State<ProductsPage> {
   }
 
   void _showStockAdjustmentDialog(Product product) {
-    final TextEditingController stockController = TextEditingController(text: product.stockQuantity.toString());
     final int currentStock = product.stockQuantity;
     int adjustment = 0;
     bool isAddition = true;

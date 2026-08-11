@@ -1,31 +1,89 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
-import 'pages/home_page.dart';
-import 'pages/production_page.dart';
-import 'pages/products_page.dart';
-import 'pages/recipes_page.dart';
-import 'pages/tables_page.dart';
+import 'pages/connection/connection_gate.dart';
+import 'providers/cart_provider.dart';
+import 'providers/catalog_provider.dart';
+import 'providers/odoo_session_provider.dart';
+import 'services/odoo/odoo_runtime.dart';
+import 'services/storage/cart_storage_service.dart';
+import 'services/storage/credentials_storage_service.dart';
+import 'services/storage/snapshot_storage_service.dart';
 import 'theme.dart';
-import 'widgets/bottom_navigation.dart';
 
 void main() async {
+  await initializeBotecoProPlatform();
+  runApp(const BotecoProApp());
+}
+
+Future<void> initializeBotecoProPlatform() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-// Inicializa a localização para português brasileiro
-  await initializeDateFormatting('pt_BR', null);
-  Intl.defaultLocale = 'pt_BR';
+  await initializeDateFormatting('pt-BR', null);
+  Intl.defaultLocale = 'pt-BR';
 
-// Define a orientação da tela para retrato
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+}
 
-  runApp(const MyApp());
+class BotecoProDependencies {
+  const BotecoProDependencies({
+    this.credentialsStorage = const CredentialsStorageService(),
+    this.snapshotStorage = const SnapshotStorageService(),
+    this.cartStorage = const CartStorageService(),
+    this.runtimeFactory = const OdooRuntimeFactory(),
+  });
+
+  final CredentialsStorageService credentialsStorage;
+  final SnapshotStorageService snapshotStorage;
+  final CartStorageService cartStorage;
+  final OdooRuntimeFactory runtimeFactory;
+}
+
+class BotecoProApp extends StatelessWidget {
+  const BotecoProApp({
+    this.dependencies = const BotecoProDependencies(),
+    super.key,
+  });
+
+  final BotecoProDependencies dependencies;
+
+  @override
+  Widget build(BuildContext context) => MultiProvider(
+        providers: [
+          ChangeNotifierProvider(
+            create: (_) => OdooSessionProvider(
+              credentialsStorage: dependencies.credentialsStorage,
+              snapshotStorage: dependencies.snapshotStorage,
+              cartStorage: dependencies.cartStorage,
+              runtimeFactory: dependencies.runtimeFactory,
+            )..initialize(),
+          ),
+          ChangeNotifierProxyProvider<OdooSessionProvider, CatalogProvider>(
+            create: (_) => CatalogProvider(
+              snapshotStorage: dependencies.snapshotStorage,
+            ),
+            update: (_, session, catalog) {
+              catalog!.bind(session);
+              return catalog;
+            },
+          ),
+          ChangeNotifierProxyProvider2<OdooSessionProvider, CatalogProvider,
+              CartProvider>(
+            create: (_) => CartProvider(storage: dependencies.cartStorage),
+            update: (_, session, catalog, cart) {
+              cart!.bind(session, catalog);
+              return cart;
+            },
+          ),
+        ],
+        child: const MyApp(),
+      );
 }
 
 class MyApp extends StatelessWidget {
@@ -39,118 +97,7 @@ class MyApp extends StatelessWidget {
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: ThemeMode.system,
-      home: const SplashScreen(),
-    );
-  }
-}
-
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
-
-  @override
-  State<SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-  @override
-  void initState() {
-    super.initState();
-    _navigateToHome();
-  }
-
-  Future<void> _navigateToHome() async {
-    await Future.delayed(const Duration(seconds: 2));
-    if (mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.sports_bar,
-              size: 80,
-              color: Theme.of(context).colorScheme.onPrimary,
-            )
-                .animate(
-                    onPlay: (controller) => controller.repeat(reverse: true))
-                .scale(
-                    duration: const Duration(seconds: 1),
-                    curve: Curves.easeInOut),
-            const SizedBox(height: 24),
-            Text(
-              'Boteco PRO',
-              style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onPrimary,
-                  ),
-            ).animate().fadeIn(
-                duration: const Duration(milliseconds: 800),
-                curve: Curves.easeIn),
-            const SizedBox(height: 8),
-            Text(
-              'Gestão completa para seu bar',
-              style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onPrimary
-                        .withOpacity(0.8),
-                  ),
-            ).animate().fadeIn(
-                delay: const Duration(milliseconds: 400),
-                duration: const Duration(milliseconds: 800)),
-            const SizedBox(height: 48),
-            CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(
-                  Theme.of(context).colorScheme.onPrimary),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class MainNavigationScreen extends StatefulWidget {
-  const MainNavigationScreen({Key? key}) : super(key: key);
-
-  @override
-  State<MainNavigationScreen> createState() => _MainNavigationScreenState();
-}
-
-class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  NavigationTab _currentTab = NavigationTab.home;
-
-  final Map<NavigationTab, Widget> _screens = {
-    NavigationTab.home: const HomePage(),
-    NavigationTab.tables: const TablesPage(),
-    NavigationTab.products: const ProductsPage(),
-    NavigationTab.recipes: const RecipesPage(),
-    NavigationTab.production: const ProductionPage(),
-  };
-
-  void _selectTab(NavigationTab tab) {
-    setState(() {
-      _currentTab = tab;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: _screens[_currentTab],
-      bottomNavigationBar: BottomNavigation(
-        currentTab: _currentTab,
-        onTabSelected: _selectTab,
-      ),
+      home: const ConnectionGate(),
     );
   }
 }

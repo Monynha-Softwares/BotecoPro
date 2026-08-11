@@ -1,0 +1,223 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:uuid/uuid.dart';
+
+import '../models/catalog.dart';
+import '../models/draft_cart.dart';
+import '../models/restaurant.dart';
+import '../models/sync_snapshot.dart';
+import '../services/storage/cart_storage_service.dart';
+import 'catalog_provider.dart';
+import 'odoo_session_provider.dart';
+
+class CartProvider extends ChangeNotifier {
+  CartProvider({CartStorageService? storage, Uuid? uuid})
+      : _storage = storage ?? const CartStorageService(),
+        _uuid = uuid ?? const Uuid();
+
+  final CartStorageService _storage;
+  final Uuid _uuid;
+
+  DraftCart? _cart;
+  OperationalContext? _boundContext;
+  int _boundCatalogRevision = -1;
+  int _generation = 0;
+  int _mutationRevision = 0;
+  bool _hasPersistenceError = false;
+  Future<void> _writeChain = Future<void>.value();
+
+  List<DraftCartItem> get items => _cart?.items ?? const [];
+  RestaurantTable? get selectedTable => _cart?.table;
+  int get itemCount => _cart?.itemCount ?? 0;
+  double get subtotal => _cart?.subtotal ?? 0;
+  int? get capturedCurrencyId => _cart?.capturedCurrencyId;
+  bool get hasUnavailableItems => _cart?.hasUnavailableItems ?? false;
+  bool get hasPersistenceError => _hasPersistenceError;
+
+  void bind(OdooSessionProvider session, CatalogProvider catalog) {
+    // A reconnect temporarily changes the session state to `connecting`, but
+    // the validated operational context remains the same. Treating that
+    // transition as a disconnect would erase the local draft exactly when it
+    // is needed for offline continuity. Explicit disconnect/demo transitions
+    // clear the context themselves and still take the cleanup path below.
+    final context = !session.isDemoMode ? session.operationalContext : null;
+    if (context == null) {
+      if (_boundContext != null || _cart != null) {
+        _boundContext = null;
+        _cart = null;
+        _mutationRevision++;
+        final generation = ++_generation;
+        _queueClear();
+        scheduleMicrotask(() {
+          if (generation == _generation) notifyListeners();
+        });
+      }
+      return;
+    }
+
+    if (_boundContext == null || !_boundContext!.matches(context)) {
+      final replacesExistingContext = _boundContext != null;
+      _boundContext = context;
+      _cart = null;
+      _mutationRevision++;
+      _boundCatalogRevision = catalog.dataRevision;
+      final generation = ++_generation;
+      final mutationRevision = _mutationRevision;
+      if (replacesExistingContext) _queueClear();
+      scheduleMicrotask(() {
+        if (generation != _generation) return;
+        notifyListeners();
+        unawaited(
+          _restore(context, catalog, generation, mutationRevision),
+        );
+      });
+      return;
+    }
+
+    if (_boundCatalogRevision != catalog.dataRevision) {
+      _boundCatalogRevision = catalog.dataRevision;
+      if (_cart != null && _catalogReady(catalog)) {
+        final generation = _generation;
+        scheduleMicrotask(() {
+          if (generation != _generation || _cart == null) return;
+          _mutationRevision++;
+          _cart = _cart!.reconcile(
+            catalog.products,
+            restaurantTables: catalog.restaurantTables,
+          );
+          _queueSave(_cart!);
+          notifyListeners();
+        });
+      }
+    }
+  }
+
+  void add(CatalogProduct product) {
+    final context = _boundContext;
+    if (context == null) return;
+    _mutationRevision++;
+    _cart = (_cart ?? DraftCart(context: context)).add(product);
+    _queueSave(_cart!);
+    notifyListeners();
+  }
+
+  void updateQuantity(int productId, int quantity) {
+    if (_cart == null) return;
+    _mutationRevision++;
+    _cart = _cart!.updateQuantity(productId, quantity);
+    _queueSave(_cart!);
+    notifyListeners();
+  }
+
+  void updateNote(int productId, String note) {
+    if (_cart == null) return;
+    _mutationRevision++;
+    _cart = _cart!.updateNote(productId, note);
+    _queueSave(_cart!);
+    notifyListeners();
+  }
+
+  void remove(int productId) {
+    if (_cart == null) return;
+    _mutationRevision++;
+    _cart = _cart!.remove(productId);
+    _queueSave(_cart!);
+    notifyListeners();
+  }
+
+  void clear() {
+    if (_cart == null) return;
+    final context = _boundContext;
+    _mutationRevision++;
+    _cart = context == null ? null : DraftCart(context: context);
+    _queueClear();
+    notifyListeners();
+  }
+
+  void selectTable(RestaurantTable? table) {
+    if (_cart == null) return;
+    _mutationRevision++;
+    _cart = _cart!.copyWith(table: table, clearTable: table == null);
+    _queueSave(_cart!);
+    notifyListeners();
+  }
+
+  /// Persists idempotency identities for a future controlled submission.
+  ///
+  /// This method only changes the local draft. It never calls Odoo.
+  void prepareSubmissionIdentity() {
+    if (_cart == null || _cart!.items.isEmpty) return;
+    _mutationRevision++;
+    _cart = _cart!.prepareSubmissionIdentity(() => _uuid.v4());
+    _queueSave(_cart!);
+    notifyListeners();
+  }
+
+  Future<void> _restore(
+    OperationalContext context,
+    CatalogProvider catalog,
+    int generation,
+    int mutationRevision,
+  ) async {
+    final stored = await _storage.read(context);
+    if (generation != _generation ||
+        mutationRevision != _mutationRevision ||
+        stored == null) {
+      return;
+    }
+    _cart = _catalogReady(catalog, context)
+        ? stored.reconcile(
+            catalog.products,
+            restaurantTables: catalog.restaurantTables,
+          )
+        : stored;
+    if (_catalogReady(catalog, context)) _queueSave(_cart!);
+    notifyListeners();
+  }
+
+  bool _catalogReady(
+    CatalogProvider catalog, [
+    OperationalContext? context,
+  ]) {
+    final expectedContext = context ?? _boundContext;
+    final catalogContext = catalog.operationalContext;
+    return expectedContext != null &&
+        catalogContext != null &&
+        catalogContext.matches(expectedContext) &&
+        (catalog.freshness == CatalogFreshness.online ||
+            catalog.freshness == CatalogFreshness.offline);
+  }
+
+  void _queueSave(DraftCart cart) {
+    final generation = _generation;
+    _enqueue(() async {
+      final context = _boundContext;
+      if (generation != _generation ||
+          context == null ||
+          !cart.matchesContext(context)) {
+        return;
+      }
+      await _storage.save(cart);
+    });
+  }
+
+  void _queueClear() {
+    _enqueue(_storage.clear);
+  }
+
+  void _enqueue(Future<void> Function() operation) {
+    _writeChain = _writeChain.then((_) async {
+      try {
+        await operation();
+        if (_hasPersistenceError) {
+          _hasPersistenceError = false;
+          notifyListeners();
+        }
+      } on Object {
+        _hasPersistenceError = true;
+        notifyListeners();
+      }
+    });
+  }
+}
