@@ -39,7 +39,10 @@ OdooClient → HTTPS/JSON-2 → Odoo Online
 - `models/` contains immutable application data and the isolated
   `models/legacy/` demo types.
 - `services/odoo/` owns JSON-2 transport, mapping, connection diagnostics,
-  catalog and read-only POS/Restaurant access.
+  catalog and read-only POS/Restaurant access. The selected POS also exposes a
+  read-only operational profile with its currency, configured pricelist,
+  non-closed sessions and payment-method metadata; this grants no write
+  authority.
 - `services/storage/` separates credentials, synchronized snapshots and the
   local draft cart. Only the API key uses secure storage.
 - `providers/` separates session/context, synchronized catalog state and the
@@ -58,8 +61,15 @@ explicit debug-only route and cannot act as an offline fallback.
 The synchronized catalog snapshot and draft cart retain their schema-v1 JSON
 keys, so this structural refactor does not invalidate data already stored by
 M7. A snapshot is accepted only for the same instance, user, company and POS.
-The draft price is an informational captured `lst_price`, not an Odoo
-transactional price.
+Currency and pricelist metadata may be cached for accurate offline
+presentation. Session ownership and payment-method data are deliberately kept
+in memory only because they are dynamic and may contain personal or operational
+information.
+
+The catalog and draft values are informational captured `lst_price` values,
+not authoritative Odoo POS prices. A currency symbol is shown only when the
+product currency matches the synchronized POS currency. Flutter does not
+reimplement pricelist, fiscal-position, tax or payment calculations.
 
 ## Development
 
@@ -81,5 +91,6 @@ flutter run \
 
 The Odoo smoke test is opt-in and must be run locally only after a real API key
 has been entered. It performs read-only calls for version, identity, companies,
-POS configurations, categories, Restaurant context and products. Normal tests
-use sanitized fakes and never require a real credential.
+POS configurations, currency, pricelist, non-closed sessions, payment-method
+metadata, categories, Restaurant context and products. Normal tests use
+sanitized fakes and never require a real credential.
